@@ -9,7 +9,7 @@ import { AuthProvider } from '@/context/AuthContext';
 
 // Add metadata for <head> tags
 export const metadata = {
-  title: 'KalindiKart - Arts, Home Decor, Gems & Gods Brass Idol Store',
+  title: 'KalindiKart - Arts, Home Decor, Power Gems & Gods Brass Idol Store',
   description: 'Your one-stop shop for unique brass idols, home decor, and artifacts.',
 };
 
