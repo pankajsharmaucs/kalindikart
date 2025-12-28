@@ -1,0 +1,121 @@
+/* --- 1. Component Global Container --- */
+.collections-component {
+    /* Standard padding for section clarity */
+    padding: 60px 20px;
+    /* Max width to prevent content from stretching too wide on large screens */
+    max-width: 1400px;
+    margin: 0 auto;
+    font-family: Arial, sans-serif;
+    background-color: #f8f8f8; /* Light background for contrast */
+}
+
+.collections-heading {
+    text-align: center;
+    font-size: 2.5em;
+    font-weight: 700;
+    color: #333;
+    margin-bottom: 50px;
+    letter-spacing: -0.5px;
+}
+
+/* --- 2. The Responsive Grid Layout --- */
+.collections-grid {
+    display: grid;
+    /* Default: Single column for mobile screens */
+    grid-template-columns: 1fr; 
+    gap: 30px; /* Spacing between cards */
+}
+
+/* Tablet / Medium Screens */
+@media (min-width: 600px) {
+    .collections-grid {
+        /* Two columns */
+        grid-template-columns: repeat(2, 1fr);
+    }
+}
+
+/* Desktop / Large Screens */
+@media (min-width: 1024px) {
+    .collections-grid {
+        /* Three columns */
+        grid-template-columns: repeat(3, 1fr);
+    }
+}
+
+/* --- 3. Individual Collection Card Styling --- */
+.collection-card {
+    display: flex;
+    flex-direction: column;
+    text-decoration: none; /* Remove underline from anchor tag */
+    color: inherit;
+    background-color: #ffffff;
+    border-radius: 12px;
+    overflow: hidden; /* Ensures image corners match card corners */
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.08);
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.collection-card:hover {
+    transform: translateY(-8px); /* Lifts the card on hover */
+    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.15);
+}
+
+/* --- 4. Image Styling --- */
+.collection-image-container {
+    width: 100%;
+    /* Maintains aspect ratio for consistent card size */
+    aspect-ratio: 16 / 10; 
+}
+
+.collection-image {
+    width: 100%;
+    height: 100%;
+    object-fit: cover; /* Crop and cover the container */
+    display: block;
+    transition: transform 0.5s ease;
+}
+
+.collection-card:hover .collection-image {
+    transform: scale(1.05); /* Subtle zoom effect on image within card hover */
+}
+
+/* --- 5. Info Block Styling --- */
+.collection-info {
+    padding: 25px 20px;
+    text-align: center;
+    flex-grow: 1; /* Allows info block to fill remaining space */
+}
+
+.collection-title {
+    font-size: 1.4em;
+    font-weight: 600;
+    color: #444;
+    margin: 0 0 10px 0;
+}
+
+.collection-description {
+    color: #777;
+    font-size: 0.95em;
+    line-height: 1.5;
+    margin-bottom: 15px;
+    height: 3em; /* Fixed height for description to prevent layout shift */
+    overflow: hidden;
+    display: -webkit-box;
+    -webkit-line-clamp: 2; /* Limit to 2 lines */
+    -webkit-box-orient: vertical;
+}
+
+.collection-cta {
+    display: inline-block;
+    font-weight: bold;
+    color: #007bff; /* Primary action color */
+    padding: 8px 15px;
+    border: 1px solid #007bff;
+    border-radius: 4px;
+    transition: background-color 0.3s, color 0.3s;
+}
+
+.collection-card:hover .collection-cta {
+    background-color: #007bff;
+    color: #ffffff;
+}

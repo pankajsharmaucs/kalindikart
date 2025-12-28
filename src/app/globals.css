@@ -1,0 +1,600 @@
+        :root {
+          /* Updated Color Palette */
+          --primary-gold: #01A9E6;
+          /* Base color - Bright Blue */
+          --dark-gold: #00739D;
+          /* Headers/lower base/darker accents */
+          --light-bg: #f0f8ff;
+          /* Light blue tint for creamy background replacement */
+          --border-color: #00739D;
+          /* Headers/lower base */
+          --text-dark: #333;
+          --hero-gradient-center: #5FD3FD;
+          /* Special icons/sections/accents */
+          --hero-gradient-edge: #01A9E6;
+          /* Base color */
+        }
+
+        .text-gold {
+          color: var(--primary-gold)
+        }
+
+        .light-bg {
+          background: var(--light-bg)
+        }
+
+        body {
+          font-family: 'Poppins', sans-serif;
+          overflow-x: hidden;
+          background-color: #fff;
+          color: #4a4a4a;
+        }
+
+        /* --- Global Styles --- */
+        .section-padding {
+          padding: 40px 0;
+        }
+
+        .section-header {
+          font-family: 'Playfair Display', serif;
+          color: var(--border-color);
+          font-weight: 700;
+          font-size: 2.5rem;
+          position: relative;
+          display: inline-block;
+          margin-bottom: 30px;
+        }
+
+        .section-header::after {
+          content: "⸻ ❈ ⸻";
+          display: block;
+          font-family: 'Times New Roman', serif;
+          font-size: 1.5rem;
+          color: #5FD3FD;
+          /* Special icons/sections/accents */
+          margin-top: 5px;
+          letter-spacing: 5px;
+        }
+
+        /* --- Header & Hero (Reused from previous task) --- */
+        .top-bar {
+          background-color: var(--primary-gold);
+          color: white;
+          font-size: 0.75rem;
+          padding: 8px 0;
+          text-align: center;
+        }
+
+        .navbar {
+          background: white;
+          box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+          padding: 10px 0;
+        }
+
+        .brand-name {
+          font-family: 'Playfair Display', serif;
+          font-size: 1.8rem;
+          color: var(--dark-gold);
+          font-weight: 700;
+          line-height: 1;
+        }
+
+        .brand-tagline {
+          font-family: 'Great Vibes', cursive;
+          font-size: 1rem;
+          color: #666;
+        }
+
+        .nav-link {
+          color: #333 !important;
+          font-weight: 500;
+          font-size: 0.9rem;
+          margin: 0 5px;
+        }
+
+        .main-badge {
+          background: linear-gradient(45deg, #01A9E6, var(--primary-gold)) !important;
+          color: white !important;
+          padding: 2px 10px;
+          border-radius: 10px;
+          font-style: italic;
+        }
+
+        /* .hero-section {
+        background: radial-gradient(circle at center, var(--hero-gradient-center) 0%, #bd8634 60%, var(--hero-gradient-edge) 100%);
+        padding: 50px 0;
+        position: relative;
+        border-bottom: 8px solid var(--border-color);
+        color: white;
+        overflow: hidden;
+    } */
+        .coupon-card {
+          background: #5FD3FD;
+          border: 2px dashed var(--border-color);
+          padding: 15px;
+          text-align: center;
+          max-width: 250px;
+          margin: 0 auto;
+        }
+
+        .hero-title {
+          font-family: 'Playfair Display', serif;
+          font-size: 3.5rem;
+          line-height: 1;
+          text-transform: uppercase;
+          letter-spacing: 2px;
+        }
+
+        .hero-cursive {
+          font-family: 'Great Vibes', cursive;
+          font-size: 3.5rem;
+          line-height: 0.5;
+          margin-bottom: 10px;
+        }
+
+        .hero-tree-img {
+          filter: drop-shadow(0 10px 15px rgba(0, 0, 0, 0.4));
+          border-radius: 10px;
+        }
+
+
+        /* --- Trust Strip --- */
+        .trust-strip {
+          background-color: #f8f8f8;
+          padding: 10px 0;
+        }
+
+        .trust-icons img {
+          height: 33px;
+          margin: 0 10px;
+          opacity: 0.7;
+        }
+
+        .trust-icons img:hover {
+          filter: grayscale(0%);
+          opacity: 1;
+        }
+
+        /* Breadcrumb */
+        .breadcrumb-section {
+          background: #faf7f2;
+          border-bottom: 1px solid #eee;
+        }
+
+        .breadcrumb-title {
+          font-size: 1.4rem;
+          font-weight: 600;
+          color: var(--dark-gold);
+        }
+
+        .breadcrumb-nav {
+          font-size: 0.95rem;
+          display: flex;
+          align-items: center;
+          gap: 8px;
+          font-weight: 500;
+          color: #555;
+        }
+
+        .breadcrumb-link {
+          text-decoration: none;
+          color: var(--primary-gold);
+        }
+
+        .breadcrumb-link:hover {
+          color: var(--dark-gold);
+        }
+
+        .breadcrumb-current {
+          color: #999;
+          text-transform: capitalize;
+        }
+
+        .breadcrumb-separator {
+          color: #bbb;
+        }
+
+
+        /* Product page improvements */
+
+        .thumb-swiper {
+          height: 420px;
+        }
+
+        .main-swiper {
+          height: 420px;
+        }
+
+        .breadcrumb {
+          background: transparent !important;
+          margin-bottom: 0;
+          font-size: 14px;
+        }
+
+        /* --- Category Circles --- */
+        .category-section {
+          padding: 40px 0 20px;
+          background-color: var(--light-bg);
+        }
+
+        .category-scroll {
+          display: flex;
+          overflow-x: auto;
+          gap: 20px;
+          padding: 10px 5px;
+          scrollbar-width: none;
+          /* Firefox */
+          justify-content: center;
+        }
+
+        .category-scroll::-webkit-scrollbar {
+          display: none;
+        }
+
+        .cat-item {
+          text-align: center;
+          min-width: 90px;
+          cursor: pointer;
+          transition: transform 0.2s;
+        }
+
+        .cat-item:hover {
+          transform: translateY(-5px);
+        }
+
+        .cat-img {
+          width: 80px;
+          height: 80px;
+          border-radius: 50%;
+          object-fit: cover;
+          border: 2px solid var(--dark-gold);
+          padding: 2px;
+          background: white;
+          box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+
+        .cat-name {
+          margin-top: 8px;
+          font-size: 0.85rem;
+          font-weight: 500;
+          color: #555;
+        }
+
+        /* --- Product Cards --- */
+        .product-card {
+          border: 1px solid #f0e9d6;
+          border-radius: 8px;
+          overflow: hidden;
+          transition: box-shadow 0.3s, transform 0.3s;
+          background-color: white;
+          text-align: center;
+        }
+
+        .product-card:hover {
+          box-shadow: 0 8px 20px rgba(0, 0, 0, 0.1);
+          transform: translateY(-5px);
+        }
+
+        .product-img-container {
+          position: relative;
+          overflow: hidden;
+        }
+
+        .product-img {
+          width: 100%;
+          height: 200px;
+          object-fit: cover;
+          transition: transform 0.5s;
+        }
+
+        .product-card:hover .product-img {
+          transform: scale(1.05);
+        }
+
+        .tag-new {
+          position: absolute;
+          top: 10px;
+          left: 10px;
+          background: var(--dark-gold);
+          color: white;
+          padding: 3px 8px;
+          font-size: 0.7rem;
+          border-radius: 4px;
+        }
+
+        .tag-discount {
+          position: absolute;
+          top: 10px;
+          right: 10px;
+          background: #c24040;
+          color: white;
+          padding: 3px 8px;
+          font-size: 0.7rem;
+          border-radius: 4px;
+        }
+
+        .product-info {
+          padding: 15px 10px;
+        }
+
+        .product-title {
+          font-size: 0.9rem;
+          font-weight: 600;
+          color: var(--text-dark);
+          margin-bottom: 5px;
+        }
+
+        .product-price {
+          font-size: 1rem;
+          font-weight: 700;
+          color: var(--border-color);
+          margin-bottom: 0;
+        }
+
+        .product-price small {
+          text-decoration: line-through;
+          color: #999;
+          font-weight: 400;
+          margin-left: 5px;
+        }
+
+        /* --- Our Story / About Us Section --- */
+        .story-section {
+          background-color: var(--light-bg);
+          /* Keeping light background, but could be #e6f7ff for blue theme */
+          padding: 80px 0;
+          position: relative;
+          z-index: 1;
+        }
+
+        .story-section::before {
+          content: '';
+          position: absolute;
+          top: 0;
+          left: 0;
+          width: 100%;
+          height: 100%;
+          background: url('https://www.transparenttextures.com/patterns/oriental-tiles-dark.png');
+          opacity: 0.05;
+          z-index: -1;
+        }
+
+        .story-text h3 {
+          color: var(--border-color);
+          font-family: 'Playfair Display', serif;
+          margin-bottom: 20px;
+        }
+
+        .story-image {
+          border-radius: 8px;
+          box-shadow: 0 10px 20px rgba(0, 0, 0, 0.2);
+        }
+
+        .story-image-2 {
+          position: relative;
+          background: linear-gradient(135deg, #5FD3FD, #00739D);
+          /* Used special/dark blue for gradient */
+          padding: 20px;
+          border-radius: 8px;
+          text-align: center;
+          margin-top: 20px;
+          color: white;
+          font-family: 'Great Vibes', cursive;
+          font-size: 2rem;
+          line-height: 1.2;
+        }
+
+        /* --- Sustainability Banner (Parallax) --- */
+        .parallax-banner {
+          background-image: url('/main/parallex_bg.png');
+          background-attachment: fixed;
+          background-position: center;
+          background-repeat: no-repeat;
+          background-size: cover;
+          padding: 100px 0;
+          text-align: center;
+          position: relative;
+        }
+
+        .parallax-overlay {
+          position: absolute;
+          top: 0;
+          left: 0;
+          right: 0;
+          bottom: 0;
+          background: rgba(74, 155, 185, 0.57);
+        }
+
+        .parallax-content {
+          position: relative;
+          z-index: 2;
+        }
+
+        .parallax-content h2 {
+          font-family: 'Playfair Display', serif;
+          font-size: 3rem;
+          margin-bottom: 20px;
+          text-shadow: 2px 2px 4px rgba(0, 87, 116, 0.83);
+        }
+
+        /* --- Gifting Section --- */
+        .gifting-box {
+          background: #f5f5f5;
+          border: 1px solid #e0d8c7;
+          border-radius: 8px;
+          padding: 20px;
+          text-align: center;
+          transition: background 0.3s;
+        }
+
+        .gifting-box:hover {
+          background: #fff;
+          box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
+        }
+
+        .gifting-box i {
+          font-size: 2.5rem;
+          color: var(--dark-gold);
+          margin-bottom: 15px;
+        }
+
+        .gifting-box h4 {
+          font-size: 1.1rem;
+          font-weight: 600;
+          color: var(--text-dark);
+        }
+
+        /* --- Footer --- */
+        .footer {
+          background: url('/main/footer_bg2.png');
+          background-size: cover;
+          background-position: center;
+          color: #242423;
+          padding: 50px 0 20px;
+        }
+
+        .footer .container {
+          background: #ffffffcb;
+        }
+
+        .footer h5 {
+          font-family: 'Playfair Display', serif;
+          font-weight: 700;
+          font-size: 1.2rem;
+          margin-bottom: 20px;
+          color: #242423;
+        }
+
+        .footer a {
+          color: #242423;
+          text-decoration: none;
+          font-size: 0.9rem;
+          line-height: 2.2;
+          display: block;
+        }
+
+        .footer a:hover {
+          color: var(--hero-gradient-center);
+        }
+
+        .social-icons {
+          display: flex;
+        }
+
+        .social-icons a {
+          font-size: 1.5rem;
+          margin-right: 15px;
+          color: #242423;
+          transition: color 0.3s;
+        }
+
+        .social-icons a:hover {
+          color: var(--hero-gradient-center);
+        }
+
+        .newsletter-input {
+          background: transparent;
+          border: 1px solid #f0e9d6;
+          color: white;
+          border-radius: 4px 0 0 4px;
+        }
+
+        .newsletter-input::placeholder {
+          color: #ccc;
+        }
+
+        .newsletter-btn {
+          background-color: var(--hero-gradient-center);
+          color: var(--border-color);
+          font-weight: 600;
+          border-radius: 0 4px 4px 0;
+        }
+
+        .newsletter-btn:hover {
+          background-color: white;
+          color: var(--border-color);
+        }
+
+        .payment-footer img {
+          height: 25px;
+          margin-right: 10px;
+          filter: grayscale(50%);
+          opacity: 0.8;
+        }
+
+        /* --- Responsive Adjustments --- */
+        @media (max-width: 991px) {
+          .hero-title {
+            font-size: 2.5rem;
+          }
+
+          .hero-cursive {
+            font-size: 2.5rem;
+          }
+
+          .section-header {
+            font-size: 2rem;
+          }
+
+          .story-section {
+            padding: 50px 0;
+          }
+
+          .col-hero-text {
+            order: 1;
+            margin-bottom: 30px;
+          }
+
+          .col-hero-img {
+            order: 2;
+            margin-bottom: 30px;
+          }
+
+          .col-hero-coupon {
+            order: 3;
+          }
+        }
+
+        .hero-section {
+          background: radial-gradient(circle at center,
+              var(--hero-gradient-center) 0%,
+              #01A9E6 60%,
+              var(--hero-gradient-edge) 100%);
+          padding: 0px 0;
+          position: relative;
+          /* border-bottom: 8px solid var(--border-color); */
+          color: white;
+          overflow: hidden;
+        }
+
+        /* Make swiper take full width */
+        .hero-swiper-container {
+          width: 100%;
+          padding: 0px;
+        }
+
+        /* Responsive image fit */
+        .swiper-slide img {
+          width: 100%;
+          height: 100%;
+          object-fit: cover;
+          border-radius: 10px;
+
+        }
+
+        /* Optional: height control */
+        .myHeroSwiper {
+          width: 100%;
+          /* height: 350px; */
+          /* adjust for your design */
+        }
+
+        @media (max-width: 768px) {
+          .myHeroSwiper {
+            height: 220px;
+          }
+
+          .footer .container {
+            background: #fffffffa;
+          }
+        }
