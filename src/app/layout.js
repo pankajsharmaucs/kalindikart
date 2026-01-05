@@ -10,7 +10,7 @@ import { AuthProvider } from '@/context/AuthContext';
 // Add metadata for <head> tags
 export const metadata = {
   title: 'KalindiKart - Arts, Home Decor, Gem Stones & Gods Brass Idol Store',
-  description: 'Get unique brass idols, Gems,  home decor, and artifacts.',
+  description: 'Now Get unique brass idols, Gems,  home decor, and artifacts.',
 };
 
 export default function RootLayout({ children }) {

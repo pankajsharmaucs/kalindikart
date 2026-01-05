@@ -44,7 +44,7 @@ export default function SignupPage() {
             <div className="signup-wrapper">
                 <header className="text-center mb-4">
                     <i className="bi bi-person-plus-fill display-4 text-primary-gold mb-2"></i>
-                    <h1 className="h4 fw-bold text-dark-gold mb-1">Create Account</h1>
+                    <h1 className="h4 fw-bold text-dark-gold mb-1">Login Account</h1>
                     <p className="text-muted small">Fill in the details to sign up</p>
                 </header>
 
