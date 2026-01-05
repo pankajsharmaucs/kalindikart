@@ -1,43 +1,18 @@
-name: Deploy KalindiKart
-
-on:
-  push:
-    branches:
-      - main
-
-jobs:
-  deploy:
-    runs-on: ubuntu-latest
-
-    steps:
-      - name: Checkout repository
-        uses: actions/checkout@v3
-
-      - name: Deploy to server via SSH
-        uses: appleboy/ssh-action@v1.0.0
-        with:
-          host: ${{ secrets.SSH_HOST }}        # Your server IP
-          username: ${{ secrets.SSH_USER }}    # Usually 'root'
-          key: ${{ secrets.SSH_PRIVATE_KEY }}      # Private key (from GitHub secret)
-          port: ${{ secrets.SSH_PORT }}        # Usually 22
-          script: |
-            echo "🚀 Deploying KalindiKart..."
-
-            cd /var/www/kalindikart
-
-            echo "📥 Pulling latest code"
-            git reset --hard
-            git pull origin main
-
-            echo "📦 Installing dependencies"
-            npm install
-
-            echo "🏗️ Building app"
-            npm run build
-
-            echo "♻️ Restarting PM2"
-            pm2 restart kalindikart || pm2 start npm --name "kalindikart" -- start
-
-            pm2 save
-
-            echo "✅ Deployment completed successfully"
+- name: Deploy KalindiKart
+  uses: appleboy/ssh-action@v1.0.0
+  with:
+    host: ${{ secrets.SSH_HOST }}
+    username: root
+    port: ${{ secrets.SSH_PORT }}
+    key: ${{ secrets.SSH_PRIVATE_KEY }}
+    passphrase: ${{ secrets.SSH_PASSPHRASE }}
+    script: |
+      echo "🚀 Deploying KalindiKart..."
+      cd /var/www/kalindikart
+      git reset --hard
+      git pull origin main
+      npm install
+      npm run build
+      pm2 restart kalindikart || pm2 start npm --name "kalindikart" -- start
+      pm2 save
+      echo "✅ Deployment completed successfully"
