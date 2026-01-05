@@ -7,8 +7,7 @@ import { useParams } from 'next/navigation';
 import ProductSwiper from '@/components/ProductSwiper';
 
 import { useRouter } from 'next/navigation';
-import { useCartStore } from '@/stores/cartStore'; // ← ADD THIS IMPORT
-
+import { useCartStore } from '@/stores/cartStore';
 
 // *** MOCK DEFINITION FOR Breadcrumb Component ***
 // NOTE: Replace this mock with your actual import path for Breadcrumb, e.g., import Breadcrumb from '@/components/Breadcrumb';
@@ -66,9 +65,11 @@ export default function ProductPage() {
     // Get from Zustand
     const addToCart = useCartStore((state) => state.addToCart);
     const isInCart = useCartStore((state) => state.isInCart);
-    const cartCount = useCartStore((state) => state.cartCount);
+    const cartCount = useCartStore((state) => state.getCartCount()); // derived
 
-   
+    const handleAddToCart = async () => {
+        await addToCart(product);
+    };
 
     // --- State Hooks ---
     const [product, setProduct] = useState(null);
@@ -78,13 +79,7 @@ export default function ProductPage() {
     const [deliveryStatus, setDeliveryStatus] = useState(null);
     const [mainImage, setMainImage] = useState(null); // Retained for utility purposes
 
-     const alreadyInCart = product?.id ? isInCart(product.id) : false;
-
-    const handleAddToCart = async () => {
-        if (!product) return;
-        await addToCart(product);
-        // Optional: add toast notification later
-    };
+    const alreadyInCart = product?.id ? isInCart(product.id) : false;
 
     const handleGoToCart = () => {
         router.push('/cart');
@@ -92,7 +87,7 @@ export default function ProductPage() {
 
     const params = useParams();
     const { category, slug } = params;
-    
+
     // Callback function passed to Swiper to update the mainImage state
     const handleImageChange = useCallback((newImageUrl) => {
         setMainImage(newImageUrl);
