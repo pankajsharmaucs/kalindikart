@@ -1,0 +1,43 @@
+name: Deploy Kalindikart
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Deploy to VPS via SSH
+        uses: appleboy/ssh-action@v1.0.3
+        with:
+          host: ${{ secrets.VPS_HOST }}
+          username: ${{ secrets.VPS_USER }}
+          key: ${{ secrets.VPS_KEY }}
+          script: |
+            set -e
+
+            export PM2_HOME=/root/.pm2
+
+            cd /var/www/kalindikart
+
+            # Fix git ownership warning
+            git config --global --add safe.directory /var/www/kalindikart
+
+            echo "🔄 Pulling latest code..."
+            git reset --hard
+            git pull origin main
+
+            echo "📦 Installing dependencies..."
+            npm install
+
+            echo "🏗️ Building Next.js app..."
+            npm run build
+
+            echo "🚀 Reloading PM2..."
+            pm2 reload kalindikart || pm2 start npm --name "kalindikart" -- start
+            pm2 save
+
+            echo "✅ Deployment completed successfully"
