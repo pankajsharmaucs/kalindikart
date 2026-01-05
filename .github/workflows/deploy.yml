@@ -1,43 +1,53 @@
-name: Deploy Kalindikart
+name: Deploy KalindiKart to Server
 
 on:
   push:
     branches:
-      - main
+      - main   # change if you deploy from another branch
 
 jobs:
   deploy:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Deploy to VPS via SSH
-        uses: appleboy/ssh-action@v1.0.3
-        with:
-          host: ${{ secrets.VPS_HOST }}
-          username: ${{ secrets.VPS_USER }}
-          key: ${{ secrets.VPS_KEY }}
-          script: |
-            set -e
+      - name: Checkout code
+        uses: actions/checkout@v4
 
-            export PM2_HOME=/root/.pm2
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - name: Install dependencies
+        run: npm install
+
+      - name: Build Next.js app
+        run: npm run build
+
+      - name: Deploy to Server via SSH
+        uses: appleboy/ssh-action@v1.0.0
+        with:
+          host: ${{ secrets.SSH_HOST }}
+          username: ${{ secrets.SSH_USER }}
+          port: ${{ secrets.SSH_PORT }}
+          key: ${{ secrets.SSH_PRIVATE_KEY }}
+          script: |
+            echo "🚀 Deploying KalindiKart..."
 
             cd /var/www/kalindikart
 
-            # Fix git ownership warning
-            git config --global --add safe.directory /var/www/kalindikart
-
-            echo "🔄 Pulling latest code..."
-            git reset --hard
+            echo "📥 Pulling latest code"
             git pull origin main
 
-            echo "📦 Installing dependencies..."
+            echo "📦 Installing dependencies"
             npm install
 
-            echo "🏗️ Building Next.js app..."
+            echo "🏗️ Building app"
             npm run build
 
-            echo "🚀 Reloading PM2..."
-            pm2 reload kalindikart || pm2 start npm --name "kalindikart" -- start
+            echo "♻️ Restarting PM2"
+            pm2 restart kalindikart || pm2 start npm --name "kalindikart" -- start
+
             pm2 save
 
             echo "✅ Deployment completed successfully"
