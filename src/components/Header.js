@@ -5,6 +5,7 @@ import { usePathname } from 'next/navigation';
 import { useEffect, useState, useRef } from 'react';
 import Image from 'next/image';
 import { useAuth } from '@/context/AuthContext';
+import { useCartStore } from '@/stores/cartStore';
 
 export default function Header() {
   const { user, isLoggedIn, logout } = useAuth();
@@ -15,6 +16,7 @@ export default function Header() {
   const [loadingCategories, setLoadingCategories] = useState(true);
   const [loadingSubcats, setLoadingSubcats] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  const cartItems = useCartStore((state) => state.cartItems);
 
   const dropdownRef = useRef(null);
 
@@ -253,20 +255,20 @@ export default function Header() {
             <li className="nav-item"><Link onClick={closeNavbar} className={`nav-link ${isActive('/trending') ? 'active-link' : ''}`} href="/trending">Trending</Link></li>
             <li className="nav-item"><Link onClick={closeNavbar} className={`nav-link ${isActive('/about') ? 'active-link' : ''}`} href="/about">About us</Link></li>
             {/* <li className="nav-item"><Link onClick={closeNavbar} className={`nav-link ${isActive('/login') ? 'active-link' : ''}`} href="/login">Login</Link></li> */}
-                      
+
             {isLoggedIn ? (
-            <>
-              <span>Welcome, {user?.name || user?.email}</span>
-              <button onClick={handleLogout} className="btn btn-outline-danger">
-                Logout
-              </button>
-            </>
-          ) : (
-            <Link href="/login" className="btn btn-primary-gold">
-              Login
-            </Link>
-          )}
-         
+              <>
+                <span>Welcome, {user?.name || user?.email}</span>
+                <button onClick={handleLogout} className="btn btn-outline-danger">
+                  Logout
+                </button>
+              </>
+            ) : (
+              <Link href="/login" className="btn btn-primary-gold">
+                Login
+              </Link>
+            )}
+
           </ul>
 
           {/* Right Icons */}
@@ -274,7 +276,13 @@ export default function Header() {
             {/* <i className="fas fa-search me-3 cursor-pointer"></i> */}
             {/* <i className="far fa-user me-3 cursor-pointer"></i> */}
             {/* <div className="position-relative me-3"><i className="far fa-heart cursor-pointer"></i><span className="badge-count">0</span></div> */}
-            <div className="position-relative"><i className="fas fa-shopping-cart cursor-pointer"></i><span className="badge-count">0</span></div>
+            <Link href="/cart" className="position-relative me-3">
+              <i className="fas fa-shopping-cart cursor-pointer"></i>
+              {cartItems.length > 0 && (
+                <span className="badge-count">{cartItems.length}</span>
+              )}
+            </Link>
+
           </div>
         </div>
       </div>
