@@ -11,6 +11,9 @@ import { AuthProvider } from '@/context/AuthContext';
 export const metadata = {
   title: 'KalindiKart - Arts, Home Decor, Gem Stones & Gods Brass Idol Store',
   description: 'Now Get unique brass idols, Gems,  home decor, and artifacts.',
+  icons: {
+    icon: '/favicon.png', // Path relative to public/
+  },
 };
 
 export default function RootLayout({ children }) {
