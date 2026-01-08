@@ -1,19 +1,17 @@
 'use client';
 
 import React from 'react';
-import { useCartStore } from '@/stores/cartStore';
+import { useCartStore } from '../../stores/cartStore';
 import { useRouter } from 'next/navigation';
+import '../../app/globals.css';
 
 export default function CartPage() {
   const cartItems = useCartStore((state) => state.cartItems);
   const removeFromCart = useCartStore((state) => state.removeFromCart);
   const updateQuantity = useCartStore((state) => state.updateQuantity);
   const getCartTotal = useCartStore((state) => state.getCartTotal);
+  const isLoggedIn = useCartStore((state) => state.isLoggedIn);
   const router = useRouter();
-
-  const handleCheckout = () => {
-    router.push('/checkout');
-  };
 
   if (!cartItems.length)
     return (
@@ -22,12 +20,38 @@ export default function CartPage() {
           <div className="display-1 mb-3">🛒</div>
           <h2 className="fw-bold">Your cart is empty</h2>
           <p className="text-muted mb-4">Looks like you haven't added anything to your cart yet.</p>
-          <button onClick={() => router.push('/')} className="btn btn-primary btn-lg px-5">
+          <button onClick={() => router.push('/')} className="btn btn-primary-gold btn-lg px-5">
             Continue Shopping
           </button>
         </div>
       </div>
     );
+
+  const handleCheckout = () => {
+    if (!isLoggedIn) {
+      router.push('/login?redirect=/checkout');
+      return;
+    }
+    router.push('/checkout');
+  };
+
+  const resolveImage = (images) => {
+    if (!images) return '/placeholder.png';
+    let img = images;
+
+    if (typeof img === 'string') {
+      try {
+        const parsed = JSON.parse(img);
+        if (Array.isArray(parsed)) img = parsed[0];
+      } catch { }
+    }
+
+    if (Array.isArray(img)) img = img[0];
+    if (typeof img !== 'string') return '/placeholder.png';
+    if (img.startsWith('http')) return img;
+    if (!img.startsWith('/')) return `/${img}`;
+    return img;
+  };
 
   return (
     <div className="container py-5 mt-4">
@@ -42,28 +66,14 @@ export default function CartPage() {
                 {cartItems.map((item) => (
                   <div key={item.product_id} className="list-group-item p-4">
                     <div className="row align-items-center">
-
                       <div className="col-3 col-md-2">
-                        {item.images ? (
-                          <img
-                            src={
-                              Array.isArray(item.images)
-                                ? item.images[0]
-                                : typeof item.images === 'string'
-                                  ? JSON.parse(item.images)[0] || item.images // handle JSON string
-                                  : item.images // fallback
-                            }
-                            alt={item.title}
-                            className="img-fluid rounded border shadow-sm"
-                            style={{ width: '80px', height: '80px', objectFit: 'cover' }}
-                          />
-                        ) : (
-                          <img
-                            src="https://via.placeholder.com/80"
-                            alt="placeholder"
-                            className="img-fluid rounded border shadow-sm"
-                          />
-                        )}
+                        <img
+                          src={resolveImage(item.images)}
+                          alt={item.title}
+                          className="img-fluid rounded border shadow-sm"
+                          style={{ width: '80px', height: '80px', objectFit: 'cover' }}
+                          onError={(e) => (e.currentTarget.src = '/placeholder.png')}
+                        />
                       </div>
 
                       <div className="col-9 col-md-10">
@@ -101,7 +111,7 @@ export default function CartPage() {
                           </div>
                           <div className="text-end">
                             <span className="text-muted small d-block">Price: ₹{item.price.toLocaleString('en-IN')}</span>
-                            <span className="fw-bold fs-5 text-primary">₹{(item.price * item.quantity).toLocaleString('en-IN')}</span>
+                            <span className="fw-bold fs-5 text-primary-gold">₹{(item.price * item.quantity).toLocaleString('en-IN')}</span>
                           </div>
                         </div>
                       </div>
@@ -117,25 +127,44 @@ export default function CartPage() {
         <div className="col-lg-4">
           <div className="card border-0 shadow-sm sticky-top" style={{ top: '20px' }}>
             <div className="card-body p-4">
-              <h5 className="fw-bold mb-4">Order Summary</h5>
+              <h5 className="fw-bold mb-4 text-dark-gold">Order Summary</h5>
+
               <div className="d-flex justify-content-between mb-3">
                 <span className="text-muted">Subtotal</span>
                 <span>₹{getCartTotal().toLocaleString('en-IN')}</span>
               </div>
+
               <div className="d-flex justify-content-between mb-3">
                 <span className="text-muted">Shipping</span>
-                <span className="text-success">FREE</span>
+                <span className="text-success fw-semibold">FREE</span>
               </div>
+
               <hr />
+
               <div className="d-flex justify-content-between mb-4">
                 <span className="h5 fw-bold">Total</span>
-                <span className="h5 fw-bold text-primary">₹{getCartTotal().toLocaleString('en-IN')}</span>
+                <span className="h5 fw-bold text-primary-gold">₹{getCartTotal().toLocaleString('en-IN')}</span>
               </div>
-              <button className="btn btn-primary w-100 py-3 fw-bold shadow-sm" onClick={handleCheckout}>
+
+              <button
+                className="btn btn-primary-gold text-white btn-lg 
+                w-100 d-flex align-items-center justify-content-center gap-2 shadow-sm"
+                onClick={handleCheckout}
+              >
+                <i className="bi bi-lock-fill fs-5"></i>
                 PROCEED TO CHECKOUT
               </button>
-              <div className="mt-4 p-3 bg-light rounded small text-muted">
-                <i className="bi bi-shield-check me-2"></i> Secure checkout powered by Stripe.
+
+              {!isLoggedIn && (
+                <p className="text-muted small mt-3 text-center">
+                  <i className="bi bi-info-circle me-1 text-dark-gold"></i>
+                  Login required to place order
+                </p>
+              )}
+
+              <div className="mt-4 p-3 rounded bg-light small text-muted">
+                <i className="bi bi-shield-check me-2 text-primary-gold"></i>
+                Secure checkout powered by Stripe
               </div>
             </div>
           </div>

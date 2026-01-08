@@ -4,8 +4,8 @@ import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { useEffect, useState, useRef } from 'react';
 import Image from 'next/image';
-import { useAuth } from '@/context/AuthContext';
-import { useCartStore } from '@/stores/cartStore';
+import { useAuth } from '../context/AuthContext';
+import { useCartStore } from '../stores/cartStore';
 
 export default function Header() {
   const { user, isLoggedIn, logout } = useAuth();
@@ -258,7 +258,7 @@ export default function Header() {
 
             {isLoggedIn ? (
               <>
-                <span>Welcome, {user?.name || user?.email}</span>
+                <span> {user?.name || user?.email}</span>
                 <button onClick={handleLogout} className="btn btn-outline-danger">
                   Logout
                 </button>

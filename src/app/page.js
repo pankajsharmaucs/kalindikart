@@ -8,11 +8,11 @@ import Link from 'next/link';
 import HeroSwiper from '../components/HeroSwiper';
 import ReelsSlider from '../components/ReelsSlider';
 import ProductCard from '../components/ProductCard';
-import NewArrivalsSection from '@/components/newArrivals/page';
+import NewArrivalsSection from '../components/newArrivals/page';
 // Note: ProductCard is assumed to be the styled version we finalized,
 // and it should be defined in 'components/ProductCard.js' or similar.
 
-import CategorySection from '@/components/Home/CategorySection';
+import CategorySection from '../components/Home/CategorySection';
 
 
 export default function HomePage() {

@@ -2,8 +2,8 @@
 
 import React, { useEffect, useState } from 'react';
 import { useParams, useRouter } from 'next/navigation';
-import Breadcrumb from '@/components/Breadcrumb';
-import ProductCard from '@/components/ProductCard';
+import Breadcrumb from '../../../../components/Breadcrumb';
+import ProductCard from '../../../../components/ProductCard';
 
 export default function SubCategoryClient() {
   const { slug: categorySlug, subcat: subCategorySlug } = useParams();

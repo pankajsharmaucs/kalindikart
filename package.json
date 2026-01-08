@@ -19,7 +19,13 @@
     "react": "19.1.0",
     "react-dom": "19.1.0",
     "react-icons": "^5.5.0",
+    "sweetalert2": "^11.26.17",
     "swiper": "^12.0.3",
     "zustand": "^5.0.9"
+  },
+  "devDependencies": {
+    "@types/node": "25.0.3",
+    "@types/react": "19.2.7",
+    "typescript": "5.9.3"
   }
 }

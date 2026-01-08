@@ -4,10 +4,10 @@
 import React, { useEffect, useState, useMemo, useCallback } from 'react';
 import { useParams } from 'next/navigation';
 // Import the new Swiper component
-import ProductSwiper from '@/components/ProductSwiper';
+import ProductSwiper from '../../../../components/ProductSwiper';
 
 import { useRouter } from 'next/navigation';
-import { useCartStore } from '@/stores/cartStore';
+import { useCartStore } from '../../../../stores/cartStore';
 
 // *** MOCK DEFINITION FOR Breadcrumb Component ***
 // NOTE: Replace this mock with your actual import path for Breadcrumb, e.g., import Breadcrumb from '@/components/Breadcrumb';
@@ -254,20 +254,20 @@ export default function ProductPage() {
                         {/* ========================================================== */}
                         {/* LEFT COLUMN: SWIPER IMAGE GALLERY (col-lg-6) */}
                         {/* ========================================================== */}
-                        <div className="col-12 col-lg-6">
-                            {/* ProductSwiper handles main image and vertical/horizontal thumbnails */}
-                            <ProductSwiper
-                                imageList={imageList}
-                                productTitle={product.title}
-                                onImageChange={handleImageChange}
-                            />
+                        <div className="col-12 col-md-12 col-lg-6 d-flex justify-content-center">
+                            <div className="w-100">
+                                <div className="ratio ratio-1x1 border rounded bg-white p-2">
+                                    <ProductSwiper
+                                        imageList={imageList}
+                                        productTitle={product.title}
+                                        onImageChange={handleImageChange}
+                                    />
+                                </div>
+                            </div>
                         </div>
 
-                        {/* ========================================================== */}
-                        {/* RIGHT COLUMN: STICKY INFO PANEL (col-lg-6) */}
-                        {/* ========================================================== */}
-                        <div className="col-12 col-lg-6 "> {/* Added sticky-info-panel class for desktop sticky behavior */}
-                            <div className="p-3 border rounded shadow-sm bg-white product-info-card">
+                        <div className="col-12 col-md-12 col-lg-6 mt-4 mt-lg-0">
+                            <div className="p-3 border rounded shadow-sm bg-white ">
 
                                 <h1 className="h3 fw-bold mb-1">{product.title}</h1>
 
@@ -328,32 +328,41 @@ export default function ProductPage() {
 
                                 {/* Actions */}
                                 {/* Actions */}
-                                <div className="d-grid gap-2 mb-3">
+                                <div className="d-grid gap-3 mb-4 cart-actions">
                                     {alreadyInCart ? (
                                         <button
-                                            className="btn btn-success btn-lg"
+                                            className="btn btn-success btn-lg d-flex align-items-center justify-content-center cart-btn cart-btn-success"
                                             onClick={handleGoToCart}
                                         >
-                                            <i className="bi bi-cart-check me-2"></i>
-                                            GO TO CART ({cartCount})
+                                            <i className="bi bi-cart-check me-2 fs-5"></i>
+                                            <span className="fw-semibold">
+                                                GO TO CART
+                                                <span className="ms-2 badge bg-light text-success">
+                                                    {cartCount}
+                                                </span>
+                                            </span>
                                         </button>
                                     ) : (
                                         <>
-                                            <button className="btn btn-primary-gold btn-lg">
-                                                <i className="bi bi-lightning-fill me-2"></i>
-                                                BUY NOW
-                                            </button>
                                             <button
-                                                className="btn btn-warning btn-lg"
+                                                className="btn btn-primary btn-lg d-flex align-items-center justify-content-center cart-btn cart-btn-buy"
+                                            >
+                                                <i className="bi bi-lightning-fill me-2 fs-5"></i>
+                                                <span className="fw-semibold">BUY NOW</span>
+                                            </button>
+
+                                            <button
+                                                className="btn btn-outline-warning btn-lg d-flex align-items-center justify-content-center cart-btn cart-btn-add"
                                                 onClick={handleAddToCart}
                                                 disabled={!product}
                                             >
-                                                <i className="bi bi-cart-plus me-2"></i>
-                                                ADD TO CART
+                                                <i className="bi bi-cart-plus me-2 fs-5"></i>
+                                                <span className="fw-semibold">ADD TO CART</span>
                                             </button>
                                         </>
                                     )}
                                 </div>
+
 
                                 {/* Additional Info */}
                                 <div className="mt-3 small text-muted border-top pt-3">
@@ -614,7 +623,7 @@ export default function ProductPage() {
                     }
                     .product-thumbs-wrap {
                         width: 100%; /* Full width for horizontal scroll */
-                        height: 90px;
+                        height: 90px !important;
                         margin-bottom: 15px !important;
                     }
                     .product-thumbs-swiper .swiper-wrapper {

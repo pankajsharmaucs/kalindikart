@@ -2,7 +2,7 @@
 
 import React, { useEffect, useState } from 'react';
 import Link from 'next/link';
-import Breadcrumb from '@/components/Breadcrumb';
+import Breadcrumb from '../../components/Breadcrumb';
 
 // Helper to create slug if backend doesn't provide one
 const createSlug = (text) =>

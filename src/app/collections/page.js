@@ -2,8 +2,8 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
-import Breadcrumb from '@/components/Breadcrumb';
-import ProductCard from '@/components/ProductCard';
+import Breadcrumb from '../../components/Breadcrumb';
+import ProductCard from '../../components/ProductCard';
 
 export default function CollectionsPage() {
   const [products, setProducts] = useState([]);

@@ -23,6 +23,129 @@
           background: var(--light-bg)
         }
 
+        /* ============================= */
+        /* Primary Gold Buttons & Text   */
+        /* ============================= */
+
+        /* Button */
+        .btn-primary-gold {
+          background-color: var(--primary-gold) !important;
+          color: #fff !important;
+          border: 1px solid var(--primary-gold) !important;
+          transition: all 0.3s ease !important;
+        }
+
+        /* Button Hover / Focus */
+        .btn-primary-gold:hover,
+        .btn-primary-gold:focus {
+          background-color: #efad40 !important;
+          /* Accent hover color */
+          border-color: #efad40 !important;
+          color: #000 !important;
+        }
+
+        /* Shadow variant for buttons */
+        .btn-primary-gold-shadow {
+          box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1) !important;
+        }
+
+        /* Text */
+        .text-primary-gold {
+          color: var(--primary-gold) !important;
+        }
+
+        .text-dark-gold {
+          color: var(--dark-gold) !important;
+        }
+
+        /* Borders */
+        .border-primary-gold {
+          border-color: var(--primary-gold) !important;
+        }
+
+        /* Background */
+        .bg-primary-gold {
+          background-color: var(--primary-gold) !important;
+          color: #fff !important;
+        }
+
+        /* Optional hover background */
+        .bg-primary-gold:hover {
+          background-color: #efad40 !important;
+          color: #fff !important;
+        }
+
+        /* For small text / info */
+        .text-primary-gold-small {
+          color: var(--primary-gold) !important;
+          font-weight: 500 !important;
+        }
+
+        /* ===================== Checkout Page Enhancements ===================== */
+
+        /* Input focus effect */
+        .form-control:focus {
+          border-color: var(--primary-gold) !important;
+          box-shadow: 0 0 5px var(--primary-gold) !important;
+        }
+
+        /* Floating label color */
+        .form-floating>label {
+          color: var(--dark-gold) !important;
+          font-weight: 500 !important;
+        }
+
+        /* Card hover effect */
+        .card.shadow-sm {
+          border-radius: 12px !important;
+          transition: all 0.2s ease-in-out !important;
+        }
+
+        .card.shadow-sm:hover {
+          box-shadow: 0 6px 20px rgba(0, 0, 0, 0.15) !important;
+        }
+
+        /* Right summary items hover */
+        .card .d-flex.align-items-center:hover {
+          background-color: var(--light-bg) !important;
+          border-radius: 8px !important;
+          transition: 0.3s !important;
+        }
+
+        /* Quantity text */
+        .text-muted {
+          font-size: 0.85rem !important;
+        }
+
+        /* Image round & fit */
+        .card img {
+          border-radius: 8px !important;
+          object-fit: cover !important;
+        }
+
+
+
+        /* Payment Processing Page */
+        .progress {
+          background-color: #f0f0f0 !important;
+        }
+
+        .progress-bar {
+          background-color: var(--primary-gold) !important;
+          font-weight: 600;
+          color: #fff;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+        }
+
+        .card.shadow-sm {
+          border-radius: 12px !important;
+        }
+
+
+
+
         body {
           font-family: 'Poppins', sans-serif;
           overflow-x: hidden;

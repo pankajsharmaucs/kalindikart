@@ -2,7 +2,7 @@
 
 import React, { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
-import Breadcrumb from '@/components/Breadcrumb';
+import Breadcrumb from '../../../components/Breadcrumb';
 
 export default function CategoryClient({ slug }) {
   const [subCategories, setSubCategories] = useState([]);
