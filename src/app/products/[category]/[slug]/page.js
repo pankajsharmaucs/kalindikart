@@ -10,7 +10,6 @@ import { useRouter } from 'next/navigation';
 import { useCartStore } from '../../../../stores/cartStore';
 
 // *** MOCK DEFINITION FOR Breadcrumb Component ***
-// NOTE: Replace this mock with your actual import path for Breadcrumb, e.g., import Breadcrumb from '@/components/Breadcrumb';
 const Breadcrumb = ({ product }) => {
     if (!product) return null;
 

@@ -1,7 +1,7 @@
 // src/app/products/[category]/page.js
 
-import Breadcrumb from "@/components/Breadcrumb";
-import { products } from "@/data/products";
+import Breadcrumb from "../../../components/Breadcrumb";
+import { products } from "../../../data/products";
 import Link from "next/link";
 import Image from "next/image";
 
