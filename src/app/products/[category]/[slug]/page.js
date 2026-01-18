@@ -343,15 +343,15 @@ export default function ProductPage() {
                                         </button>
                                     ) : (
                                         <>
-                                            <button
+                                            {/* <button
                                                 className="btn btn-primary btn-lg d-flex align-items-center justify-content-center cart-btn cart-btn-buy"
                                             >
                                                 <i className="bi bi-lightning-fill me-2 fs-5"></i>
                                                 <span className="fw-semibold">BUY NOW</span>
-                                            </button>
+                                            </button> */}
 
                                             <button
-                                                className="btn btn-outline-warning btn-lg d-flex align-items-center justify-content-center cart-btn cart-btn-add"
+                                                className="btn btn-warning btn-lg d-flex align-items-center justify-content-center cart-btn cart-btn-add"
                                                 onClick={handleAddToCart}
                                                 disabled={!product}
                                             >

@@ -1,17 +1,85 @@
 'use client';
 
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { useCartStore } from '../../stores/cartStore';
 import { useRouter } from 'next/navigation';
 import '../../app/globals.css';
 
 export default function CartPage() {
-  const cartItems = useCartStore((state) => state.cartItems);
+  const router = useRouter();
+
+  // Local cart store for guests
+  const guestCartItems = useCartStore((state) => state.cartItems);
   const removeFromCart = useCartStore((state) => state.removeFromCart);
   const updateQuantity = useCartStore((state) => state.updateQuantity);
   const getCartTotal = useCartStore((state) => state.getCartTotal);
   const isLoggedIn = useCartStore((state) => state.isLoggedIn);
-  const router = useRouter();
+
+  // State to hold cart for logged-in users
+  const [cartItems, setCartItems] = useState([]);
+
+  // Fetch cart from DB if user is logged in
+  useEffect(() => {
+    const fetchCart = async () => {
+      if (!isLoggedIn) {
+        setCartItems(guestCartItems);
+        return;
+      }
+
+      const userMobile = localStorage.getItem('userMobile');
+      if (!userMobile) return;
+
+      try {
+        const res = await fetch(`/api/cart?userId=${userMobile}`);
+        const data = await res.json();
+
+        if (data.success && Array.isArray(data.cartItems)) {
+          setCartItems(data.cartItems);
+        } else {
+          setCartItems([]);
+        }
+      } catch (err) {
+        console.error('Error fetching DB cart:', err);
+        setCartItems([]);
+      }
+    };
+
+    fetchCart();
+  }, [isLoggedIn, guestCartItems]);
+
+  // Remove item handler
+  const handleRemove = (product_id) => {
+    if (isLoggedIn) {
+      const userMobile = localStorage.getItem('userMobile');
+      fetch('/api/cart/remove', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ userId: userMobile, productId: product_id }),
+      }).then(() => setCartItems(cartItems.filter(item => item.product_id !== product_id)));
+    } else {
+      removeFromCart(product_id);
+      setCartItems(guestCartItems);
+    }
+  };
+
+  // Update quantity handler
+  const handleUpdateQuantity = (product_id, quantity) => {
+    if (quantity <= 0) return;
+
+    if (isLoggedIn) {
+      const userMobile = localStorage.getItem('userMobile');
+      fetch('/api/cart/update', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ userId: userMobile, productId: product_id, quantity }),
+      }).then(() => {
+        setCartItems(cartItems.map(item => item.product_id === product_id ? { ...item, quantity } : item));
+      });
+    } else {
+      updateQuantity(product_id, quantity);
+      setCartItems(guestCartItems);
+    }
+  };
 
   if (!cartItems.length)
     return (
@@ -53,6 +121,8 @@ export default function CartPage() {
     return img;
   };
 
+  const totalPrice = cartItems.reduce((sum, item) => sum + item.price * item.quantity, 0);
+
   return (
     <div className="container py-5 mt-4">
       <h2 className="fw-bold mb-4">Shopping Cart ({cartItems.length} items)</h2>
@@ -84,7 +154,7 @@ export default function CartPage() {
                           </div>
                           <button
                             className="btn btn-link text-danger p-0"
-                            onClick={() => removeFromCart(item.product_id)}
+                            onClick={() => handleRemove(item.product_id)}
                             title="Remove item"
                           >
                             <i className="bi bi-trash"></i> Remove
@@ -95,7 +165,7 @@ export default function CartPage() {
                           <div className="input-group input-group-sm" style={{ maxWidth: '120px' }}>
                             <button
                               className="btn btn-outline-secondary"
-                              onClick={() => updateQuantity(item.product_id, item.quantity - 1)}
+                              onClick={() => handleUpdateQuantity(item.product_id, item.quantity - 1)}
                               disabled={item.quantity <= 1}
                             >-</button>
                             <input
@@ -106,7 +176,7 @@ export default function CartPage() {
                             />
                             <button
                               className="btn btn-outline-secondary"
-                              onClick={() => updateQuantity(item.product_id, item.quantity + 1)}
+                              onClick={() => handleUpdateQuantity(item.product_id, item.quantity + 1)}
                             >+</button>
                           </div>
                           <div className="text-end">
@@ -131,7 +201,7 @@ export default function CartPage() {
 
               <div className="d-flex justify-content-between mb-3">
                 <span className="text-muted">Subtotal</span>
-                <span>₹{getCartTotal().toLocaleString('en-IN')}</span>
+                <span>₹{totalPrice.toLocaleString('en-IN')}</span>
               </div>
 
               <div className="d-flex justify-content-between mb-3">
@@ -143,7 +213,7 @@ export default function CartPage() {
 
               <div className="d-flex justify-content-between mb-4">
                 <span className="h5 fw-bold">Total</span>
-                <span className="h5 fw-bold text-primary-gold">₹{getCartTotal().toLocaleString('en-IN')}</span>
+                <span className="h5 fw-bold text-primary-gold">₹{totalPrice.toLocaleString('en-IN')}</span>
               </div>
 
               <button

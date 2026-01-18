@@ -3,13 +3,39 @@
 import { useState, useRef, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { useAuth } from '../../context/AuthContext';
+import { useCartStore } from '../../stores/cartStore';
+
+/* ----------------------------------------
+   TEMP MOCK SERVICES (replace later)
+---------------------------------------- */
+const sendOtp = async (mobile) => {
+  const res = await fetch('/api/user/send-otp', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ mobile }),
+  });
+
+  const data = await res.json();
+  return data.success;
+};
+
+const verifyOtpApi = async (mobile, otp) => {
+  const res = await fetch('/api/user/verify-otp', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ mobile, otp }),
+  });
+
+  return await res.json();
+};
 
 export default function LoginPage() {
   const router = useRouter();
-  const { loginWithOtp, verifyOtp } = useAuth();
+  const { login } = useAuth();
+  const { setAuth, syncLocalCartToDB } = useCartStore.getState();
 
   const [mobile, setMobile] = useState('');
-  const [step, setStep] = useState('mobile'); // mobile | otp
+  const [step, setStep] = useState('mobile');
   const [otp, setOtp] = useState(Array(5).fill(''));
   const inputsRef = useRef([]);
   const [timer, setTimer] = useState(60);
@@ -34,17 +60,18 @@ export default function LoginPage() {
     }
 
     setLoading(true);
-    // const res = await loginWithOtp(mobile); // API
+    const success = await sendOtp(mobile);
     setLoading(false);
 
-    // if (res.success) {
+    if (!success) {
+      setError('Failed to send OTP');
+      return;
+    }
+
     setStep('otp');
     setTimer(60);
     setOtp(Array(5).fill(''));
     setTimeout(() => inputsRef.current[0]?.focus(), 100);
-    // } else {
-    //   setError(res.message || 'Failed to send OTP');
-    // }
   };
 
   /* ---------------- OTP INPUT ---------------- */
@@ -67,65 +94,51 @@ export default function LoginPage() {
   };
 
   /* ---------------- VERIFY OTP ---------------- */
-  // const handleVerifyOtp = async () => {
-  //   const otpValue = otp.join('');
-  //   if (otpValue.length !== 5) {
-  //     setError('Enter complete OTP');
-  //     return;
-  //   }
-
-  //   setLoading(true);
-  //   const res = await verifyOtp({ mobile, otp: otpValue });
-  //   setLoading(false);
-
-  //   if (res.success) {
-  //     router.push('/checkout');
-  //   } else {
-  //     setError('Invalid OTP');
-  //   }
-  // };
-
-  // Mock OTP verification
   const handleVerifyOtp = async () => {
     const otpValue = otp.join('');
+
     if (otpValue.length !== 5) {
       setError('Enter complete OTP');
       return;
     }
 
     setLoading(true);
-    await new Promise((r) => setTimeout(r, 1000)); // simulate API call
+    const res = await verifyOtpApi(mobile, otpValue);
     setLoading(false);
 
-    if (otpValue !== '12345') {
-      // Always fail for wrong OTP
-      setError('Invalid OTP, but logging in for demo...');
+    if (!res.success) {
+      setError('Invalid OTP');
+      return;
     }
 
-    // Save login to localStorage
-    localStorage.setItem('isLoggedIn', 'true');
-    localStorage.setItem('userMobile', mobile);
+    // ✅ FINAL LOGIN
+    login({
+      mobile: res.user.mobile,
+      userId: res.user.id,
+    });
 
-    // Redirect to checkout
+
+    setAuth(true, mobile); // mobile = user_id
+    await syncLocalCartToDB();
+
     router.push('/checkout');
   };
-  
+
   /* ---------------- RESEND OTP ---------------- */
-  const handleResendOtp = () => {
+  const handleResendOtp = async () => {
     setTimer(60);
     setOtp(Array(5).fill(''));
     inputsRef.current[0]?.focus();
+    await sendOtp(mobile);
   };
 
   return (
     <div className="container py-5">
       <div className="row justify-content-center">
         <div className="col-md-5 col-lg-4">
-
           <div className="card shadow-lg border-0 p-4">
-            <h3 className="text-center fw-bold text-dark-gold mb-2">
-              Login to Continue
-            </h3>
+
+            <h3 className="text-center fw-bold mb-2">Login to Continue</h3>
             <p className="text-center text-muted small mb-4">
               Secure OTP-based login
             </p>
@@ -141,14 +154,16 @@ export default function LoginPage() {
                     placeholder="Enter mobile number"
                     maxLength="10"
                     value={mobile}
-                    onChange={(e) => setMobile(e.target.value.replace(/\D/g, ''))}
+                    onChange={(e) =>
+                      setMobile(e.target.value.replace(/\D/g, ''))
+                    }
                   />
                 </div>
 
                 {error && <p className="text-danger small">{error}</p>}
 
                 <button
-                  className="btn btn-primary-gold text-white w-100 py-2 fw-semibold"
+                  className="btn btn-primary-gold w-100 py-2 fw-semibold"
                   disabled={loading}
                 >
                   {loading ? 'Sending OTP...' : 'Login with OTP'}
@@ -157,7 +172,12 @@ export default function LoginPage() {
             )}
 
             {step === 'otp' && (
-              <>
+              <form
+                onSubmit={(e) => {
+                  e.preventDefault();
+                  handleVerifyOtp();
+                }}
+              >
                 <p className="text-center small text-muted mb-3">
                   OTP sent to <strong>{mobile}</strong>
                 </p>
@@ -178,11 +198,13 @@ export default function LoginPage() {
                   ))}
                 </div>
 
-                {error && <p className="text-danger small text-center">{error}</p>}
+                {error && (
+                  <p className="text-danger small text-center">{error}</p>
+                )}
 
                 <button
-                  className="btn btn-primary-gold text-white w-100 py-2 fw-semibold"
-                  onClick={handleVerifyOtp}
+                  type="submit" 
+                  className="btn btn-primary-gold w-100 py-2 fw-semibold"
                   disabled={loading}
                 >
                   {loading ? 'Verifying...' : 'Verify OTP'}
@@ -195,17 +217,18 @@ export default function LoginPage() {
                     </span>
                   ) : (
                     <button
-                      className="btn btn-link text-dark-gold fw-semibold p-0"
+                      type="button"
+                      className="btn btn-link fw-semibold p-0"
                       onClick={handleResendOtp}
                     >
                       Resend OTP
                     </button>
                   )}
                 </div>
-              </>
+              </form>
             )}
-          </div>
 
+          </div>
         </div>
       </div>
     </div>

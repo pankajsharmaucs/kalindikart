@@ -1,62 +1,39 @@
 import { NextResponse } from 'next/server';
-import { pool } from '../db.js';
+import { pool } from '../db.js'; // relative path
 
-// ✅ Get cart items by user
 export async function GET(req) {
   try {
-    const { searchParams } = new URL(req.url);
-    const user_id = searchParams.get('user_id');
+    const userId = req.nextUrl.searchParams.get('userId');
 
-    const [rows] = await pool.query(
-      'SELECT c.*, p.title, p.price, p.images FROM cart c JOIN products p ON c.product_id = p.id WHERE c.user_id = ?',
-      [user_id]
-    );
-
-    return NextResponse.json(rows);
-  } catch (error) {
-    console.error(error);
-    return NextResponse.json({ error: 'Failed to fetch cart' }, { status: 500 });
-  }
-}
-
-// ✅ Add item to cart
-export async function POST(req) {
-  try {
-    const { user_id, product_id, quantity } = await req.json();
-
-    // Check if exists
-    const [exist] = await pool.query(
-      'SELECT * FROM cart WHERE user_id = ? AND product_id = ?',
-      [user_id, product_id]
-    );
-
-    if (exist.length > 0) {
-      await pool.query(
-        'UPDATE cart SET quantity = quantity + ? WHERE user_id = ? AND product_id = ?',
-        [quantity, user_id, product_id]
-      );
-    } else {
-      await pool.query(
-        'INSERT INTO cart (user_id, product_id, quantity, created_at) VALUES (?, ?, ?, NOW())',
-        [user_id, product_id, quantity]
-      );
+    if (!userId) {
+      return NextResponse.json({ success: false, message: 'User ID is required' }, { status: 400 });
     }
 
-    return NextResponse.json({ message: 'Item added to cart' });
-  } catch (error) {
-    console.error(error);
-    return NextResponse.json({ error: 'Failed to add to cart' }, { status: 500 });
-  }
-}
+    const [rows] = await pool.query(
+      `SELECT product_id, quantity, price 
+       FROM cart WHERE user_id = ?`,
+      [userId]
+    );
 
-// ✅ Remove item
-export async function DELETE(req) {
-  try {
-    const { user_id, product_id } = await req.json();
-    await pool.query('DELETE FROM cart WHERE user_id = ? AND product_id = ?', [user_id, product_id]);
-    return NextResponse.json({ message: 'Item removed from cart' });
-  } catch (error) {
-    console.error(error);
-    return NextResponse.json({ error: 'Failed to remove from cart' }, { status: 500 });
+    // Add title and images if you have products table
+    const cartItems = await Promise.all(rows.map(async (item) => {
+      const [prod] = await pool.query(
+        `SELECT title, images FROM products WHERE id = ?`,
+        [item.product_id]
+      );
+
+      return {
+        product_id: item.product_id,
+        quantity: item.quantity,
+        price: parseFloat(item.price),
+        title: prod[0]?.title || 'Unknown Product',
+        images: prod[0]?.images || [],
+      };
+    }));
+
+    return NextResponse.json({ success: true, cartItems });
+  } catch (err) {
+    console.error('Fetch cart error:', err);
+    return NextResponse.json({ success: false, message: 'Server error' }, { status: 500 });
   }
 }
