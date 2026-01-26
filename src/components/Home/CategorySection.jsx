@@ -1,15 +1,17 @@
 'use client';
-
 import React, { useEffect, useState } from 'react';
 import Link from 'next/link';
 
-// helper to create slug if backend doesn't provide one
-const createSlug = (text) =>
-  text
+const createSlug = (text) => {
+  if (!text) return 'category';
+  return text
+    .toString()
     .toLowerCase()
     .trim()
     .replace(/[^a-z0-9\s-]/g, '')
-    .replace(/\s+/g, '-');
+    .replace(/\s+/g, '-')
+    .replace(/-+/g, '-');
+};
 
 export default function CategorySection() {
   const [categories, setCategories] = useState([]);
@@ -18,12 +20,24 @@ export default function CategorySection() {
   useEffect(() => {
     fetch('/api/category')
       .then((res) => res.json())
-      .then((data) => {
-        setCategories(data || []);
+      .then((response) => {
+        // Safely get array no matter what the API returns
+        let items = [];
+
+        if (Array.isArray(response)) {
+          items = response;
+        } else if (response && Array.isArray(response.data)) {
+          items = response.data;
+        } else if (response && Array.isArray(response.categories)) {
+          items = response.categories;
+        }
+
+        setCategories(items);
         setLoading(false);
       })
       .catch((err) => {
-        console.error('Category fetch error:', err);
+        console.error('Failed to load categories:', err);
+        setCategories([]);
         setLoading(false);
       });
   }, []);
@@ -44,21 +58,26 @@ export default function CategorySection() {
           <p className="text-center">Loading categories...</p>
         ) : (
           <div className="category-scroll">
-            {categories.map((cat) => {
-              const slug = createSlug(cat.slug);
+            {(Array.isArray(categories) ? categories : []).map((cat) => {
+              const slug = createSlug(cat.slug || cat.name || cat.category_name || '');
+              const name = cat.name || cat.category_name || 'Unnamed';
+              const image = cat.image || '/assets/Home/default-category.png';
 
               return (
                 <Link
                   href={`/category/${slug}`}
-                  key={cat.id}
+                  key={cat.id || slug}
                   className="cat-item text-decoration-none"
                 >
                   <img
-                    src={cat.image || '/assets/Home/default-category.png'}
-                    alt={cat.name}
+                    src={image}
+                    alt={name}
                     className="cat-img"
+                    onError={(e) => {
+                      e.target.src = '/assets/Home/default-category.png';
+                    }}
                   />
-                  <div className="cat-name">{cat.name}</div>
+                  <div className="cat-name">{name}</div>
                 </Link>
               );
             })}

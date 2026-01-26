@@ -3,7 +3,7 @@
 import React from 'react';
 import Link from 'next/link';
 
-export default function ProductCard({ product }) {
+export default function ProductCard1({ product }) {
   // Hard guard to prevent "undefined/products/..."
   if (!product) return null;
 
@@ -41,7 +41,7 @@ export default function ProductCard({ product }) {
   const re_category_slug = category_slug.replace(/\s+/g, '-');
 
   return (
-    <div className="col-lg-3 col-md-6 col-sm-6 mb-4">
+    <div className="col-lg-12 mb-4">
       <Link
         href={`/products/${re_category_slug}/${slug}`}
         className="product-card-link"

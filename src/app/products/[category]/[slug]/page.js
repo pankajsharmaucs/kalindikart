@@ -1,21 +1,16 @@
 // ProductPage.jsx
 'use client';
-
 import React, { useEffect, useState, useMemo, useCallback } from 'react';
 import { useParams } from 'next/navigation';
 // Import the new Swiper component
 import ProductSwiper from '../../../../components/ProductSwiper';
-
 import { useRouter } from 'next/navigation';
 import { useCartStore } from '../../../../stores/cartStore';
-
 // *** MOCK DEFINITION FOR Breadcrumb Component ***
 const Breadcrumb = ({ product }) => {
     if (!product) return null;
-
     const categorySlug = product.category_slug?.toLowerCase().replace(/\s+/g, '-');
     const subcategorySlug = product.subcategory_slug?.toLowerCase().replace(/\s+/g, '-');
-
     return (
         <div className="bg-light border-bottom py-3">
             <div className="container product-page-wrapper">
@@ -25,7 +20,6 @@ const Breadcrumb = ({ product }) => {
                         <li className="breadcrumb-item">
                             <a href="/">Home</a>
                         </li>
-
                         {/* Category */}
                         {product.category_name && categorySlug && (
                             <li className="breadcrumb-item">
@@ -34,7 +28,6 @@ const Breadcrumb = ({ product }) => {
                                 </a>
                             </li>
                         )}
-
                         {/* Subcategory */}
                         {product.subcategory_name && subcategorySlug && (
                             <li className="breadcrumb-item">
@@ -43,7 +36,6 @@ const Breadcrumb = ({ product }) => {
                                 </a>
                             </li>
                         )}
-
                         {/* Current Product */}
                         <li className="breadcrumb-item active" aria-current="page">
                             {product.title}
@@ -57,18 +49,15 @@ const Breadcrumb = ({ product }) => {
     );
 };
 // *************************************************
-
 export default function ProductPage() {
     const router = useRouter();
-
     // Get from Zustand
     const addToCart = useCartStore((state) => state.addToCart);
-    const isInCart = useCartStore((state) => state.isInCart);
     const cartCount = useCartStore((state) => state.getCartCount()); // derived
-
     const handleAddToCart = async () => {
         await addToCart(product);
     };
+
 
     // --- State Hooks ---
     const [product, setProduct] = useState(null);
@@ -77,49 +66,41 @@ export default function ProductPage() {
     const [pincode, setPincode] = useState('');
     const [deliveryStatus, setDeliveryStatus] = useState(null);
     const [mainImage, setMainImage] = useState(null); // Retained for utility purposes
-
-    const alreadyInCart = product?.id ? isInCart(product.id) : false;
+    // const alreadyInCart = useCartStore((state) => product?.id ? state.items?.some(item => item.id === product.id) ?? false : false);
+    const alreadyInCart = useCartStore((state) =>
+        product
+            ? state.cartItems.some(item => item.product_id === product.id)
+            : false
+    );
 
     const handleGoToCart = () => {
         router.push('/cart');
     };
-
     const params = useParams();
     const { category, slug } = params;
-
     // Callback function passed to Swiper to update the mainImage state
     const handleImageChange = useCallback((newImageUrl) => {
         setMainImage(newImageUrl);
     }, []);
-
     // --- Data Fetching Effect (Retaining your API logic) ---
     useEffect(() => {
         const fetchProduct = async () => {
             setLoading(true);
             setError(null);
             setProduct(null);
-
             try {
                 // Mock API call (Replace with actual backend fetching logic)
                 const res = await fetch(`/api/products?slug=${slug}`);
                 if (!res.ok) throw new Error('Product not found or network error.');
-
                 const data = await res.json();
                 if (!data || Object.keys(data).length === 0) {
                     throw new Error('Product data is empty.');
                 }
-
                 let productCategorySlug = data.category_slug?.toLowerCase();
                 productCategorySlug = productCategorySlug.replace(' ', '-');
-
                 // console.log(productCategorySlug);
-
                 if (productCategorySlug !== category) throw new Error('Invalid category URL');
-
-
-
                 setProduct(data);
-
                 let initialImages = [];
                 try {
                     // Assuming data.images is a JSON string of image URLs
@@ -128,21 +109,17 @@ export default function ProductPage() {
                     // Fallback to check if it's already an array or a single string
                     initialImages = Array.isArray(data.images) ? data.images : (data.images ? [data.images] : []);
                 }
-
                 if (initialImages.length > 0) {
                     setMainImage(initialImages[0]);
                 }
-
             } catch (err) {
                 setError(err instanceof Error ? err.message : 'Something went wrong');
             } finally {
                 setLoading(false);
             }
         };
-
         fetchProduct();
     }, [slug, category]);
-
     // --- Pincode Check Handler (Mock Logic Retained) ---
     const handlePincodeCheck = (e) => {
         e.preventDefault();
@@ -166,7 +143,6 @@ export default function ProductPage() {
             }
         }, 1000);
     };
-
     // --- Utility Calculations & Memos ---
     const { currentPrice, originalPrice, discountPercentage, imageList, specifications, productRating, totalRatings } = useMemo(() => {
         let images = [];
@@ -176,17 +152,14 @@ export default function ProductPage() {
             // Ensure single string image is also handled if it wasn't parsed
             images = Array.isArray(images) ? images : (images ? [images] : []);
         } catch { /* ignored */ }
-
         const fallbackImage = 'https://via.placeholder.com/600x600/01A9E6/FFFFFF?text=Product+Image';
         const imageList = images.length ? images : [fallbackImage];
-
         const discountPercentage = Number(product?.discount) || 0;
         const currentPrice = Number(product?.price) || 0;
         const originalPrice =
             discountPercentage > 0 && discountPercentage < 100
                 ? Math.round(currentPrice / (1 - discountPercentage / 100))
                 : currentPrice; // If no discount, original price is current price
-
         const specifications = [
             { key: 'Brand', value: product?.brand_name || 'N/A' },
             { key: 'Color', value: product?.color || 'Blue' },
@@ -194,14 +167,10 @@ export default function ProductPage() {
             { key: 'Weight', value: product?.weight || 'N/A' },
             { key: 'Model Number', value: product?.sku || 'N/A' },
         ];
-
         const productRating = Number(product?.rating) || 4.5;
         const totalRatings = Number(product?.total_ratings) || 12987;
-
         return { currentPrice, originalPrice, discountPercentage, imageList, specifications, productRating, totalRatings };
     }, [product]);
-
-
     // --- Mock Data for UI Sections ---
     const keyFeatures = [
         "Lightweight and optimized for comfort.",
@@ -209,7 +178,6 @@ export default function ProductPage() {
         "Ergonomic design with padded straps.",
         "Available in multiple color options.",
     ];
-
     const reviewDistribution = [
         { stars: 5, count: 8500, percentage: 65 },
         { stars: 4, count: 3000, percentage: 23 },
@@ -217,8 +185,6 @@ export default function ProductPage() {
         { stars: 2, count: 300, percentage: 2 },
         { stars: 1, count: 187, percentage: 1.5 },
     ];
-
-
     // --- Render Status ---
     if (loading)
         return <div className="container py-5 text-center">
@@ -227,29 +193,24 @@ export default function ProductPage() {
             </div>
             <p className="mt-2 text-muted">Fetching product details...</p>
         </div>;
-
     if (error)
         return <div className="container py-5 text-center text-danger">🛑 Error: {error}</div>;
-
     if (!product) return <div className="container py-5 text-center text-muted">Product not available.</div>;
-
     // --- Main Render (Integrated UI) ---
     return (
         <>
             {/* REPLACED HEADER WITH BREADCRUMB COMPONENT
-            <header className="bg-white shadow-sm py-2 sticky-top" style={{ zIndex: 1030 }}>...</header> 
+            <header className="bg-white shadow-sm py-2 sticky-top" style={{ zIndex: 1030 }}>...</header>
             */}
-            <Breadcrumb
+            {/* <Breadcrumb
                 title={product.title || "Product Detail"}
                 current={product.title || "Product"}
                 description="Explore our curated selection of premium handcrafted products."
-            />
-
+            /> */}
             {/* Main Content Area */}
             <main className="product-page-wrapper p-3 p-lg-0">
                 <div className="container-fluid px-0">
                     <div className="row g-4 pt-4 px-3 px-lg-4">
-
                         {/* ========================================================== */}
                         {/* LEFT COLUMN: SWIPER IMAGE GALLERY (col-lg-6) */}
                         {/* ========================================================== */}
@@ -264,18 +225,14 @@ export default function ProductPage() {
                                 </div>
                             </div>
                         </div>
-
                         <div className="col-12 col-md-12 col-lg-6 mt-4 mt-lg-0">
                             <div className="p-3 border rounded shadow-sm bg-white ">
-
                                 <h1 className="h3 fw-bold mb-1">{product.title}</h1>
-
                                 {/* Rating */}
                                 <div className="d-flex align-items-center mb-3">
                                     <span className="badge rating-badge me-2 py-1"><i className="bi bi-star-fill me-1"></i>{productRating.toFixed(1)}</span>
                                     <span className="text-muted small">({totalRatings.toLocaleString()} Reviews)</span>
                                 </div>
-
                                 {/* Price */}
                                 <div className="mb-3 border-bottom pb-2">
                                     <span className="price-text me-2">₹{currentPrice.toLocaleString('en-IN')}</span>
@@ -286,7 +243,6 @@ export default function ProductPage() {
                                         </>
                                     )}
                                 </div>
-
                                 {/* Key Features */}
                                 <div className="mb-4 small text-dark">
                                     <h6 className="fw-bold text-dark-gold mb-2">Key Features:</h6>
@@ -299,7 +255,6 @@ export default function ProductPage() {
                                         ))}
                                     </ul>
                                 </div>
-
                                 {/* Pincode Check (Interactive) */}
                                 <div className="p-3 border rounded mb-4 shadow-sm-light delivery-check-box">
                                     <p className="fw-semibold mb-2 text-dark-gold">Check Delivery Estimate</p>
@@ -316,7 +271,6 @@ export default function ProductPage() {
                                             <button className="btn btn-outline-dark-gold" type="submit">CHECK</button>
                                         </div>
                                     </form>
-
                                     {deliveryStatus && (
                                         <p className={`small mb-0 text-${deliveryStatus.type === 'success' ? 'success' : 'danger'}`}>
                                             <i className={`bi bi-${deliveryStatus.type === 'success' ? 'truck' : 'exclamation-octagon'} me-1`}></i>
@@ -324,7 +278,6 @@ export default function ProductPage() {
                                         </p>
                                     )}
                                 </div>
-
                                 {/* Actions */}
                                 {/* Actions */}
                                 <div className="d-grid gap-3 mb-4 cart-actions">
@@ -349,7 +302,6 @@ export default function ProductPage() {
                                                 <i className="bi bi-lightning-fill me-2 fs-5"></i>
                                                 <span className="fw-semibold">BUY NOW</span>
                                             </button> */}
-
                                             <button
                                                 className="btn btn-warning btn-lg d-flex align-items-center justify-content-center cart-btn cart-btn-add"
                                                 onClick={handleAddToCart}
@@ -361,8 +313,6 @@ export default function ProductPage() {
                                         </>
                                     )}
                                 </div>
-
-
                                 {/* Additional Info */}
                                 <div className="mt-3 small text-muted border-top pt-3">
                                     <p className="mb-1"><i className="bi bi-gift me-1"></i>Free gift wrapping available.</p>
@@ -370,18 +320,15 @@ export default function ProductPage() {
                                 </div>
                             </div>
                         </div>
-
                         {/* ========================================================== */}
                         {/* MAIN SCROLLABLE CONTENT (Full width below product box) */}
                         {/* ========================================================== */}
                         <div className="col-12 px-3 px-lg-4">
-
                             {/* Description */}
                             <div className="product-content-section pt-4">
                                 <h4 className="fw-bold mb-3 border-bottom pb-1 text-dark-gold">Product Description</h4>
                                 <div className="text-secondary" dangerouslySetInnerHTML={{ __html: product.description || '<p>No detailed description available.</p>' }} />
                             </div>
-
                             {/* Specifications */}
                             <div className="product-content-section pt-4">
                                 <h4 className="fw-bold mb-3 border-bottom pb-1 text-dark-gold">Technical Specifications</h4>
@@ -396,18 +343,15 @@ export default function ProductPage() {
                                     </tbody>
                                 </table>
                             </div>
-
                             {/* LIFESTYLE FULL-WIDTH BANNER */}
                             <div className="col-12 px-0">
                                 <div className="lifestyle-banner rounded">
                                     <h2 className="display-5 text-white shadow-text">Performance Meets Style</h2>
                                 </div>
                             </div>
-
                             {/* REVIEWS SECTION */}
                             <div className="product-content-section pt-5">
                                 <h4 className="fw-bold mb-4 border-bottom pb-1 text-dark-gold" id="reviews">Customer Reviews & Ratings</h4>
-
                                 <div className="row mb-5">
                                     {/* Rating Summary */}
                                     <div className="col-md-4 text-center border-end rating-summary-box">
@@ -420,7 +364,6 @@ export default function ProductPage() {
                                         </div>
                                         <p className="small text-muted mb-0">Based on {totalRatings.toLocaleString()} ratings</p>
                                     </div>
-
                                     {/* Distribution Bars */}
                                     <div className="col-md-8 p-3 rating-distribution-bars">
                                         {reviewDistribution.map((dist) => (
@@ -441,7 +384,6 @@ export default function ProductPage() {
                                         ))}
                                     </div>
                                 </div>
-
                                 <h5 className="fw-bold mb-3">Top Customer Reviews</h5>
                                 <div className="row g-4">
                                     {/* Mock Review 1 */}
@@ -469,7 +411,6 @@ export default function ProductPage() {
                                 </div>
                                 <button className="btn btn-primary-gold mt-4 text-white">View All {totalRatings.toLocaleString()} Reviews</button>
                             </div>
-
                             {/* Related Products (Placeholder) */}
                             <div className="product-content-section border-top pt-5">
                                 <h4 className="fw-bold mb-4 border-bottom pb-1 text-dark-gold">More Products You May Like</h4>
@@ -478,34 +419,30 @@ export default function ProductPage() {
                                 </div>
                             </div>
                         </div>
-
                     </div>
                 </div>
             </main>
-
             {/* Global Styles (Updated for the Bright Blue palette and corrected gallery layout) */}
             <style jsx global>{`
                 /* --- New Color Palette --- */
                 :root {
                     --primary-gold: #01A9E6; /* Base color - Bright Blue */
-                    --dark-gold: #00739D;    /* Headers/darker accents */
-                    --light-bg: #f0f8ff;     /* Light blue tint for background */
+                    --dark-gold: #00739D;    /* Headers/darker accents */
+                    --light-bg: #f0f8ff;     /* Light blue tint for background */
                     --border-color: #00739D;
                     --text-dark: #333;
                     --hero-gradient-center: #5FD3FD;
                     --hero-gradient-edge: #01A9E6;
                 }
-
                 .text-primary-gold { color: var(--primary-gold) !important; }
                 .text-dark-gold { color: var(--dark-gold) !important; }
-                
+               
                 .product-page-wrapper {
                     max-width: 1300px;
                     margin: auto;
                     background-color: #fff;
                     box-shadow: 0 0 15px rgba(0, 0, 0, 0.05);
                 }
-
                 /* --- BUTTON STYLES (Retained) --- */
                 .btn-primary-gold {
                     background-color: var(--primary-gold);
@@ -517,7 +454,6 @@ export default function ProductPage() {
                     background-color: var(--dark-gold);
                     border-color: var(--dark-gold);
                 }
-
                 .btn-dark-gold {
                     background-color: var(--dark-gold);
                     border-color: var(--dark-gold);
@@ -528,7 +464,6 @@ export default function ProductPage() {
                     background-color: var(--primary-gold);
                     border-color: var(--primary-gold);
                 }
-
                 .btn-outline-dark-gold {
                     color: var(--dark-gold);
                     border-color: var(--dark-gold);
@@ -537,17 +472,17 @@ export default function ProductPage() {
                     background-color: var(--dark-gold);
                     color: #fff;
                 }
-                
+               
                 /* --- SWIPER GALLERY STYLES (Fixed Alignment) --- */
-                
+               
                 .product-gallery-container {
                     /* Removed fixed height. Auto-adjusts based on the main image size */
-                    min-height: 450px; 
+                    min-height: 450px;
                 }
-                
+               
                 /* Thumbnails Wrapper (Horizontal on Mobile, Vertical on Desktop) */
                 .product-thumbs-wrap {
-                    flex-shrink: 0; 
+                    flex-shrink: 0;
                     height: 100%;
                     width: 80px; /* Fixed width for vertical column */
                 }
@@ -572,14 +507,14 @@ export default function ProductPage() {
                     height: 100%;
                     object-fit: cover;
                 }
-                
+               
                 /* Main Image Slider */
                 .product-main-wrap {
                     flex-grow: 1;
                     position: relative;
                     /* Use aspect ratio for clean look. You might need to adjust this. */
                     padding-bottom: 100%; /* Creates 1:1 aspect ratio container */
-                    height: 0; 
+                    height: 0;
                     overflow: hidden;
                     border: 1px solid #eee;
                 }
@@ -602,7 +537,6 @@ export default function ProductPage() {
                     width: auto;
                     object-fit: contain;
                 }
-
                 /* Swiper Navigation */
                 .swiper-button-next, .swiper-button-prev {
                     color: var(--dark-gold) !important;
@@ -612,8 +546,6 @@ export default function ProductPage() {
                     border-radius: 50%;
                     --swiper-navigation-size: 16px;
                 }
-
-
                 /* Mobile/Small Screen Overrides for Swiper */
                 @media (max-width: 991px) {
                     .product-gallery-container {
@@ -628,24 +560,24 @@ export default function ProductPage() {
                     .product-thumbs-swiper .swiper-wrapper {
                         /* Force horizontal display */
                         display: flex;
-                        flex-direction: row; 
+                        flex-direction: row;
                     }
                     .product-thumb-item {
                         width: 80px;
                         height: 80px;
-                        margin-bottom: 0; 
+                        margin-bottom: 0;
                         margin-right: 8px; /* Spacing for horizontal layout */
                     }
                     .product-main-wrap {
                         padding-bottom: 75%; /* Adjust main image aspect ratio on mobile (e.g., 4:3) */
                     }
                 }
-                
+               
                 /* Desktop Sticky Panel */
                 @media (min-width: 992px) {
                     .sticky-info-panel {
                         position: sticky;
-                        top: 80px; 
+                        top: 80px;
                         z-index: 100;
                         align-self: flex-start;
                     }

@@ -36,11 +36,11 @@ export default function CategoryListPage() {
 
   return (
     <div className="container py-4">
-      <Breadcrumb
+      {/* <Breadcrumb
         title="Category"
         current="Category"
         description="Explore all our handcrafted product categories."
-      />
+      /> */}
 
 
       {loading && <p className="text-center">Loading categories...</p>}

@@ -26,9 +26,12 @@ export default function RootLayout({ children }) {
       <body>
         <AuthProvider>
           <div className="top-bar">
-            <div className="container">
-              FREE DELIVERY PAN INDIA. COD AVAILABLE NOW &nbsp;|&nbsp; SAME DAY DELIVERY AVAILABLE IN DELHI/NCR
-              &nbsp;|&nbsp; FREE BRASS GIFT 🎁 ON ORDERS ABOVE ₹5,000! ✨
+            <div className="marquee-container">
+              <div className="marquee-text">
+                FREE DELIVERY PAN INDIA. COD AVAILABLE NOW &nbsp;|&nbsp;
+                SAME DAY DELIVERY AVAILABLE IN DELHI/NCR &nbsp;|&nbsp;
+                FREE BRASS GIFT 🎁 ON ORDERS ABOVE ₹5,000! ✨
+              </div>
             </div>
           </div>
 

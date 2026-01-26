@@ -63,11 +63,11 @@ export default function TrendingPage() {
 
   return (
     <div className="container py-4">
-      <Breadcrumb
+      {/* <Breadcrumb
         title="Trending Products"
         current="Trending"
         description="Check out the most popular handcrafted products trending now."
-      />
+      /> */}
 
       <div className="row g-4 mt-4">
         {products.map((product) => (

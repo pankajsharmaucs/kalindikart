@@ -1,122 +1,145 @@
 // app/page.js
 'use client';
 
-// Import Next.js specific components and utilities
 import Link from 'next/link';
-
-// Import custom components (assuming these are defined in your components folder)
 import HeroSwiper from '../components/HeroSwiper';
-import ReelsSlider from '../components/ReelsSlider';
-import ProductCard from '../components/ProductCard';
 import NewArrivalsSection from '../components/newArrivals/page';
-// Note: ProductCard is assumed to be the styled version we finalized,
-// and it should be defined in 'components/ProductCard.js' or similar.
-
 import CategorySection from '../components/Home/CategorySection';
-
 
 export default function HomePage() {
   return (
     <>
-      {/* 1. Hero/Main Slider Section */}
-      <HeroSwiper />
+      {/* ================= HERO ================= */}
+      <section className="hero-wrapper">
+        <HeroSwiper />
+      </section>
 
-      {/* 2. Trust and Payment Strip */}
-      <div className="trust-strip">
+      {/* ================= TRUST STRIP ================= */}
+      <section className="trust-strip hero-trust">
         <div className="container text-center">
-          <span className="text-muted small me-3 d-none d-md-inline">Trusted by 20000+ Happy Customers &nbsp;|&nbsp; Secure Payments:</span>
-          <div className="d-inline-block trust-icons">
-            {/* Asset assumed to be in the public directory */}
-            <img src="/assets/payment_options.png" alt="payment options" />
+          <div className="d-flex flex-column flex-md-row align-items-center justify-content-center gap-2">
+            <span className="text-muted small d-none d-md-inline">
+              Trusted by 20,000+ Happy Customers &nbsp;|&nbsp; Secure Payments
+            </span>
+            <div className="trust-icons">
+              <img src="/assets/payment_options.png" alt="payment options" />
+            </div>
           </div>
         </div>
-      </div>
+      </section>
 
-      {/* 3. Category Circles Section */}
-      <CategorySection />
+      {/* ================= CATEGORY ================= */}
+      <section className="section-spacing">
+        <CategorySection />
+      </section>
 
-      {/* 4. New Arrivals Section (Dynamic Product Grid) */}
-      <>
-        {/* Other sections */}
+      {/* ================= NEW ARRIVALS ================= */}
+      <section className="section-spacing">
         <NewArrivalsSection />
-      </>
+      </section>
 
-      {/* 5. Instagram Reels Slider */}
-      {/* <ReelsSlider /> */}
-
-      {/* 6. Our Story / About Us Section */}
+      {/* ================= STORY ================= */}
       <section className="story-section">
         <div className="container">
-          <div className="row align-items-center">
-            <div className="col-lg-6 mb-4 mb-lg-0">
-              <div className="story-text">
-                <p className="text-uppercase small fw-bold" style={{ color: 'var(--primary-gold)' }}>Our Legacy</p>
-                <h2 className="section-header" style={{ marginBottom: '20px' }}>The Art of Artisanship</h2>
-                <p className="lead">KalindiKart is more than just a store; it's a testament to the timeless beauty of Indian metalwork. We specialize in Bronze and Brass sculptures, handcrafted by master artisans using the ancient lost-wax technique.</p>
-                <p>Every piece tells a story of devotion and skill, passed down through generations. Our commitment is to preserve this heritage while bringing spiritual elegance to your home.</p>
-                <Link href="#" className="btn mt-3" style={{ backgroundColor: 'var(--primary-gold)', color: 'white', borderRadius: '20px' }}>
-                  Read Full Story
-                </Link>
-              </div>
-            </div>
+          <div className="row align-items-center g-4">
+
             <div className="col-lg-6">
-              <div className="row g-4">
+              <p className="text-uppercase small fw-bold text-primary-gold">
+                Our Legacy
+              </p>
+
+              <h2 className="section-header mb-3">
+                The Art of Artisanship
+              </h2>
+
+              <p className="lead">
+                KalindiKart is more than a store — it is a celebration of Indian
+                bronze & brass craftsmanship created using the ancient lost-wax technique.
+              </p>
+
+              <p className="text-muted">
+                Every piece reflects devotion, precision and timeless artistry,
+                handcrafted by master artisans for spiritual homes.
+              </p>
+
+              <Link
+                href="/about"
+                className="btn btn-primary-gold mt-3 px-4 py-2 rounded-pill"
+              >
+                Read Full Story
+              </Link>
+            </div>
+
+            <div className="col-lg-6">
+              <div className="row g-3">
                 <div className="col-6">
-                  <img src="/assets/Home/hsnficraft-hanuman.jpg" alt="Artisan" className="img-fluid story-image" />
+                  <img
+                    src="/assets/Home/hsnficraft-hanuman.jpg"
+                    alt="Artisan"
+                    className="img-fluid story-image"
+                  />
                 </div>
                 <div className="col-6">
                   <div className="story-image-2 h-100 d-flex align-items-center justify-content-center">
-                    &quot;Opulence that speaks to the Soul&quot;
+                    “Opulence that speaks to the Soul”
                   </div>
                 </div>
               </div>
             </div>
+
           </div>
         </div>
       </section>
 
-      {/* 7. Sustainability Parallax Banner */}
+      {/* ================= PARALLAX ================= */}
       <section className="parallax-banner">
         <div className="parallax-overlay"></div>
         <div className="container parallax-content">
-          <h2 className="text-white">Sustainable & Ethical Craftsmanship</h2>
-          <p className="lead text-white">We use only ethically sourced materials and ensure fair wages for our artisans, promoting responsible luxury.</p>
+          <h2 className="text-white mb-3">
+            Sustainable & Ethical Craftsmanship
+          </h2>
+          <p className="lead text-white mb-0">
+            Ethically sourced materials & fair artisan wages — responsible luxury.
+          </p>
         </div>
       </section>
 
-      {/* 8. Gifting & Features Section */}
+      {/* ================= WHY US ================= */}
       <section className="section-padding bg-light">
         <div className="container text-center">
           <h2 className="section-header">Why Choose KalindiKart?</h2>
+
           <div className="row g-4 mt-4">
-            <div className="col-lg-3 col-md-6">
-              <div className="gifting-box">
-                <i className="fas fa-gifts"></i>
-                <h4>Gifting Solutions</h4>
-                <p className="small text-muted mb-0">Custom engraving and luxurious packaging for every occasion.</p>
+            {[
+              {
+                icon: 'fa-gifts',
+                title: 'Gifting Solutions',
+                desc: 'Custom engraving & premium packaging',
+              },
+              {
+                icon: 'fa-shield-alt',
+                title: 'Secure Packaging',
+                desc: 'Insured & multi-layer safe delivery',
+              },
+              {
+                icon: 'fa-certificate',
+                title: 'Authenticity Certified',
+                desc: 'Verified material certification',
+              },
+              {
+                icon: 'fa-truck-fast',
+                title: 'Fast Shipping',
+                desc: 'Reliable delivery across India & abroad',
+              },
+            ].map((item, i) => (
+              <div className="col-lg-3 col-md-6" key={i}>
+                <div className="gifting-box">
+                  <i className={`fas ${item.icon}`}></i>
+                  <h4>{item.title}</h4>
+                  <p className="small text-muted mb-0">{item.desc}</p>
+                </div>
               </div>
-            </div>
-            <div className="col-lg-3 col-md-6">
-              <div className="gifting-box">
-                <i className="fas fa-shield-alt"></i>
-                <h4>Secure Packaging</h4>
-                <p className="small text-muted mb-0">Insured, multi-layer packaging guarantees safe delivery.</p>
-              </div>
-            </div>
-            <div className="col-lg-3 col-md-6">
-              <div className="gifting-box">
-                <i className="fas fa-certificate"></i>
-                <h4>Authenticity Certified</h4>
-                <p className="small text-muted mb-0">Each idol comes with a certificate of material authenticity.</p>
-              </div>
-            </div>
-            <div className="col-lg-3 col-md-6">
-              <div className="gifting-box">
-                <i className="fas fa-truck-fast"></i>
-                <h4>Fast Shipping</h4>
-                <p className="small text-muted mb-0">Quick and reliable delivery across India and worldwide.</p>
-              </div>
-            </div>
+            ))}
           </div>
         </div>
       </section>
