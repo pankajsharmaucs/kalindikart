@@ -38,7 +38,7 @@ export default function HeroSwiper() {
           <div className="swiper-wrapper">
             <div className="swiper-slide">
               {/* Ensure image paths are correct (e.g., from the /public folder) */}
-              <img src="/main/Home/Slider2.png" alt="Slider Image 1" />
+              <img src="/main/Home/slider2.png" alt="Slider Image 1" />
             </div>
             <div className="swiper-slide">
               <img src="/main/Home/Urli_Banner.png" alt="Slider Image 2" />
