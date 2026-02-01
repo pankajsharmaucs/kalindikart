@@ -3,36 +3,30 @@
 
 import React, { useEffect, useState, useMemo } from 'react';
 
-// Define the path prefix once
 const IMAGE_PATH_PREFIX = '/assets/';
 
 export default function ProductSwiper({ imageList = [], productTitle, onImageChange }) {
-  // State to hold the Swiper instances
   const [mainSwiper, setMainSwiper] = useState(null);
   const [thumbsSwiper, setThumbsSwiper] = useState(null);
   const [isZoomed, setIsZoomed] = useState(false);
 
-  // Default fallback image
   const fallbackImage = 'https://via.placeholder.com/600x600/178ad6/FFFFFF?text=Product+Image';
 
-  // Use the actual image list or the fallback
   const imagesToDisplay = useMemo(
     () => (imageList.length > 0 ? imageList : [fallbackImage]),
     [imageList]
   );
 
   useEffect(() => {
-    // Ensure Swiper class is available globally (from the CDN script)
     if (typeof window === 'undefined' || !window.Swiper) {
       console.warn('Swiper not found. Ensure the CDN script is loaded.');
       return;
     }
 
-    // Destroy existing instances before creating new ones (important for state cleanup)
     if (mainSwiper) mainSwiper.destroy(true, true);
     if (thumbsSwiper) thumbsSwiper.destroy(true, true);
 
-    // --- 1. Initialize Thumb Swiper ---
+    // Initialize Thumb Swiper
     const thumbs = new window.Swiper('.product-thumbs-swiper', {
       spaceBetween: 10,
       slidesPerView: 'auto',
@@ -54,7 +48,7 @@ export default function ProductSwiper({ imageList = [], productTitle, onImageCha
     });
     setThumbsSwiper(thumbs);
 
-    // --- 2. Initialize Main Swiper ---
+    // Initialize Main Swiper
     const main = new window.Swiper('.product-main-swiper', {
       loop: imagesToDisplay.length > 1,
       spaceBetween: 10,
@@ -74,30 +68,33 @@ export default function ProductSwiper({ imageList = [], productTitle, onImageCha
       fadeEffect: {
         crossFade: true,
       },
-      // Update parent state when slide changes
       on: {
         slideChange: function () {
           if (onImageChange) {
             const realIndex = this.realIndex;
             onImageChange(imagesToDisplay[realIndex]);
           }
+          // Reset zoom when slide changes
+          setIsZoomed(false);
         },
       },
     });
     setMainSwiper(main);
 
-    // Cleanup function
     return () => {
       if (main) main.destroy(true, true);
       if (thumbs) thumbs.destroy(true, true);
     };
-  }, [imagesToDisplay, onImageChange]); // Dependency on the memoized list
+  }, [imagesToDisplay, onImageChange]);
+
+  const handleZoomToggle = () => {
+    setIsZoomed(!isZoomed);
+  };
 
   return (
     <>
-      {/* The container uses flex to arrange vertical thumbs + main image on desktop */}
       <div className="product-gallery-container">
-        {/* 1. THUMBNAILS (Horizontal on mobile, Vertical on Desktop) */}
+        {/* THUMBNAILS */}
         <div className="product-thumbs-wrap">
           <div className="swiper product-thumbs-swiper">
             <div className="swiper-wrapper">
@@ -116,18 +113,20 @@ export default function ProductSwiper({ imageList = [], productTitle, onImageCha
           </div>
         </div>
 
-        {/* 2. MAIN IMAGE SLIDER */}
+        {/* MAIN IMAGE SLIDER */}
         <div className="product-main-wrap">
           <div className="swiper product-main-swiper">
             <div className="swiper-wrapper">
               {imagesToDisplay.map((img, index) => (
                 <div key={index} className="swiper-slide product-main-slide">
-                  <div className={`main-image-placeholder ${isZoomed ? 'zoomed' : ''}`}>
+                  <div 
+                    className={`main-image-placeholder ${isZoomed ? 'zoomed' : ''}`}
+                    onClick={handleZoomToggle}
+                  >
                     <img
                       src={img === fallbackImage ? img : `/${img}`}
                       alt={productTitle}
                       className="img-fluid main-product-image"
-                      onClick={() => setIsZoomed(!isZoomed)}
                     />
                     {/* Zoom Icon */}
                     <div className="zoom-icon">
@@ -138,7 +137,6 @@ export default function ProductSwiper({ imageList = [], productTitle, onImageCha
               ))}
             </div>
 
-            {/* Navigation buttons */}
             {imagesToDisplay.length > 1 && (
               <>
                 <div className="swiper-button-next"></div>
@@ -157,7 +155,7 @@ export default function ProductSwiper({ imageList = [], productTitle, onImageCha
       </div>
 
       <style jsx global>{`
-        /* ============= GALLERY CONTAINER ============= */
+        /* GALLERY CONTAINER */
         .product-gallery-container {
           display: flex;
           gap: 1rem;
@@ -170,7 +168,7 @@ export default function ProductSwiper({ imageList = [], productTitle, onImageCha
           }
         }
 
-        /* ============= THUMBNAILS ============= */
+        /* THUMBNAILS */
         .product-thumbs-wrap {
           width: 100%;
           order: 2;
@@ -229,7 +227,7 @@ export default function ProductSwiper({ imageList = [], productTitle, onImageCha
           transform: scale(1.1);
         }
 
-        /* ============= MAIN IMAGE ============= */
+        /* MAIN IMAGE */
         .product-main-wrap {
           flex: 1;
           position: relative;
@@ -259,6 +257,7 @@ export default function ProductSwiper({ imageList = [], productTitle, onImageCha
           position: relative;
           overflow: hidden;
           cursor: zoom-in;
+          transition: all 0.3s ease;
         }
 
         @media (min-width: 992px) {
@@ -269,17 +268,18 @@ export default function ProductSwiper({ imageList = [], productTitle, onImageCha
 
         .main-image-placeholder.zoomed {
           cursor: zoom-out;
+          background: rgba(0, 0, 0, 0.95);
         }
 
         .main-product-image {
           width: 100%;
           height: 100%;
           object-fit: contain;
-          transition: transform 0.5s ease;
+          transition: transform 0.5s cubic-bezier(0.4, 0, 0.2, 1);
         }
 
         .main-image-placeholder.zoomed .main-product-image {
-          transform: scale(1.5);
+          transform: scale(1.8);
         }
 
         /* Zoom Icon */
@@ -287,25 +287,33 @@ export default function ProductSwiper({ imageList = [], productTitle, onImageCha
           position: absolute;
           bottom: 15px;
           right: 15px;
-          width: 40px;
-          height: 40px;
-          background: rgba(0, 0, 0, 0.6);
+          width: 45px;
+          height: 45px;
+          background: rgba(0, 0, 0, 0.7);
           border-radius: 50%;
           display: flex;
           align-items: center;
           justify-content: center;
           color: white;
-          font-size: 1rem;
+          font-size: 1.1rem;
           opacity: 0;
-          transition: opacity 0.3s ease;
+          transition: all 0.3s ease;
           pointer-events: none;
+          z-index: 5;
         }
 
         .main-image-placeholder:hover .zoom-icon {
           opacity: 1;
+          transform: scale(1.1);
         }
 
-        /* ============= NAVIGATION BUTTONS ============= */
+        .main-image-placeholder.zoomed .zoom-icon {
+          opacity: 1;
+          background: rgba(255, 255, 255, 0.9);
+          color: #178ad6;
+        }
+
+        /* NAVIGATION BUTTONS */
         .swiper-button-next,
         .swiper-button-prev {
           background: rgba(255, 255, 255, 0.9);
@@ -334,7 +342,14 @@ export default function ProductSwiper({ imageList = [], productTitle, onImageCha
           color: white;
         }
 
-        /* ============= PAGINATION ============= */
+        /* Hide navigation when zoomed */
+        .main-image-placeholder.zoomed ~ .swiper-button-next,
+        .main-image-placeholder.zoomed ~ .swiper-button-prev {
+          opacity: 0;
+          pointer-events: none;
+        }
+
+        /* PAGINATION */
         .swiper-pagination {
           bottom: 10px !important;
         }
@@ -351,7 +366,7 @@ export default function ProductSwiper({ imageList = [], productTitle, onImageCha
           background: #178ad6;
         }
 
-        /* ============= IMAGE COUNTER ============= */
+        /* IMAGE COUNTER */
         .image-counter {
           position: absolute;
           top: 15px;
@@ -368,7 +383,7 @@ export default function ProductSwiper({ imageList = [], productTitle, onImageCha
           box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
         }
 
-        /* ============= RESPONSIVE ============= */
+        /* RESPONSIVE */
         @media (max-width: 991px) {
           .product-thumbs-wrap {
             height: auto;
@@ -393,6 +408,10 @@ export default function ProductSwiper({ imageList = [], productTitle, onImageCha
             font-size: 0.8rem;
             padding: 6px 12px;
           }
+
+          .main-image-placeholder.zoomed .main-product-image {
+            transform: scale(1.5);
+          }
         }
 
         @media (max-width: 576px) {
@@ -405,9 +424,13 @@ export default function ProductSwiper({ imageList = [], productTitle, onImageCha
           }
 
           .zoom-icon {
-            width: 35px;
-            height: 35px;
-            font-size: 0.9rem;
+            width: 40px;
+            height: 40px;
+            font-size: 0.95rem;
+          }
+
+          .main-image-placeholder.zoomed .main-product-image {
+            transform: scale(1.3);
           }
         }
       `}</style>

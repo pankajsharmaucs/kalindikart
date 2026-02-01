@@ -1,3 +1,6 @@
+// ============================================
+// FILE: app/products/page.jsx
+// ============================================
 'use client';
 
 import React, { useState, useEffect } from 'react';
@@ -118,7 +121,7 @@ export default function ProductsPage() {
   if (error) {
     return (
       <div className="container py-5 text-center">
-        <i className="fas fa-exclamation-circle fa-4x text-danger mb-3"></i>
+        <i className="bi bi-exclamation-circle display-1 text-danger mb-3"></i>
         <h4 className="text-danger">Error: {error}</h4>
         <button className="btn btn-primary mt-3" onClick={() => window.location.reload()}>
           Retry
@@ -138,7 +141,7 @@ export default function ProductsPage() {
               className="btn btn-primary w-100 d-lg-none mb-3 position-relative"
               onClick={() => setShowFilters(!showFilters)}
             >
-              <i className={`fas fa-${showFilters ? 'times' : 'filter'} me-2`}></i>
+              <i className={`bi bi-${showFilters ? 'x' : 'funnel'} me-2`}></i>
               {showFilters ? 'Hide' : 'Show'} Filters
               {(selectedCategories.length > 0 || searchQuery) && (
                 <span className="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger">
@@ -156,11 +159,11 @@ export default function ProductsPage() {
                 {/* Filter Header */}
                 <div className="d-flex justify-content-between align-items-center pb-3 mb-3 border-bottom">
                   <h6 className="mb-0 fw-bold">
-                    <i className="fas fa-sliders-h me-2"></i>Filters
+                    <i className="bi bi-sliders me-2"></i>Filters
                   </h6>
                   {(selectedCategories.length > 0 || priceRange[0] !== 0 || priceRange[1] !== maxPrice || searchQuery || sortBy !== 'default') && (
                     <button className="btn btn-sm btn-outline-primary" onClick={clearFilters}>
-                      <i className="fas fa-redo me-1"></i>Clear
+                      <i className="bi bi-arrow-clockwise me-1"></i>Clear
                     </button>
                   )}
                 </div>
@@ -168,7 +171,7 @@ export default function ProductsPage() {
                 {/* Search Filter */}
                 <div className="mb-4">
                   <label className="form-label fw-semibold small mb-2">
-                    <i className="fas fa-search me-2"></i>Search
+                    <i className="bi bi-search me-2"></i>Search
                   </label>
                   <div className="position-relative">
                     <input
@@ -183,7 +186,7 @@ export default function ProductsPage() {
                         className="btn btn-sm position-absolute top-50 end-0 translate-middle-y border-0"
                         onClick={() => setSearchQuery('')}
                       >
-                        <i className="fas fa-times text-muted"></i>
+                        <i className="bi bi-x text-muted"></i>
                       </button>
                     )}
                   </div>
@@ -193,7 +196,7 @@ export default function ProductsPage() {
                 {categories.length > 0 && (
                   <div className="mb-4">
                     <label className="form-label fw-semibold small mb-2 d-flex justify-content-between align-items-center">
-                      <span><i className="fas fa-tags me-2"></i>Categories</span>
+                      <span><i className="bi bi-tags me-2"></i>Categories</span>
                       {selectedCategories.length > 0 && (
                         <span className="badge bg-primary">{selectedCategories.length}</span>
                       )}
@@ -223,7 +226,7 @@ export default function ProductsPage() {
                 {/* Price Range Filter */}
                 <div className="mb-4">
                   <label className="form-label fw-semibold small mb-2">
-                    <i className="fas fa-rupee-sign me-2"></i>Price Range
+                    <i className="bi bi-currency-rupee me-2"></i>Price Range
                   </label>
                   <div className="alert alert-info py-2 text-center small fw-bold">
                     ₹{priceRange[0].toLocaleString('en-IN')} - ₹{priceRange[1].toLocaleString('en-IN')}
@@ -264,7 +267,7 @@ export default function ProductsPage() {
                 {/* Sort By */}
                 <div className="mb-3">
                   <label className="form-label fw-semibold small mb-2">
-                    <i className="fas fa-sort me-2"></i>Sort By
+                    <i className="bi bi-sort-down me-2"></i>Sort By
                   </label>
                   <select
                     className="form-select form-select-sm"
@@ -286,37 +289,7 @@ export default function ProductsPage() {
           {/* ========== RIGHT SIDE - PRODUCTS ========== */}
           <div className="col-lg-9">
             {/* Results Header */}
-            <div className="card shadow-sm mb-4">
-              <div className="card-body p-3">
-                <div className="row align-items-center">
-                  <div className="col-md-8">
-                    <h5 className="mb-1 fw-bold">
-                      {selectedCategories.length > 0 ? selectedCategories.join(', ') : 'All Products'}
-                    </h5>
-                    <p className="mb-0 text-muted small">
-                      Showing {filteredProducts.length} of {products.length} products
-                    </p>
-                  </div>
-                  <div className="col-md-4 text-md-end mt-3 mt-md-0">
-                    <select
-                      className="form-select form-select-sm d-none d-lg-inline-block"
-                      style={{ width: 'auto' }}
-                      value={sortBy}
-                      onChange={(e) => setSortBy(e.target.value)}
-                    >
-                      <option value="default">Sort By</option>
-                      <option value="price-low">Price: Low → High</option>
-                      <option value="price-high">Price: High → Low</option>
-                      <option value="name-az">Name: A-Z</option>
-                      <option value="name-za">Name: Z-A</option>
-                      <option value="discount">Discount</option>
-                    </select>
-                  </div>
-                </div>
-              </div>
-            </div>
-
-            {/* Products Grid */}
+                       {/* Products Grid */}
             {filteredProducts.length > 0 ? (
               <div className="row g-3 g-md-4">
                 {filteredProducts.map((product) => (
@@ -326,14 +299,14 @@ export default function ProductsPage() {
             ) : (
               <div className="card shadow-sm text-center py-5">
                 <div className="card-body">
-                  <i className="fas fa-shopping-bag fa-5x text-muted mb-4"></i>
+                  <i className="bi bi-bag-x display-1 text-muted mb-4"></i>
                   <h4 className="fw-bold mb-3">No Products Found</h4>
                   <p className="text-muted mb-4">
                     We couldn't find any products matching your filters.<br />
                     Try adjusting your search criteria.
                   </p>
                   <button className="btn btn-primary" onClick={clearFilters}>
-                    <i className="fas fa-redo me-2"></i>Clear All Filters
+                    <i className="bi bi-arrow-clockwise me-2"></i>Clear All Filters
                   </button>
                 </div>
               </div>
@@ -393,17 +366,17 @@ export default function ProductsPage() {
 
         /* Form Range Custom Color */
         .form-range::-webkit-slider-thumb {
-          background-color: var(--primary-gold, #0d6efd);
+          background-color: #D4AF37;
         }
 
         .form-range::-moz-range-thumb {
-          background-color: var(--primary-gold, #0d6efd);
+          background-color: #D4AF37;
         }
 
         /* Form Check Custom Color */
         .form-check-input:checked {
-          background-color: var(--primary-gold, #0d6efd);
-          border-color: var(--primary-gold, #0d6efd);
+          background-color: #D4AF37;
+          border-color: #D4AF37;
         }
 
         /* Smooth Transitions */

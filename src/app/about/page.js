@@ -105,7 +105,7 @@ export default function AboutPage() {
               <div className="kk-value-box">
                 <h4>Our Mission</h4>
                 <p>
-                  To preserve India’s artisanal heritage while offering spiritually rich,
+                  To preserve India's artisanal heritage while offering spiritually rich,
                   handcrafted sculptures for refined homes that seek meaning, not just décor.
                 </p>
                 <p className="kk-value-sub">
@@ -162,7 +162,7 @@ export default function AboutPage() {
       {/* ================= CSS ================= */}
       <style jsx global>{`
         .kk-about-page {
-          font-family: 'Poppins', sans-serif;
+          font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen', 'Ubuntu', 'Cantarell', sans-serif;
         }
 
         /* HERO */
@@ -180,8 +180,8 @@ export default function AboutPage() {
           position: absolute;
           inset: 0;
           background: linear-gradient(
-            rgba(6, 35, 80, 0.8),
-            rgba(6, 35, 80, 0.7)
+            rgba(39, 171, 204, 0.8), 
+            rgba(39, 171, 204, 0.7)
           );
         }
 
@@ -195,39 +195,37 @@ export default function AboutPage() {
 
         .kk-hero-eyebrow {
           text-transform: uppercase;
-          letter-spacing: 0.15em;
+          letter-spacing: 0.1em;
           font-size: 0.75rem;
           color: #cfe8ff;
-          margin-bottom: 6px;
+          margin-bottom: 4px;
           font-weight: 600;
         }
 
         .kk-about-hero h1 {
           color: #fff;
           font-size: 2.6rem;
-          font-family: 'Playfair Display', serif;
-          margin-bottom: 8px;
+          font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', sans-serif;
+          font-weight: 600;
+          margin-bottom: 6px;
         }
 
         .kk-hero-subtitle {
           color: #eaf6ff;
           font-size: 1rem;
-          line-height: 1.6;
+          line-height: 1.5;
         }
 
         .kk-hero-divider {
           display: block;
-          width: 70px;
+          width: 60px;
           height: 3px;
-          background: var(--primary-gold);
-          margin: 12px auto 14px;
+          background: rgb(39, 171, 204);
+          margin: 8px auto 10px;
           border-radius: 999px;
         }
 
-        /* SECTION */
-        .kk-about-section {
-          padding: 80px 0;
-        }
+    
 
         .kk-about-section-light {
           background: #f5fbff;
@@ -235,90 +233,92 @@ export default function AboutPage() {
 
         .kk-about-card {
           background: #fff;
-          padding: 45px;
-          border-radius: 18px;
-          box-shadow: 0 20px 45px rgba(0, 0, 0, 0.08);
+          padding: 24px;
+          border-radius: 10px;
+          box-shadow: 0 4px 12px rgba(0, 0, 0, 0.06);
           transition: transform 0.3s ease, box-shadow 0.3s ease;
         }
 
         .kk-about-card:hover {
-          transform: translateY(-4px);
-          box-shadow: 0 30px 60px rgba(1, 169, 230, 0.18);
+          transform: translateY(-2px);
+          box-shadow: 0 8px 20px rgba(39, 171, 204, 0.12);
         }
 
         /* SPLIT CARD (STORY) */
         .kk-about-card-split {
           display: grid;
           grid-template-columns: minmax(0, 2fr) minmax(0, 1.3fr);
-          gap: 32px;
+          gap: 20px;
           align-items: flex-start;
         }
 
         .kk-about-tag {
           font-size: 0.75rem;
-          letter-spacing: 1.5px;
+          letter-spacing: 1.2px;
           font-weight: 600;
-          color: var(--primary-gold);
-          margin-bottom: 10px;
+          color: rgb(39, 171, 204);
+          margin-bottom: 8px;
           display: inline-block;
           text-transform: uppercase;
         }
 
         .kk-about-card h2 {
-          font-family: 'Playfair Display', serif;
-          margin-bottom: 18px;
+          font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', sans-serif;
+          font-weight: 600;
+          margin-bottom: 12px;
           color: #222;
+          font-size: 1.6rem;
         }
 
         .kk-about-card p {
           color: #555;
-          line-height: 1.7;
+          line-height: 1.6;
           font-size: 0.98rem;
         }
 
         .kk-about-card p + p {
-          margin-top: 8px;
+          margin-top: 6px;
         }
 
         .kk-about-card-side {
           display: flex;
           flex-direction: column;
-          gap: 14px;
+          gap: 10px;
         }
 
         .kk-stat-pill {
           background: #f0f8ff;
           border-radius: 999px;
-          padding: 10px 18px;
+          padding: 8px 14px;
           display: inline-flex;
           flex-direction: column;
           align-items: flex-start;
-          border: 1px solid rgba(1, 169, 230, 0.2);
+          border: 1px solid rgba(39, 171, 204, 0.2);
         }
 
         .kk-stat-number {
           font-size: 1.2rem;
           font-weight: 700;
-          color: var(--primary-gold);
+          color: rgb(39, 171, 204);
           line-height: 1.3;
         }
 
         .kk-stat-label {
           font-size: 0.78rem;
           text-transform: uppercase;
-          letter-spacing: 0.12em;
+          letter-spacing: 0.1em;
           color: #666;
         }
 
         .kk-stat-note {
           font-size: 0.9rem;
           color: #666;
-          margin-top: 6px;
+          margin-top: 4px;
         }
 
         .kk-section-intro {
-          margin-top: 6px;
-          margin-bottom: 22px;
+          margin-top: 4px;
+          margin-bottom: 16px;
           color: #555;
           max-width: 580px;
         }
@@ -327,37 +327,37 @@ export default function AboutPage() {
         .kk-timeline {
           display: grid;
           grid-template-columns: repeat(4, minmax(0, 1fr));
-          gap: 20px;
-          margin-top: 30px;
+          gap: 12px;
+          margin-top: 20px;
         }
 
         .kk-step {
           background: #f9fbfd;
-          padding: 22px 16px;
-          border-radius: 14px;
+          padding: 14px 12px;
+          border-radius: 8px;
           text-align: left;
-          box-shadow: 0 8px 18px rgba(0, 0, 0, 0.05);
+          box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
           position: relative;
         }
 
         .kk-step span {
           font-size: 1rem;
           font-weight: 700;
-          color: var(--primary-gold);
+          color: rgb(39, 171, 204);
           display: inline-flex;
           align-items: center;
           justify-content: center;
-          width: 30px;
-          height: 30px;
+          width: 28px;
+          height: 28px;
           border-radius: 999px;
-          border: 1px solid var(--primary-gold);
-          margin-bottom: 10px;
+          border: 1px solid rgb(39, 171, 204);
+          margin-bottom: 8px;
         }
 
         .kk-step h4 {
           font-size: 0.95rem;
           font-weight: 600;
-          margin-bottom: 6px;
+          margin-bottom: 4px;
           color: #222;
         }
 
@@ -365,48 +365,51 @@ export default function AboutPage() {
           font-size: 0.9rem;
           color: #555;
           margin: 0;
+          line-height: 1.5;
         }
 
         /* GRID */
         .kk-about-grid {
           display: grid;
           grid-template-columns: repeat(2, 1fr);
-          gap: 25px;
-          margin-top: 20px;
+          gap: 16px;
+          margin-top: 14px;
         }
 
         .kk-value-box {
           background: #f9fbfd;
-          padding: 25px;
-          border-radius: 14px;
-          border-left: 3px solid var(--primary-gold);
+          padding: 16px;
+          border-radius: 8px;
+          border-left: 3px solid rgb(39, 171, 204);
         }
 
         .kk-value-box h4 {
-          margin-bottom: 10px;
+          margin-bottom: 6px;
+          font-size: 1.1rem;
+          font-weight: 600;
         }
 
         .kk-value-sub {
-          margin-top: 8px;
+          margin-top: 6px;
           font-size: 0.9rem;
           color: #666;
         }
 
         /* WHY */
         .kk-why-list {
-          margin-top: 20px;
+          margin-top: 14px;
           list-style: none;
           padding-left: 0;
           display: grid;
-          gap: 14px;
+          gap: 10px;
         }
 
         .kk-why-list li {
-          padding-left: 26px;
+          padding-left: 22px;
           position: relative;
           color: #444;
           font-size: 0.96rem;
-          line-height: 1.6;
+          line-height: 1.5;
         }
 
         .kk-why-list li::before {
@@ -414,7 +417,7 @@ export default function AboutPage() {
           position: absolute;
           left: 0;
           top: 2px;
-          color: var(--primary-gold);
+          color: rgb(39, 171, 204);
           font-weight: 700;
         }
 
@@ -427,7 +430,7 @@ export default function AboutPage() {
         @keyframes fadeUp {
           from {
             opacity: 0;
-            transform: translateY(18px);
+            transform: translateY(16px);
           }
           to {
             opacity: 1;
@@ -442,7 +445,7 @@ export default function AboutPage() {
           }
 
           .kk-about-card {
-            padding: 35px 26px;
+            padding: 20px 18px;
           }
 
           .kk-timeline {
@@ -472,13 +475,17 @@ export default function AboutPage() {
           }
 
           .kk-about-section {
-            padding: 60px 0;
+            padding: 40px 0;
           }
         }
 
         @media (max-width: 576px) {
           .kk-about-card {
-            padding: 26px 18px;
+            padding: 18px 14px;
+          }
+
+          .kk-about-section {
+            padding: 35px 0;
           }
         }
       `}</style>

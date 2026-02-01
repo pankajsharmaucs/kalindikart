@@ -1,129 +1,71 @@
 // ProductPage.jsx
 'use client';
 import React, { useEffect, useState, useMemo, useCallback } from 'react';
-import { useParams } from 'next/navigation';
-// Import the new Swiper component
+import { useParams, useRouter } from 'next/navigation';
 import ProductSwiper from '../../../../components/ProductSwiper';
-import { useRouter } from 'next/navigation';
 import { useCartStore } from '../../../../stores/cartStore';
-// *** MOCK DEFINITION FOR Breadcrumb Component ***
-const Breadcrumb = ({ product }) => {
-    if (!product) return null;
-    const categorySlug = product.category_slug?.toLowerCase().replace(/\s+/g, '-');
-    const subcategorySlug = product.subcategory_slug?.toLowerCase().replace(/\s+/g, '-');
-    return (
-        <div className="bg-light border-bottom py-3">
-            <div className="container product-page-wrapper">
-                <nav aria-label="breadcrumb">
-                    <ol className="breadcrumb mb-1">
-                        {/* Home */}
-                        <li className="breadcrumb-item">
-                            <a href="/">Home</a>
-                        </li>
-                        {/* Category */}
-                        {product.category_name && categorySlug && (
-                            <li className="breadcrumb-item">
-                                <a href={`/category/${categorySlug}`}>
-                                    {product.category_name}
-                                </a>
-                            </li>
-                        )}
-                        {/* Subcategory */}
-                        {product.subcategory_name && subcategorySlug && (
-                            <li className="breadcrumb-item">
-                                <a href={`/category/${categorySlug}/${subcategorySlug}`}>
-                                    {product.subcategory_name}
-                                </a>
-                            </li>
-                        )}
-                        {/* Current Product */}
-                        <li className="breadcrumb-item active" aria-current="page">
-                            {product.title}
-                        </li>
-                    </ol>
-                </nav>
-                <h1 className="h4 fw-bold mb-1 text-dark-gold">{product.title}</h1>
-                <p className="text-muted small mb-0">{product.description || 'Explore our curated selection of premium handcrafted products.'}</p>
-            </div>
-        </div>
-    );
-};
-// *************************************************
+
 export default function ProductPage() {
     const router = useRouter();
-    // Get from Zustand
+    const params = useParams();
+    const { category, slug } = params;
+
+    // Zustand Store
     const addToCart = useCartStore((state) => state.addToCart);
-    const cartCount = useCartStore((state) => state.getCartCount()); // derived
-    const handleAddToCart = async () => {
-        await addToCart(product);
-    };
+    const cartCount = useCartStore((state) => state.getCartCount());
 
-
-    // --- State Hooks ---
+    // State Management
     const [product, setProduct] = useState(null);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
     const [pincode, setPincode] = useState('');
     const [deliveryStatus, setDeliveryStatus] = useState(null);
-    const [mainImage, setMainImage] = useState(null); // Retained for utility purposes
-    // const alreadyInCart = useCartStore((state) => product?.id ? state.items?.some(item => item.id === product.id) ?? false : false);
+    const [mainImage, setMainImage] = useState(null);
+    const [selectedQuantity, setSelectedQuantity] = useState(1);
+
     const alreadyInCart = useCartStore((state) =>
-        product
-            ? state.cartItems.some(item => item.product_id === product.id)
-            : false
+        product ? state.cartItems.some(item => item.product_id === product.id) : false
     );
 
-    const handleGoToCart = () => {
-        router.push('/cart');
-    };
-    const params = useParams();
-    const { category, slug } = params;
-    // Callback function passed to Swiper to update the mainImage state
     const handleImageChange = useCallback((newImageUrl) => {
         setMainImage(newImageUrl);
     }, []);
-    // --- Data Fetching Effect (Retaining your API logic) ---
+
+    // Fetch Product
     useEffect(() => {
         const fetchProduct = async () => {
             setLoading(true);
             setError(null);
-            setProduct(null);
             try {
-                // Mock API call (Replace with actual backend fetching logic)
                 const res = await fetch(`/api/products?slug=${slug}`);
-                if (!res.ok) throw new Error('Product not found or network error.');
+                if (!res.ok) throw new Error('Product not found');
                 const data = await res.json();
-                if (!data || Object.keys(data).length === 0) {
-                    throw new Error('Product data is empty.');
-                }
-                let productCategorySlug = data.category_slug?.toLowerCase();
-                productCategorySlug = productCategorySlug.replace(' ', '-');
-                // console.log(productCategorySlug);
+                if (!data || Object.keys(data).length === 0) throw new Error('Product data is empty');
+
+                let productCategorySlug = data.category_slug?.toLowerCase().replace(' ', '-');
                 if (productCategorySlug !== category) throw new Error('Invalid category URL');
+
                 setProduct(data);
+
                 let initialImages = [];
                 try {
-                    // Assuming data.images is a JSON string of image URLs
                     initialImages = typeof data.images === 'string' ? JSON.parse(data.images) : data.images || [];
                 } catch {
-                    // Fallback to check if it's already an array or a single string
                     initialImages = Array.isArray(data.images) ? data.images : (data.images ? [data.images] : []);
                 }
-                if (initialImages.length > 0) {
-                    setMainImage(initialImages[0]);
-                }
+                if (initialImages.length > 0) setMainImage(initialImages[0]);
             } catch (err) {
-                setError(err instanceof Error ? err.message : 'Something went wrong');
+                setError(err.message);
             } finally {
                 setLoading(false);
             }
         };
         fetchProduct();
     }, [slug, category]);
-    // --- Pincode Check Handler (Mock Logic Retained) ---
+
+    // Pincode Check
     const handlePincodeCheck = (e) => {
         e.preventDefault();
-        // ... (Pincode check logic remains the same)
         if (!pincode || pincode.length !== 6 || isNaN(pincode)) {
             setDeliveryStatus({ message: 'Please enter a valid 6-digit Pincode.', type: 'danger' });
             return;
@@ -143,41 +85,49 @@ export default function ProductPage() {
             }
         }, 1000);
     };
-    // --- Utility Calculations & Memos ---
+
+    // Calculated Values
     const { currentPrice, originalPrice, discountPercentage, imageList, specifications, productRating, totalRatings } = useMemo(() => {
         let images = [];
         try {
-            // Re-parse images safely
             images = typeof product?.images === 'string' ? JSON.parse(product.images) : product?.images || [];
-            // Ensure single string image is also handled if it wasn't parsed
             images = Array.isArray(images) ? images : (images ? [images] : []);
-        } catch { /* ignored */ }
+        } catch { }
+
         const fallbackImage = 'https://via.placeholder.com/600x600/01A9E6/FFFFFF?text=Product+Image';
         const imageList = images.length ? images : [fallbackImage];
         const discountPercentage = Number(product?.discount) || 0;
         const currentPrice = Number(product?.price) || 0;
-        const originalPrice =
-            discountPercentage > 0 && discountPercentage < 100
-                ? Math.round(currentPrice / (1 - discountPercentage / 100))
-                : currentPrice; // If no discount, original price is current price
+        const originalPrice = discountPercentage > 0 && discountPercentage < 100
+            ? Math.round(currentPrice / (1 - discountPercentage / 100))
+            : currentPrice;
+
         const specifications = [
             { key: 'Brand', value: product?.brand_name || 'N/A' },
             { key: 'Color', value: product?.color || 'Blue' },
             { key: 'Material', value: product?.material || 'Synthetic' },
             { key: 'Weight', value: product?.weight || 'N/A' },
-            { key: 'Model Number', value: product?.sku || 'N/A' },
+            { key: 'SKU', value: product?.sku || 'N/A' },
         ];
-        const productRating = Number(product?.rating) || 4.5;
-        const totalRatings = Number(product?.total_ratings) || 12987;
-        return { currentPrice, originalPrice, discountPercentage, imageList, specifications, productRating, totalRatings };
+
+        return {
+            currentPrice,
+            originalPrice,
+            discountPercentage,
+            imageList,
+            specifications,
+            productRating: Number(product?.rating) || 4.5,
+            totalRatings: Number(product?.total_ratings) || 12987
+        };
     }, [product]);
-    // --- Mock Data for UI Sections ---
+
     const keyFeatures = [
-        "Lightweight and optimized for comfort.",
-        "Water-resistant material for all weather.",
-        "Ergonomic design with padded straps.",
-        "Available in multiple color options.",
+        "Premium Quality Materials",
+        "Expertly Handcrafted Design",
+        "Perfect for Gifting",
+        "Durable & Long-lasting",
     ];
+
     const reviewDistribution = [
         { stars: 5, count: 8500, percentage: 65 },
         { stars: 4, count: 3000, percentage: 23 },
@@ -185,401 +135,1021 @@ export default function ProductPage() {
         { stars: 2, count: 300, percentage: 2 },
         { stars: 1, count: 187, percentage: 1.5 },
     ];
-    // --- Render Status ---
+
+    const handleAddToCart = async () => {
+        await addToCart(product);
+    };
+
+    const handleGoToCart = () => {
+        router.push('/cart');
+    };
+
+    // Loading State
     if (loading)
-        return <div className="container py-5 text-center">
-            <div className="spinner-border text-primary-gold" role="status">
-                <span className="visually-hidden">Loading...</span>
+        return (
+            <div className="loading-container">
+                <div className="spinner-wrapper">
+                    <div className="spinner-border text-primary-gold" role="status">
+                        <span className="visually-hidden">Loading...</span>
+                    </div>
+                    <p className="mt-3 text-muted">Loading product details...</p>
+                </div>
             </div>
-            <p className="mt-2 text-muted">Fetching product details...</p>
-        </div>;
+        );
+
     if (error)
-        return <div className="container py-5 text-center text-danger">🛑 Error: {error}</div>;
-    if (!product) return <div className="container py-5 text-center text-muted">Product not available.</div>;
-    // --- Main Render (Integrated UI) ---
+        return (
+            <div className="error-container">
+                <i className="bi bi-exclamation-circle text-danger display-1 mb-3"></i>
+                <h3>Oops! Something went wrong</h3>
+                <p className="text-muted">{error}</p>
+            </div>
+        );
+
+    if (!product) return null;
+
     return (
         <>
-            {/* REPLACED HEADER WITH BREADCRUMB COMPONENT
-            <header className="bg-white shadow-sm py-2 sticky-top" style={{ zIndex: 1030 }}>...</header>
-            */}
-            {/* <Breadcrumb
-                title={product.title || "Product Detail"}
-                current={product.title || "Product"}
-                description="Explore our curated selection of premium handcrafted products."
-            /> */}
-            {/* Main Content Area */}
-            <main className="product-page-wrapper p-3 p-lg-0">
+            <main className="product-page-premium">
                 <div className="container-fluid px-0">
-                    <div className="row g-4 pt-4 px-3 px-lg-4">
-                        {/* ========================================================== */}
-                        {/* LEFT COLUMN: SWIPER IMAGE GALLERY (col-lg-6) */}
-                        {/* ========================================================== */}
-                        <div className="col-12 col-md-12 col-lg-6 d-flex justify-content-center">
-                            <div className="w-100">
-                                <div className="ratio ratio-1x1 border rounded bg-white p-2">
+                    {/* Breadcrumb */}
+                    <div className="breadcrumb-wrapper">
+                        <div className="container">
+                            <nav aria-label="breadcrumb">
+                                <ol className="breadcrumb mb-0">
+                                    <li className="breadcrumb-item"><a href="/">Home</a></li>
+                                    {product.category_name && (
+                                        <li className="breadcrumb-item">
+                                            <a href={`/category/${product.category_slug?.toLowerCase().replace(/\s+/g, '-')}`}>
+                                                {product.category_name}
+                                            </a>
+                                        </li>
+                                    )}
+                                    <li className="breadcrumb-item active">{product.title}</li>
+                                </ol>
+                            </nav>
+                        </div>
+                    </div>
+
+                    <div className="container product-container">
+                        <div className="row g-5">
+                            {/* LEFT: Image Gallery */}
+                            <div className="col-lg-6">
+                                <div className="product-gallery-section fade-in">
                                     <ProductSwiper
                                         imageList={imageList}
                                         productTitle={product.title}
                                         onImageChange={handleImageChange}
                                     />
+                                    
+                                    {/* Trust Badges */}
+                                    <div className="trust-badges mt-4">
+                                        <div className="badge-item">
+                                            <i className="bi bi-shield-check"></i>
+                                            <span>Secure Payment</span>
+                                        </div>
+                                        <div className="badge-item">
+                                            <i className="bi bi-truck"></i>
+                                            <span>Fast Delivery</span>
+                                        </div>
+                                        <div className="badge-item">
+                                            <i className="bi bi-award"></i>
+                                            <span>Premium Quality</span>
+                                        </div>
+                                    </div>
                                 </div>
                             </div>
-                        </div>
-                        <div className="col-12 col-md-12 col-lg-6 mt-4 mt-lg-0">
-                            <div className="p-3 border rounded shadow-sm bg-white ">
-                                <h1 className="h3 fw-bold mb-1">{product.title}</h1>
-                                {/* Rating */}
-                                <div className="d-flex align-items-center mb-3">
-                                    <span className="badge rating-badge me-2 py-1"><i className="bi bi-star-fill me-1"></i>{productRating.toFixed(1)}</span>
-                                    <span className="text-muted small">({totalRatings.toLocaleString()} Reviews)</span>
-                                </div>
-                                {/* Price */}
-                                <div className="mb-3 border-bottom pb-2">
-                                    <span className="price-text me-2">₹{currentPrice.toLocaleString('en-IN')}</span>
-                                    {discountPercentage > 0 && (
-                                        <>
-                                            <span className="text-muted text-decoration-line-through me-2">₹{originalPrice.toLocaleString('en-IN')}</span>
-                                            <span className="discount-badge badge p-2">{discountPercentage}% OFF</span>
-                                        </>
-                                    )}
-                                </div>
-                                {/* Key Features */}
-                                <div className="mb-4 small text-dark">
-                                    <h6 className="fw-bold text-dark-gold mb-2">Key Features:</h6>
-                                    <ul className="list-unstyled product-features">
-                                        {keyFeatures.map((feature, index) => (
-                                            <li key={index} className="mb-1">
-                                                <i className="bi bi-check-circle-fill me-2 feature-icon"></i>
-                                                {feature}
-                                            </li>
-                                        ))}
-                                    </ul>
-                                </div>
-                                {/* Pincode Check (Interactive) */}
-                                <div className="p-3 border rounded mb-4 shadow-sm-light delivery-check-box">
-                                    <p className="fw-semibold mb-2 text-dark-gold">Check Delivery Estimate</p>
-                                    <form onSubmit={handlePincodeCheck}>
-                                        <div className="input-group mb-2">
+
+                            {/* RIGHT: Product Details */}
+                            <div className="col-lg-6">
+                                <div className="product-details-section fade-in-delay">
+                                    {/* Title */}
+                                    <h1 className="product-title">{product.title}</h1>
+
+                                    {/* Rating */}
+                                    <div className="rating-section">
+                                        <div className="stars">
+                                            {[...Array(5)].map((_, i) => (
+                                                <i key={i} className={`bi bi-star${i < Math.floor(productRating) ? '-fill' : ''}`}></i>
+                                            ))}
+                                            <span className="rating-value">{productRating}</span>
+                                        </div>
+                                        <span className="review-count">({totalRatings.toLocaleString()} reviews)</span>
+                                    </div>
+
+                                    {/* Price */}
+                                    <div className="price-section">
+                                        <div className="price-main">₹{currentPrice.toLocaleString('en-IN')}</div>
+                                        {discountPercentage > 0 && (
+                                            <>
+                                                <div className="price-original">₹{originalPrice.toLocaleString('en-IN')}</div>
+                                                <div className="price-discount">{discountPercentage}% OFF</div>
+                                            </>
+                                        )}
+                                    </div>
+
+                                    <div className="divider"></div>
+
+                                    {/* Key Features */}
+                                    <div className="features-section">
+                                        <h6 className="section-label">Key Highlights</h6>
+                                        <ul className="features-list">
+                                            {keyFeatures.map((feature, index) => (
+                                                <li key={index}>
+                                                    <i className="bi bi-check-circle-fill"></i>
+                                                    <span>{feature}</span>
+                                                </li>
+                                            ))}
+                                        </ul>
+                                    </div>
+
+                                    {/* Quantity Selector */}
+                                    <div className="quantity-section">
+                                        <h6 className="section-label">Quantity</h6>
+                                        <div className="quantity-selector">
+                                            <button 
+                                                className="qty-btn"
+                                                onClick={() => setSelectedQuantity(Math.max(1, selectedQuantity - 1))}
+                                            >
+                                                <i className="bi bi-dash"></i>
+                                            </button>
+                                            <input 
+                                                type="text" 
+                                                value={selectedQuantity} 
+                                                readOnly 
+                                                className="qty-input"
+                                            />
+                                            <button 
+                                                className="qty-btn"
+                                                onClick={() => setSelectedQuantity(selectedQuantity + 1)}
+                                            >
+                                                <i className="bi bi-plus"></i>
+                                            </button>
+                                        </div>
+                                    </div>
+
+                                    {/* Pincode Check */}
+                                    <div className="pincode-section">
+                                        <h6 className="section-label">
+                                            <i className="bi bi-geo-alt me-2"></i>Check Delivery
+                                        </h6>
+                                        <form onSubmit={handlePincodeCheck} className="pincode-form">
                                             <input
                                                 type="text"
-                                                className="form-control"
+                                                className="pincode-input"
                                                 placeholder="Enter Pincode"
                                                 maxLength="6"
                                                 value={pincode}
                                                 onChange={(e) => setPincode(e.target.value)}
                                             />
-                                            <button className="btn btn-outline-dark-gold" type="submit">CHECK</button>
-                                        </div>
-                                    </form>
-                                    {deliveryStatus && (
-                                        <p className={`small mb-0 text-${deliveryStatus.type === 'success' ? 'success' : 'danger'}`}>
-                                            <i className={`bi bi-${deliveryStatus.type === 'success' ? 'truck' : 'exclamation-octagon'} me-1`}></i>
-                                            {deliveryStatus.message}
-                                        </p>
-                                    )}
-                                </div>
-                                {/* Actions */}
-                                {/* Actions */}
-                                <div className="d-grid gap-3 mb-4 cart-actions">
-                                    {alreadyInCart ? (
-                                        <button
-                                            className="btn btn-success btn-lg d-flex align-items-center justify-content-center cart-btn cart-btn-success"
-                                            onClick={handleGoToCart}
-                                        >
-                                            <i className="bi bi-cart-check me-2 fs-5"></i>
-                                            <span className="fw-semibold">
+                                            <button type="submit" className="pincode-btn">CHECK</button>
+                                        </form>
+                                        {deliveryStatus && (
+                                            <div className={`delivery-status status-${deliveryStatus.type}`}>
+                                                <i className={`bi bi-${deliveryStatus.type === 'success' ? 'check-circle' : 'exclamation-circle'}`}></i>
+                                                {deliveryStatus.message}
+                                            </div>
+                                        )}
+                                    </div>
+
+                                    <div className="divider"></div>
+
+                                    {/* Action Buttons */}
+                                    <div className="action-buttons">
+                                        {alreadyInCart ? (
+                                            <button className="btn-go-cart" onClick={handleGoToCart}>
+                                                <i className="bi bi-cart-check me-2"></i>
                                                 GO TO CART
-                                                <span className="ms-2 badge bg-light text-success">
-                                                    {cartCount}
-                                                </span>
-                                            </span>
-                                        </button>
-                                    ) : (
-                                        <>
-                                            {/* <button
-                                                className="btn btn-primary btn-lg d-flex align-items-center justify-content-center cart-btn cart-btn-buy"
-                                            >
-                                                <i className="bi bi-lightning-fill me-2 fs-5"></i>
-                                                <span className="fw-semibold">BUY NOW</span>
-                                            </button> */}
-                                            <button
-                                                className="btn btn-warning btn-lg d-flex align-items-center justify-content-center cart-btn cart-btn-add"
-                                                onClick={handleAddToCart}
-                                                disabled={!product}
-                                            >
-                                                <i className="bi bi-cart-plus me-2 fs-5"></i>
-                                                <span className="fw-semibold">ADD TO CART</span>
+                                                <span className="cart-badge">{cartCount}</span>
                                             </button>
-                                        </>
-                                    )}
-                                </div>
-                                {/* Additional Info */}
-                                <div className="mt-3 small text-muted border-top pt-3">
-                                    <p className="mb-1"><i className="bi bi-gift me-1"></i>Free gift wrapping available.</p>
-                                    <p className="mb-1"><i className="bi bi-shield-check me-1"></i>{product.return_policy || '10-Day Easy Return Policy'}</p>
+                                        ) : (
+                                            <button className="btn-add-cart" onClick={handleAddToCart}>
+                                                <i className="bi bi-cart-plus me-2"></i>
+                                                ADD TO CART
+                                            </button>
+                                        )}
+                                    </div>
+
+                                    {/* Additional Info */}
+                                    <div className="info-tags">
+                                        <div className="info-tag">
+                                            <i className="bi bi-gift"></i>
+                                            <span>Free Gift Wrapping</span>
+                                        </div>
+                                        <div className="info-tag">
+                                            <i className="bi bi-arrow-repeat"></i>
+                                            <span>{product.return_policy || '10-Day Easy Return'}</span>
+                                        </div>
+                                    </div>
                                 </div>
                             </div>
                         </div>
-                        {/* ========================================================== */}
-                        {/* MAIN SCROLLABLE CONTENT (Full width below product box) */}
-                        {/* ========================================================== */}
-                        <div className="col-12 px-3 px-lg-4">
-                            {/* Description */}
-                            <div className="product-content-section pt-4">
-                                <h4 className="fw-bold mb-3 border-bottom pb-1 text-dark-gold">Product Description</h4>
-                                <div className="text-secondary" dangerouslySetInnerHTML={{ __html: product.description || '<p>No detailed description available.</p>' }} />
-                            </div>
-                            {/* Specifications */}
-                            <div className="product-content-section pt-4">
-                                <h4 className="fw-bold mb-3 border-bottom pb-1 text-dark-gold">Technical Specifications</h4>
-                                <table className="table table-borderless specs-table">
-                                    <tbody>
-                                        {specifications.map((spec, index) => (
-                                            <tr key={index}>
-                                                <td className="fw-semibold" style={{ width: '40%' }}>{spec.key}</td>
-                                                <td>{spec.value}</td>
-                                            </tr>
-                                        ))}
-                                    </tbody>
-                                </table>
-                            </div>
-                            {/* LIFESTYLE FULL-WIDTH BANNER */}
-                            <div className="col-12 px-0">
-                                <div className="lifestyle-banner rounded">
-                                    <h2 className="display-5 text-white shadow-text">Performance Meets Style</h2>
-                                </div>
-                            </div>
-                            {/* REVIEWS SECTION */}
-                            <div className="product-content-section pt-5">
-                                <h4 className="fw-bold mb-4 border-bottom pb-1 text-dark-gold" id="reviews">Customer Reviews & Ratings</h4>
-                                <div className="row mb-5">
-                                    {/* Rating Summary */}
-                                    <div className="col-md-4 text-center border-end rating-summary-box">
-                                        <h1 className="display-3 fw-bold text-primary-gold">{productRating.toFixed(1)}</h1>
-                                        <div className="text-warning mb-2 h5">
-                                            {/* Star icons based on rating */}
-                                            {[...Array(5)].map((_, i) => (
-                                                <i key={i} className={`bi bi-star${i + 1 <= Math.floor(productRating) ? '-fill' : (i < productRating && i + 1 > productRating ? '-half' : '')}`}></i>
-                                            ))}
-                                        </div>
-                                        <p className="small text-muted mb-0">Based on {totalRatings.toLocaleString()} ratings</p>
+
+                        {/* Tabs Section */}
+                        <div className="product-tabs-section mt-5">
+                            <ul className="nav nav-tabs premium-tabs" role="tablist">
+                                <li className="nav-item">
+                                    <button className="nav-link active" data-bs-toggle="tab" data-bs-target="#description">
+                                        Description
+                                    </button>
+                                </li>
+                                <li className="nav-item">
+                                    <button className="nav-link" data-bs-toggle="tab" data-bs-target="#specifications">
+                                        Specifications
+                                    </button>
+                                </li>
+                                <li className="nav-item">
+                                    <button className="nav-link" data-bs-toggle="tab" data-bs-target="#reviews">
+                                        Reviews ({totalRatings})
+                                    </button>
+                                </li>
+                            </ul>
+
+                            <div className="tab-content premium-tab-content">
+                                {/* Description */}
+                                <div className="tab-pane fade show active" id="description">
+                                    <div className="tab-content-inner">
+                                        <div dangerouslySetInnerHTML={{ __html: product.description || '<p>No description available.</p>' }} />
                                     </div>
-                                    {/* Distribution Bars */}
-                                    <div className="col-md-8 p-3 rating-distribution-bars">
-                                        {reviewDistribution.map((dist) => (
-                                            <div key={dist.stars} className="d-flex align-items-center mb-1">
-                                                <span className="small me-2" style={{ width: '30px' }}>{dist.stars} <i className="bi bi-star-fill text-warning"></i></span>
-                                                <div className="progress flex-grow-1 me-2" style={{ height: '8px' }}>
-                                                    <div
-                                                        className="progress-bar bg-success"
-                                                        role="progressbar"
-                                                        style={{ width: `${dist.percentage}%` }}
-                                                        aria-valuenow={dist.percentage}
-                                                        aria-valuemin="0"
-                                                        aria-valuemax="100"
-                                                    ></div>
+                                </div>
+
+                                {/* Specifications */}
+                                <div className="tab-pane fade" id="specifications">
+                                    <div className="tab-content-inner">
+                                        <table className="specs-table">
+                                            <tbody>
+                                                {specifications.map((spec, index) => (
+                                                    <tr key={index}>
+                                                        <td className="spec-key">{spec.key}</td>
+                                                        <td className="spec-value">{spec.value}</td>
+                                                    </tr>
+                                                ))}
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                </div>
+
+                                {/* Reviews */}
+                                <div className="tab-pane fade" id="reviews">
+                                    <div className="tab-content-inner">
+                                        <div className="reviews-summary">
+                                            <div className="rating-overview">
+                                                <div className="overall-rating">
+                                                    <div className="rating-number">{productRating}</div>
+                                                    <div className="stars">
+                                                        {[...Array(5)].map((_, i) => (
+                                                            <i key={i} className={`bi bi-star${i < Math.floor(productRating) ? '-fill' : ''}`}></i>
+                                                        ))}
+                                                    </div>
+                                                    <div className="total-reviews">{totalRatings.toLocaleString()} ratings</div>
                                                 </div>
-                                                <span className="small text-muted" style={{ width: '60px', textAlign: 'right' }}>{dist.count.toLocaleString()}</span>
                                             </div>
-                                        ))}
-                                    </div>
-                                </div>
-                                <h5 className="fw-bold mb-3">Top Customer Reviews</h5>
-                                <div className="row g-4">
-                                    {/* Mock Review 1 */}
-                                    <div className="col-md-6">
-                                        <div className="card review-card h-100 p-3">
-                                            <h6 className="fw-bold text-dark-gold">Solid Build Quality</h6>
-                                            <div className="text-warning mb-2">
-                                                <i className="bi bi-star-fill"></i><i className="bi bi-star-fill"></i><i className="bi bi-star-fill"></i><i className="bi bi-star-fill"></i><i className="bi bi-star-fill"></i>
+
+                                            <div className="rating-bars">
+                                                {reviewDistribution.map((dist) => (
+                                                    <div key={dist.stars} className="rating-bar-row">
+                                                        <span className="star-label">{dist.stars} <i className="bi bi-star-fill"></i></span>
+                                                        <div className="progress-wrapper">
+                                                            <div className="progress-bar-custom" style={{ width: `${dist.percentage}%` }}></div>
+                                                        </div>
+                                                        <span className="count-label">{dist.count.toLocaleString()}</span>
+                                                    </div>
+                                                ))}
                                             </div>
-                                            <p className="card-text small text-muted">"The backpack is robust and handles heavy loads well. The blue color is vibrant and stylish."</p>
-                                            <p className="card-text small fw-semibold mb-0">Riya Sharma, 1 week ago</p>
+                                        </div>
+
+                                        <div className="reviews-list">
+                                            <h6 className="mb-4">Customer Reviews</h6>
+                                            <div className="review-card">
+                                                <div className="review-header">
+                                                    <div className="reviewer-info">
+                                                        <div className="reviewer-avatar">RS</div>
+                                                        <div>
+                                                            <div className="reviewer-name">Riya Sharma</div>
+                                                            <div className="review-date">1 week ago</div>
+                                                        </div>
+                                                    </div>
+                                                    <div className="review-stars">
+                                                        {[...Array(5)].map((_, i) => (
+                                                            <i key={i} className="bi bi-star-fill"></i>
+                                                        ))}
+                                                    </div>
+                                                </div>
+                                                <div className="review-body">
+                                                    <h6 className="review-title">Excellent Product!</h6>
+                                                    <p className="review-text">The quality is outstanding and the craftsmanship is evident. Perfect for gifting!</p>
+                                                </div>
+                                            </div>
+
+                                            <div className="review-card">
+                                                <div className="review-header">
+                                                    <div className="reviewer-info">
+                                                        <div className="reviewer-avatar">VK</div>
+                                                        <div>
+                                                            <div className="reviewer-name">Vikram Kumar</div>
+                                                            <div className="review-date">3 days ago</div>
+                                                        </div>
+                                                    </div>
+                                                    <div className="review-stars">
+                                                        {[...Array(4)].map((_, i) => (
+                                                            <i key={i} className="bi bi-star-fill"></i>
+                                                        ))}
+                                                        <i className="bi bi-star"></i>
+                                                    </div>
+                                                </div>
+                                                <div className="review-body">
+                                                    <h6 className="review-title">Great Value</h6>
+                                                    <p className="review-text">Very happy with my purchase. Fast delivery and secure packaging.</p>
+                                                </div>
+                                            </div>
                                         </div>
                                     </div>
-                                    {/* Mock Review 2 */}
-                                    <div className="col-md-6">
-                                        <div className="card review-card h-100 p-3">
-                                            <h6 className="fw-bold text-dark-gold">Comfortable for Hiking</h6>
-                                            <div className="text-warning mb-2">
-                                                <i className="bi bi-star-fill"></i><i className="bi bi-star-fill"></i><i className="bi bi-star-fill"></i><i className="bi bi-star-fill"></i><i className="bi bi-star-half"></i>
-                                            </div>
-                                            <p className="card-text small text-muted">"Excellent padding on the shoulders makes it comfortable even on long treks. Highly recommended for outdoor use."</p>
-                                            <p className="card-text small fw-semibold mb-0">Vikram K., 3 days ago</p>
-                                        </div>
-                                    </div>
-                                </div>
-                                <button className="btn btn-primary-gold mt-4 text-white">View All {totalRatings.toLocaleString()} Reviews</button>
-                            </div>
-                            {/* Related Products (Placeholder) */}
-                            <div className="product-content-section border-top pt-5">
-                                <h4 className="fw-bold mb-4 border-bottom pb-1 text-dark-gold">More Products You May Like</h4>
-                                <div className="row row-cols-2 row-cols-md-4 g-3">
-                                    {/* Map over related products data here */}
                                 </div>
                             </div>
                         </div>
                     </div>
                 </div>
             </main>
-            {/* Global Styles (Updated for the Bright Blue palette and corrected gallery layout) */}
+
             <style jsx global>{`
-                /* --- New Color Palette --- */
+                /* ========== PREMIUM PRODUCT PAGE STYLES ========== */
+                
                 :root {
-                    --primary-gold: #01A9E6; /* Base color - Bright Blue */
-                    --dark-gold: #00739D;    /* Headers/darker accents */
-                    --light-bg: #f0f8ff;     /* Light blue tint for background */
-                    --border-color: #00739D;
-                    --text-dark: #333;
-                    --hero-gradient-center: #5FD3FD;
-                    --hero-gradient-edge: #01A9E6;
+                    --primary: #01A9E6;
+                    --primary-dark: #00739D;
+                    --success: #10b981;
+                    --warning: #f59e0b;
+                    --danger: #ef4444;
+                    --text-primary: #1f2937;
+                    --text-secondary: #6b7280;
+                    --border: #e5e7eb;
+                    --bg-light: #f9fafb;
+                    --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.1);
+                    --shadow-md: 0 4px 6px rgba(0, 0, 0, 0.1);
+                    --shadow-lg: 0 10px 15px rgba(0, 0, 0, 0.1);
+                    --radius: 12px;
+                    --transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
                 }
-                .text-primary-gold { color: var(--primary-gold) !important; }
-                .text-dark-gold { color: var(--dark-gold) !important; }
-               
-                .product-page-wrapper {
-                    max-width: 1300px;
-                    margin: auto;
-                    background-color: #fff;
-                    box-shadow: 0 0 15px rgba(0, 0, 0, 0.05);
+
+                /* Loading & Error States */
+                .loading-container, .error-container {
+                    min-height: 60vh;
+                    display: flex;
+                    flex-direction: column;
+                    align-items: center;
+                    justify-content: center;
+                    padding: 3rem 1rem;
                 }
-                /* --- BUTTON STYLES (Retained) --- */
-                .btn-primary-gold {
-                    background-color: var(--primary-gold);
-                    border-color: var(--primary-gold);
-                    color: #fff;
+
+                .spinner-wrapper {
+                    text-align: center;
+                }
+
+                /* Main Container */
+                .product-page-premium {
+                    background: #fff;
+                    min-height: 100vh;
+                    padding-bottom: 4rem;
+                }
+
+                /* Breadcrumb */
+                .breadcrumb-wrapper {
+                    background: var(--bg-light);
+                    padding: 1rem 0;
+                    border-bottom: 1px solid var(--border);
+                }
+
+                .breadcrumb {
+                    margin: 0;
+                    font-size: 0.875rem;
+                }
+
+                .breadcrumb-item a {
+                    color: var(--text-secondary);
+                    text-decoration: none;
+                    transition: var(--transition);
+                }
+
+                .breadcrumb-item a:hover {
+                    color: var(--primary);
+                }
+
+                .breadcrumb-item.active {
+                    color: var(--text-primary);
+                }
+
+                /* Product Container */
+                .product-container {
+                    max-width: 1400px;
+                    padding-top: 2rem;
+                }
+
+                /* Animations */
+                @keyframes fadeIn {
+                    from {
+                        opacity: 0;
+                        transform: translateY(20px);
+                    }
+                    to {
+                        opacity: 1;
+                        transform: translateY(0);
+                    }
+                }
+
+                .fade-in {
+                    animation: fadeIn 0.6s ease-out;
+                }
+
+                .fade-in-delay {
+                    animation: fadeIn 0.6s ease-out 0.2s backwards;
+                }
+
+                /* Gallery Section */
+                .product-gallery-section {
+                    position: sticky;
+                    top: 100px;
+                }
+
+                /* Trust Badges */
+                .trust-badges {
+                    display: flex;
+                    gap: 1rem;
+                    padding: 1.5rem;
+                    background: var(--bg-light);
+                    border-radius: var(--radius);
+                }
+
+                .badge-item {
+                    flex: 1;
+                    display: flex;
+                    flex-direction: column;
+                    align-items: center;
+                    gap: 0.5rem;
+                    font-size: 0.875rem;
+                    color: var(--text-secondary);
+                    text-align: center;
+                }
+
+                .badge-item i {
+                    font-size: 1.5rem;
+                    color: var(--primary);
+                }
+
+                /* Product Details */
+                .product-details-section {
+                    padding: 0 1rem;
+                }
+
+                .product-title {
+                    font-size: 2rem;
+                    font-weight: 700;
+                    color: var(--text-primary);
+                    margin-bottom: 1rem;
+                    line-height: 1.3;
+                }
+
+                /* Rating Section */
+                .rating-section {
+                    display: flex;
+                    align-items: center;
+                    gap: 1rem;
+                    margin-bottom: 1.5rem;
+                }
+
+                .stars {
+                    display: flex;
+                    align-items: center;
+                    gap: 0.25rem;
+                }
+
+                .stars i {
+                    color: #fbbf24;
+                    font-size: 1.125rem;
+                }
+
+                .rating-value {
+                    margin-left: 0.5rem;
                     font-weight: 600;
+                    color: var(--text-primary);
                 }
-                .btn-primary-gold:hover {
-                    background-color: var(--dark-gold);
-                    border-color: var(--dark-gold);
+
+                .review-count {
+                    color: var(--text-secondary);
+                    font-size: 0.875rem;
                 }
-                .btn-dark-gold {
-                    background-color: var(--dark-gold);
-                    border-color: var(--dark-gold);
-                    color: #fff;
+
+                /* Price Section */
+                .price-section {
+                    display: flex;
+                    align-items: baseline;
+                    gap: 1rem;
+                    margin-bottom: 1.5rem;
+                }
+
+                .price-main {
+                    font-size: 2.5rem;
+                    font-weight: 700;
+                    color: var(--text-primary);
+                }
+
+                .price-original {
+                    font-size: 1.5rem;
+                    color: var(--text-secondary);
+                    text-decoration: line-through;
+                }
+
+                .price-discount {
+                    background: linear-gradient(135deg, #10b981, #059669);
+                    color: white;
+                    padding: 0.25rem 0.75rem;
+                    border-radius: 6px;
                     font-weight: 600;
+                    font-size: 0.875rem;
                 }
-                .btn-dark-gold:hover {
-                    background-color: var(--primary-gold);
-                    border-color: var(--primary-gold);
+
+                /* Divider */
+                .divider {
+                    height: 1px;
+                    background: var(--border);
+                    margin: 1.5rem 0;
                 }
-                .btn-outline-dark-gold {
-                    color: var(--dark-gold);
-                    border-color: var(--dark-gold);
+
+                /* Features Section */
+                .section-label {
+                    font-size: 0.875rem;
+                    font-weight: 600;
+                    color: var(--text-secondary);
+                    text-transform: uppercase;
+                    letter-spacing: 0.05em;
+                    margin-bottom: 1rem;
                 }
-                .btn-outline-dark-gold:hover {
-                    background-color: var(--dark-gold);
-                    color: #fff;
+
+                .features-list {
+                    list-style: none;
+                    padding: 0;
+                    margin: 0 0 1.5rem 0;
+                    display: grid;
+                    gap: 0.75rem;
                 }
-               
-                /* --- SWIPER GALLERY STYLES (Fixed Alignment) --- */
-               
-                .product-gallery-container {
-                    /* Removed fixed height. Auto-adjusts based on the main image size */
-                    min-height: 450px;
+
+                .features-list li {
+                    display: flex;
+                    align-items: center;
+                    gap: 0.75rem;
+                    color: var(--text-primary);
                 }
-               
-                /* Thumbnails Wrapper (Horizontal on Mobile, Vertical on Desktop) */
-                .product-thumbs-wrap {
+
+                .features-list i {
+                    color: var(--success);
+                    font-size: 1.25rem;
                     flex-shrink: 0;
-                    height: 100%;
-                    width: 80px; /* Fixed width for vertical column */
                 }
-                .product-thumbs-swiper {
-                    height: 100%;
+
+                /* Quantity Selector */
+                .quantity-section {
+                    margin-bottom: 1.5rem;
                 }
-                .product-thumb-item {
-                    width: 80px;
-                    height: 80px;
-                    border: 1px solid #ddd;
-                    margin-bottom: 10px; /* Spacing for vertical layout */
-                    cursor: pointer;
-                    padding: 2px;
-                    opacity: 0.7;
-                }
-                .product-thumb-item.swiper-slide-thumb-active {
-                    border-color: var(--primary-gold);
-                    opacity: 1;
-                }
-                .product-thumb-item img {
-                    width: 100%;
-                    height: 100%;
-                    object-fit: cover;
-                }
-               
-                /* Main Image Slider */
-                .product-main-wrap {
-                    flex-grow: 1;
-                    position: relative;
-                    /* Use aspect ratio for clean look. You might need to adjust this. */
-                    padding-bottom: 100%; /* Creates 1:1 aspect ratio container */
-                    height: 0;
+
+                .quantity-selector {
+                    display: inline-flex;
+                    align-items: center;
+                    border: 2px solid var(--border);
+                    border-radius: var(--radius);
                     overflow: hidden;
-                    border: 1px solid #eee;
                 }
-                .product-main-swiper {
-                    position: absolute;
-                    top: 0;
-                    left: 0;
-                    width: 100%;
-                    height: 100%;
-                }
-                .product-main-slide {
+
+                .qty-btn {
+                    width: 3rem;
+                    height: 3rem;
+                    border: none;
+                    background: white;
+                    color: var(--text-primary);
+                    font-size: 1.25rem;
+                    cursor: pointer;
+                    transition: var(--transition);
                     display: flex;
                     align-items: center;
                     justify-content: center;
-                    background-color: #fff;
-                    padding: 10px;
                 }
-                .main-product-image {
-                    max-height: 100%;
-                    width: auto;
-                    object-fit: contain;
+
+                .qty-btn:hover {
+                    background: var(--bg-light);
                 }
-                /* Swiper Navigation */
-                .swiper-button-next, .swiper-button-prev {
-                    color: var(--dark-gold) !important;
-                    background-color: rgba(255, 255, 255, 0.9);
-                    width: 30px;
-                    height: 30px;
+
+                .qty-input {
+                    width: 4rem;
+                    height: 3rem;
+                    border: none;
+                    border-left: 2px solid var(--border);
+                    border-right: 2px solid var(--border);
+                    text-align: center;
+                    font-weight: 600;
+                    font-size: 1.125rem;
+                }
+
+                /* Pincode Section */
+                .pincode-section {
+                    margin-bottom: 1.5rem;
+                }
+
+                .pincode-form {
+                    display: flex;
+                    gap: 0.5rem;
+                    margin-bottom: 0.75rem;
+                }
+
+                .pincode-input {
+                    flex: 1;
+                    padding: 0.75rem 1rem;
+                    border: 2px solid var(--border);
+                    border-radius: var(--radius);
+                    font-size: 0.938rem;
+                    transition: var(--transition);
+                }
+
+                .pincode-input:focus {
+                    outline: none;
+                    border-color: var(--primary);
+                }
+
+                .pincode-btn {
+                    padding: 0.75rem 1.5rem;
+                    background: white;
+                    border: 2px solid var(--primary);
+                    color: var(--primary);
+                    border-radius: var(--radius);
+                    font-weight: 600;
+                    cursor: pointer;
+                    transition: var(--transition);
+                }
+
+                .pincode-btn:hover {
+                    background: var(--primary);
+                    color: white;
+                }
+
+                .delivery-status {
+                    padding: 0.75rem 1rem;
+                    border-radius: var(--radius);
+                    font-size: 0.875rem;
+                    display: flex;
+                    align-items: center;
+                    gap: 0.5rem;
+                }
+
+                .status-success {
+                    background: #d1fae5;
+                    color: #065f46;
+                }
+
+                .status-danger, .status-warning {
+                    background: #fee2e2;
+                    color: #991b1b;
+                }
+
+                /* Action Buttons */
+                .action-buttons {
+                    display: grid;
+                    gap: 0.75rem;
+                    margin-bottom: 1.5rem;
+                }
+
+                .btn-add-cart, .btn-go-cart {
+                    padding: 1rem 2rem;
+                    border: none;
+                    border-radius: var(--radius);
+                    font-size: 1.125rem;
+                    font-weight: 600;
+                    cursor: pointer;
+                    transition: var(--transition);
+                    display: flex;
+                    align-items: center;
+                    justify-content: center;
+                    gap: 0.5rem;
+                    position: relative;
+                }
+
+                .btn-add-cart {
+                    background: linear-gradient(135deg, var(--primary), var(--primary-dark));
+                    color: white;
+                    box-shadow: var(--shadow-md);
+                }
+
+                .btn-add-cart:hover {
+                    transform: translateY(-2px);
+                    box-shadow: var(--shadow-lg);
+                }
+
+                .btn-go-cart {
+                    background: linear-gradient(135deg, #10b981, #059669);
+                    color: white;
+                    box-shadow: var(--shadow-md);
+                }
+
+                .btn-go-cart:hover {
+                    transform: translateY(-2px);
+                    box-shadow: var(--shadow-lg);
+                }
+
+                .cart-badge {
+                    position: absolute;
+                    top: -8px;
+                    right: -8px;
+                    background: white;
+                    color: var(--success);
+                    width: 28px;
+                    height: 28px;
                     border-radius: 50%;
-                    --swiper-navigation-size: 16px;
+                    display: flex;
+                    align-items: center;
+                    justify-content: center;
+                    font-size: 0.875rem;
+                    font-weight: 700;
+                    box-shadow: var(--shadow-md);
                 }
-                /* Mobile/Small Screen Overrides for Swiper */
+
+                /* Info Tags */
+                .info-tags {
+                    display: flex;
+                    gap: 1.5rem;
+                    padding: 1rem;
+                    background: var(--bg-light);
+                    border-radius: var(--radius);
+                }
+
+                .info-tag {
+                    display: flex;
+                    align-items: center;
+                    gap: 0.5rem;
+                    font-size: 0.875rem;
+                    color: var(--text-secondary);
+                }
+
+                .info-tag i {
+                    color: var(--primary);
+                    font-size: 1.25rem;
+                }
+
+                /* Tabs */
+                .product-tabs-section {
+                    padding: 2rem 0;
+                }
+
+                .premium-tabs {
+                    border-bottom: 2px solid var(--border);
+                    gap: 2rem;
+                }
+
+                .premium-tabs .nav-link {
+                    border: none;
+                    background: none;
+                    padding: 1rem 0;
+                    font-weight: 600;
+                    color: var(--text-secondary);
+                    position: relative;
+                    cursor: pointer;
+                    transition: var(--transition);
+                }
+
+                .premium-tabs .nav-link:hover {
+                    color: var(--primary);
+                }
+
+                .premium-tabs .nav-link.active {
+                    color: var(--primary);
+                }
+
+                .premium-tabs .nav-link.active::after {
+                    content: '';
+                    position: absolute;
+                    bottom: -2px;
+                    left: 0;
+                    right: 0;
+                    height: 3px;
+                    background: var(--primary);
+                    border-radius: 3px 3px 0 0;
+                }
+
+                .premium-tab-content {
+                    padding: 2rem 0;
+                }
+
+                .tab-content-inner {
+                    max-width: 900px;
+                }
+
+                /* Specifications Table */
+                .specs-table {
+                    width: 100%;
+                    border-collapse: collapse;
+                }
+
+                .specs-table tr {
+                    border-bottom: 1px solid var(--border);
+                }
+
+                .specs-table td {
+                    padding: 1rem 0;
+                }
+
+                .spec-key {
+                    font-weight: 600;
+                    color: var(--text-secondary);
+                    width: 40%;
+                }
+
+                .spec-value {
+                    color: var(--text-primary);
+                }
+
+                /* Reviews */
+                .reviews-summary {
+                    display: grid;
+                    grid-template-columns: 1fr 2fr;
+                    gap: 3rem;
+                    margin-bottom: 3rem;
+                    padding: 2rem;
+                    background: var(--bg-light);
+                    border-radius: var(--radius);
+                }
+
+                .overall-rating {
+                    text-align: center;
+                }
+
+                .rating-number {
+                    font-size: 4rem;
+                    font-weight: 700;
+                    color: var(--text-primary);
+                    line-height: 1;
+                }
+
+                .overall-rating .stars {
+                    justify-content: center;
+                    margin: 0.5rem 0;
+                }
+
+                .total-reviews {
+                    color: var(--text-secondary);
+                    font-size: 0.875rem;
+                }
+
+                .rating-bars {
+                    display: grid;
+                    gap: 0.75rem;
+                }
+
+                .rating-bar-row {
+                    display: flex;
+                    align-items: center;
+                    gap: 1rem;
+                }
+
+                .star-label {
+                    width: 3rem;
+                    font-size: 0.875rem;
+                    color: var(--text-secondary);
+                }
+
+                .star-label i {
+                    color: #fbbf24;
+                    font-size: 0.75rem;
+                }
+
+                .progress-wrapper {
+                    flex: 1;
+                    height: 8px;
+                    background: var(--border);
+                    border-radius: 4px;
+                    overflow: hidden;
+                }
+
+                .progress-bar-custom {
+                    height: 100%;
+                    background: linear-gradient(90deg, #fbbf24, #f59e0b);
+                    border-radius: 4px;
+                    transition: var(--transition);
+                }
+
+                .count-label {
+                    width: 4rem;
+                    text-align: right;
+                    font-size: 0.875rem;
+                    color: var(--text-secondary);
+                }
+
+                /* Review Cards */
+                .reviews-list {
+                    display: grid;
+                    gap: 1.5rem;
+                }
+
+                .review-card {
+                    padding: 1.5rem;
+                    border: 1px solid var(--border);
+                    border-radius: var(--radius);
+                    transition: var(--transition);
+                }
+
+                .review-card:hover {
+                    box-shadow: var(--shadow-md);
+                }
+
+                .review-header {
+                    display: flex;
+                    justify-content: space-between;
+                    margin-bottom: 1rem;
+                }
+
+                .reviewer-info {
+                    display: flex;
+                    gap: 1rem;
+                    align-items: center;
+                }
+
+                .reviewer-avatar {
+                    width: 3rem;
+                    height: 3rem;
+                    border-radius: 50%;
+                    background: linear-gradient(135deg, var(--primary), var(--primary-dark));
+                    color: white;
+                    display: flex;
+                    align-items: center;
+                    justify-content: center;
+                    font-weight: 700;
+                    font-size: 1.125rem;
+                }
+
+                .reviewer-name {
+                    font-weight: 600;
+                    color: var(--text-primary);
+                }
+
+                .review-date {
+                    font-size: 0.875rem;
+                    color: var(--text-secondary);
+                }
+
+                .review-stars i {
+                    color: #fbbf24;
+                }
+
+                .review-title {
+                    font-size: 1rem;
+                    font-weight: 600;
+                    color: var(--text-primary);
+                    margin-bottom: 0.5rem;
+                }
+
+                .review-text {
+                    color: var(--text-secondary);
+                    line-height: 1.6;
+                }
+
+                /* Responsive */
                 @media (max-width: 991px) {
-                    .product-gallery-container {
-                        min-height: auto;
-                        flex-direction: column;
+                    .product-gallery-section {
+                        position: static;
                     }
-                    .product-thumbs-wrap {
-                        width: 100%; /* Full width for horizontal scroll */
-                        height: 90px !important;
-                        margin-bottom: 15px !important;
+
+                    .trust-badges {
+                        gap: 0.5rem;
                     }
-                    .product-thumbs-swiper .swiper-wrapper {
-                        /* Force horizontal display */
-                        display: flex;
-                        flex-direction: row;
+
+                    .badge-item {
+                        font-size: 0.75rem;
                     }
-                    .product-thumb-item {
-                        width: 80px;
-                        height: 80px;
-                        margin-bottom: 0;
-                        margin-right: 8px; /* Spacing for horizontal layout */
+
+                    .badge-item i {
+                        font-size: 1.25rem;
                     }
-                    .product-main-wrap {
-                        padding-bottom: 75%; /* Adjust main image aspect ratio on mobile (e.g., 4:3) */
+
+                    .product-title {
+                        font-size: 1.5rem;
+                    }
+
+                    .price-main {
+                        font-size: 2rem;
+                    }
+
+                    .reviews-summary {
+                        grid-template-columns: 1fr;
+                        gap: 2rem;
                     }
                 }
-               
-                /* Desktop Sticky Panel */
-                @media (min-width: 992px) {
-                    .sticky-info-panel {
-                        position: sticky;
-                        top: 80px;
-                        z-index: 100;
-                        align-self: flex-start;
+
+                @media (max-width: 576px) {
+                    .price-section {
+                        flex-wrap: wrap;
+                    }
+
+                    .info-tags {
+                        flex-direction: column;
+                        gap: 0.75rem;
+                    }
+
+                    .premium-tabs {
+                        gap: 1rem;
                     }
                 }
             `}</style>

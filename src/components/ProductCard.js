@@ -4,14 +4,12 @@ import React from 'react';
 import Link from 'next/link';
 
 export default function ProductCard({ product }) {
-  // Hard guard to prevent "undefined/products/..."
   if (!product) return null;
 
   const { slug, category_slug } = product;
 
   if (!slug || !category_slug) return null;
 
-  // Safely parse images (MySQL JSON string or array)
   let images = [];
   try {
     images = Array.isArray(product.images)
@@ -41,7 +39,7 @@ export default function ProductCard({ product }) {
   const re_category_slug = category_slug.replace(/\s+/g, '-');
 
   return (
-    <div className="col-lg-3 col-md-6 col-sm-6 mb-4">
+    <div className="col-lg-3 col-md-6 col-sm-6 col-6 mb-4">
       <Link
         href={`/products/${re_category_slug}/${slug}`}
         className="product-card-link"
@@ -55,7 +53,6 @@ export default function ProductCard({ product }) {
               loading="lazy"
             />
 
-            {/* Improved Badges */}
             <div className="product-badges">
               {isNew && (
                 <span className="tag-new">
@@ -69,14 +66,13 @@ export default function ProductCard({ product }) {
               )}
             </div>
 
-            {/* Wishlist Icon */}
             <button 
               className="btn-wishlist"
               onClick={(e) => {
                 e.preventDefault();
                 e.stopPropagation();
-                // Add wishlist logic
               }}
+              title="Add to Wishlist"
             >
               <i className="far fa-heart"></i>
             </button>
@@ -87,7 +83,6 @@ export default function ProductCard({ product }) {
               {product.title || 'Product Title'}
             </p>
 
-            {/* Enhanced Rating */}
             <div className="product-rating">
               <div className="stars">
                 {[1, 2, 3, 4, 5].map((star) => (
@@ -121,8 +116,8 @@ export default function ProductCard({ product }) {
               onClick={(e) => {
                 e.preventDefault();
                 e.stopPropagation();
-                // Open quick view modal here
               }}
+              title="Quick View"
             >
               <i className="fas fa-eye me-2"></i>Quick View
             </button>
@@ -134,6 +129,7 @@ export default function ProductCard({ product }) {
         .product-card-link {
           text-decoration: none;
           display: block;
+          height: 100%;
         }
 
         .product-card {
@@ -146,6 +142,8 @@ export default function ProductCard({ product }) {
           box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
           transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
           height: 100%;
+          display: flex;
+          flex-direction: column;
         }
 
         .product-card:hover {
@@ -158,6 +156,7 @@ export default function ProductCard({ product }) {
           position: relative;
           background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
           overflow: hidden;
+          flex-shrink: 0;
         }
 
         .product-img {
@@ -165,13 +164,13 @@ export default function ProductCard({ product }) {
           height: 250px;
           object-fit: cover;
           transition: transform 0.5s ease;
+          display: block;
         }
 
         .product-card:hover .product-img {
           transform: scale(1.08);
         }
 
-        /* Improved Badges */
         .product-badges {
           position: absolute;
           top: 12px;
@@ -195,17 +194,17 @@ export default function ProductCard({ product }) {
           box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
           text-transform: uppercase;
           letter-spacing: 0.5px;
+          white-space: nowrap;
         }
 
         .tag-new {
-          background: linear-gradient(135deg, #e79e3e,#e95943);
+          background: linear-gradient(135deg, #e79e3e, #e95943);
         }
 
         .tag-discount {
           background: linear-gradient(135deg, #dc3545, #c82333);
         }
 
-        /* Wishlist Button */
         .btn-wishlist {
           position: absolute;
           top: 12px;
@@ -219,14 +218,16 @@ export default function ProductCard({ product }) {
           align-items: center;
           justify-content: center;
           cursor: pointer;
-          z-index: 2;
+          z-index: 3;
           transition: all 0.3s ease;
           box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+          padding: 0;
         }
 
         .btn-wishlist:hover {
           background: #fff;
-          transform: scale(1.1);
+          transform: scale(1.15);
+          box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
         }
 
         .btn-wishlist i {
@@ -240,7 +241,10 @@ export default function ProductCard({ product }) {
         }
 
         .product-info {
-          padding: 15px 10px;
+          padding: 15px 12px;
+          flex: 1;
+          display: flex;
+          flex-direction: column;
         }
 
         .product-title {
@@ -252,13 +256,13 @@ export default function ProductCard({ product }) {
           overflow: hidden;
           text-overflow: ellipsis;
           transition: color 0.3s ease;
+          line-height: 1.4;
         }
 
         .product-card:hover .product-title {
           color: #178ad6;
         }
 
-        /* Enhanced Rating */
         .product-rating {
           display: flex;
           justify-content: center;
@@ -288,6 +292,13 @@ export default function ProductCard({ product }) {
         .rating-text {
           font-weight: 600;
           color: #666;
+          white-space: nowrap;
+        }
+
+        .text-muted {
+          color: #999;
+          font-weight: 400;
+          font-size: 0.9em;
         }
 
         .product-price {
@@ -318,6 +329,7 @@ export default function ProductCard({ product }) {
           font-weight: 600;
           display: inline-block;
           margin-top: 2px;
+          white-space: nowrap;
         }
 
         .btn-quick-view {
@@ -337,6 +349,7 @@ export default function ProductCard({ product }) {
           transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
           box-shadow: 0 4px 12px rgba(23, 138, 214, 0.4);
           white-space: nowrap;
+          z-index: 10;
         }
 
         .product-card:hover .btn-quick-view {
@@ -350,44 +363,97 @@ export default function ProductCard({ product }) {
           box-shadow: 0 6px 16px rgba(23, 138, 214, 0.5);
         }
 
-        /* Responsive */
-        @media (max-width: 768px) {
+        @media (max-width: 1199px) {
+          .product-img {
+            height: 220px;
+          }
+          .product-price {
+            font-size: 1.2em;
+          }
+        }
+
+        @media (max-width: 991px) {
           .product-img {
             height: 200px;
           }
+          .product-price {
+            font-size: 1.15em;
+          }
+          .product-card:hover {
+            transform: translateY(-4px);
+          }
+        }
 
+        @media (max-width: 768px) {
+          .product-img {
+            height: 180px;
+          }
           .tag-new,
           .tag-discount {
             font-size: 0.7em;
             padding: 4px 10px;
           }
-
           .btn-wishlist {
             width: 32px;
             height: 32px;
           }
-
+          .product-info {
+            padding: 12px 10px;
+          }
+          .product-title {
+            font-size: 0.95em;
+            margin-bottom: 8px;
+          }
+          .product-rating {
+            font-size: 0.8em;
+            margin-bottom: 8px;
+          }
           .product-price {
             font-size: 1.1em;
+            margin: 8px 0;
           }
-
           .btn-quick-view {
             font-size: 0.85em;
             padding: 8px 16px;
           }
         }
 
-        @media (max-width: 480px) {
+        @media (max-width: 576px) {
           .product-img {
-            height: 180px;
+            height: 160px;
           }
-
           .product-title {
             font-size: 0.9em;
+            margin-bottom: 6px;
           }
-
           .product-rating {
             font-size: 0.75em;
+            margin-bottom: 6px;
+          }
+          .product-info {
+            padding: 10px 8px;
+          }
+          .tag-new,
+          .tag-discount {
+            font-size: 0.65em;
+            padding: 3px 8px;
+          }
+          .btn-wishlist {
+            width: 30px;
+            height: 30px;
+            top: 8px;
+            right: 8px;
+          }
+          .product-price {
+            font-size: 1em;
+            margin: 6px 0;
+          }
+          .btn-quick-view {
+            font-size: 0.8em;
+            padding: 6px 12px;
+          }
+          .product-card:hover {
+            transform: translateY(-2px);
           }
         }
       `}</style>
