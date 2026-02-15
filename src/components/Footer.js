@@ -1,3 +1,5 @@
+import FloatingSocialButtons from "./FloatingSocialButtons";
+
 export default function Footer() {
   return (
     <footer
@@ -14,8 +16,8 @@ export default function Footer() {
       {/* height control */}
       <div
         style={{
-          paddingTop: "90px",
-          paddingBottom: "24px",
+          paddingTop: "0px",
+          paddingBottom: "14px",
         }}
       >
 
@@ -63,8 +65,8 @@ export default function Footer() {
               </div>
 
               {/* Column 2: Quick Links */}
-              <div className="col-lg-2 col-md-6 mb-3">
-                <h5 className="text-white mb-2">Quick Links</h5>
+              <div className="col-lg-2 col-md-6 col-6 mb-3">
+                <h5 className="text-white mb-2">Products</h5>
                 <a href="/about" className="d-block text-light mb-1">About Us</a>
                 <a href="/contact" className="d-block text-light mb-1">Contact Us</a>
                 <a href="/bulk-orders" className="d-block text-light mb-1">Bulk Orders</a>
@@ -72,16 +74,26 @@ export default function Footer() {
               </div>
 
               {/* Column 3: Customer Care */}
-              <div className="col-lg-3 col-md-6 mb-3">
-                <h5 className="text-white mb-2">Customer Care</h5>
+              <div className="col-lg-3 col-md-6 col-6 mb-3">
+                <h5 className="text-white mb-2">Discover</h5>
                 <a href="/shipping-policy" className="d-block text-light mb-1">Shipping Policy</a>
                 <a href="/refund-returns" className="d-block text-light mb-1">Refund & Returns</a>
                 <a href="/terms-of-service" className="d-block text-light mb-1">Terms of Service</a>
                 <a href="/privacy-policy" className="d-block text-light">Privacy Policy</a>
               </div>
 
+              <div className="col-lg-2 col-md-6 col-6 mb-3">
+                <h5 className="text-white mb-2">Information</h5>
+                <a href="/about" className="d-block text-light mb-1">About Us</a>
+                <a href="/contact" className="d-block text-light mb-1">Contact Us</a>
+                <a href="/bulk-orders" className="d-block text-light mb-1">Bulk Orders</a>
+                <a href="/faqs" className="d-block text-light">FAQs</a>
+              </div>
+
+
+
               {/* Column 4: Newsletter */}
-              <div className="col-lg-3 col-md-6 mb-3">
+              <div className="col-lg-3 col-md-6 col-sm-6 col-12 mb-3">
                 <h5 className="text-white mb-2">Join Our Newsletter</h5>
                 <p className="small text-light mb-2">
                   Get 10% off your first order & updates on new arrivals.
@@ -100,6 +112,9 @@ export default function Footer() {
 
             </div>
 
+
+            <FloatingSocialButtons />
+
             {/* Bottom copyright */}
             <div
               className="text-center pt-3 mt-3"
@@ -111,6 +126,9 @@ export default function Footer() {
             >
               © 2026 KalindiKart. All Rights Reserved.
             </div>
+
+
+
 
           </div>
         </div>

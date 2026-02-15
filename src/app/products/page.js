@@ -1,16 +1,18 @@
-// ============================================
-// FILE: app/products/page.jsx
-// ============================================
 'use client';
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, Suspense } from 'react';
 import ProductCard from '../../components/ProductCard';
+import { useSearchParams, useRouter, usePathname } from 'next/navigation';
 
-export default function ProductsPage() {
+function ProductsContent() {
   const [products, setProducts] = useState([]);
   const [filteredProducts, setFilteredProducts] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+
+  const searchParams = useSearchParams();
+  const router = useRouter();
+  const pathname = usePathname();
 
   // Filter states
   const [categories, setCategories] = useState([]);
@@ -18,40 +20,42 @@ export default function ProductsPage() {
   const [priceRange, setPriceRange] = useState([0, 10000]);
   const [maxPrice, setMaxPrice] = useState(10000);
   const [sortBy, setSortBy] = useState('default');
-  const [searchQuery, setSearchQuery] = useState('');
+
+  // Search state synced with URL
+  const [searchQuery, setSearchQuery] = useState(searchParams.get('search') || '');
   const [showFilters, setShowFilters] = useState(false);
 
-  // Fetch products
+  // 1. Sync state if URL changes (back/forward buttons)
+  useEffect(() => {
+    const query = searchParams.get('search');
+    setSearchQuery(query || '');
+  }, [searchParams]);
+
+  // 2. Fetch Products from API
   useEffect(() => {
     const fetchProducts = async () => {
       try {
         const response = await fetch('/api/products');
         if (!response.ok) throw new Error('Failed to fetch products');
         const data = await response.json();
-        if (!Array.isArray(data)) throw new Error('Invalid API response');
-
-        const normalizedProducts = data.map((item) => ({
+        
+        const normalized = data.map((item) => ({
           ...item,
-          category_slug: item.category_slug
-            ? item.category_slug.toLowerCase().replace(/\s+/g, '-')
-            : '',
+          category_slug: item.category_slug?.toLowerCase().replace(/\s+/g, '-') || '',
         }));
 
-        setProducts(normalizedProducts);
-        setFilteredProducts(normalizedProducts);
+        setProducts(normalized);
+        setFilteredProducts(normalized);
 
-        const uniqueCategories = [
-          ...new Set(normalizedProducts.map((p) => p.category_name).filter(Boolean)),
-        ];
-        setCategories(uniqueCategories);
+        const uniqueCats = [...new Set(normalized.map((p) => p.category_name).filter(Boolean))];
+        setCategories(uniqueCats);
 
-        const prices = normalizedProducts.map((p) => parseFloat(p.price) || 0);
+        const prices = normalized.map((p) => parseFloat(p.price) || 0);
         const max = Math.max(...prices, 1000);
         setMaxPrice(max);
         setPriceRange([0, max]);
       } catch (err) {
-        console.error(err);
-        setError(err.message || 'An error occurred');
+        setError(err.message);
       } finally {
         setLoading(false);
       }
@@ -59,7 +63,7 @@ export default function ProductsPage() {
     fetchProducts();
   }, []);
 
-  // Apply filters
+  // 3. Apply all filters locally
   useEffect(() => {
     let result = [...products];
 
@@ -68,9 +72,7 @@ export default function ProductsPage() {
     }
 
     result = result.filter(
-      (p) =>
-        parseFloat(p.price) >= priceRange[0] &&
-        parseFloat(p.price) <= priceRange[1]
+      (p) => parseFloat(p.price) >= priceRange[0] && parseFloat(p.price) <= priceRange[1]
     );
 
     if (searchQuery.trim()) {
@@ -79,24 +81,27 @@ export default function ProductsPage() {
       );
     }
 
-    if (sortBy === 'price-low') {
-      result.sort((a, b) => parseFloat(a.price) - parseFloat(b.price));
-    } else if (sortBy === 'price-high') {
-      result.sort((a, b) => parseFloat(b.price) - parseFloat(a.price));
-    } else if (sortBy === 'name-az') {
-      result.sort((a, b) => a.title.localeCompare(b.title));
-    } else if (sortBy === 'name-za') {
-      result.sort((a, b) => b.title.localeCompare(a.title));
-    } else if (sortBy === 'discount') {
-      result.sort((a, b) => parseFloat(b.discount || 0) - parseFloat(a.discount || 0));
-    }
+    if (sortBy === 'price-low') result.sort((a, b) => a.price - b.price);
+    else if (sortBy === 'price-high') result.sort((a, b) => b.price - a.price);
+    else if (sortBy === 'name-az') result.sort((a, b) => a.title.localeCompare(b.title));
+    else if (sortBy === 'name-za') result.sort((a, b) => b.title.localeCompare(a.title));
+    else if (sortBy === 'discount') result.sort((a, b) => (b.discount || 0) - (a.discount || 0));
 
     setFilteredProducts(result);
   }, [products, selectedCategories, priceRange, sortBy, searchQuery]);
 
-  const toggleCategory = (category) => {
+  // Handlers
+  const handleSearchChange = (value) => {
+    setSearchQuery(value);
+    const params = new URLSearchParams(searchParams);
+    if (value) params.set('search', value);
+    else params.delete('search');
+    router.replace(`${pathname}?${params.toString()}`, { scroll: false });
+  };
+
+  const toggleCategory = (cat) => {
     setSelectedCategories((prev) =>
-      prev.includes(category) ? prev.filter((c) => c !== category) : [...prev, category]
+      prev.includes(cat) ? prev.filter((c) => c !== cat) : [...prev, cat]
     );
   };
 
@@ -105,191 +110,96 @@ export default function ProductsPage() {
     setPriceRange([0, maxPrice]);
     setSortBy('default');
     setSearchQuery('');
+    router.replace(pathname, { scroll: false });
   };
 
-  if (loading) {
-    return (
-      <div className="container py-5 text-center">
-        <div className="spinner-border text-primary" role="status">
-          <span className="visually-hidden">Loading...</span>
-        </div>
-        <p className="mt-3 text-muted small">Loading products...</p>
-      </div>
-    );
-  }
-
-  if (error) {
-    return (
-      <div className="container py-5 text-center">
-        <i className="bi bi-exclamation-circle display-1 text-danger mb-3"></i>
-        <h4 className="text-danger">Error: {error}</h4>
-        <button className="btn btn-primary mt-3" onClick={() => window.location.reload()}>
-          Retry
-        </button>
-      </div>
-    );
-  }
+  if (loading) return <div className="loading-state"><div className="spinner-border text-primary"></div></div>;
 
   return (
-    <div className="bg-light min-vh-100 pb-5">
-      <div className="container py-4">
+    <div className="products-page bg-light min-vh-100">
+      <div className="container py-4 px-3">
         <div className="row g-4">
-          {/* ========== LEFT SIDEBAR - FILTERS ========== */}
+          
+          {/* Header */}
+          <div className="col-12 text-center py-md-5 py-3  mb-2 hero-banner">
+            <h1 className="fw-bold mb-2">All Products</h1>
+            <nav aria-label="breadcrumb">
+              <ol className="breadcrumb justify-content-center mb-0">
+                <li className="breadcrumb-item"><a href="/">Home</a></li>
+                <li className="breadcrumb-item active">Latest Products</li>
+              </ol>
+            </nav>
+          </div>
+
+          {/* Sidebar */}
           <div className="col-lg-3">
-            {/* Mobile Filter Toggle */}
-            <button
-              className="btn btn-primary w-100 d-lg-none mb-3 position-relative"
-              onClick={() => setShowFilters(!showFilters)}
-            >
-              <i className={`bi bi-${showFilters ? 'x' : 'funnel'} me-2`}></i>
+            {/* Mobile Button */}
+            <button className="btn mobile-filter-btn d-lg-none w-100 mb-3" onClick={() => setShowFilters(!showFilters)}>
+              <i className={`bi bi-${showFilters ? 'x-lg' : 'funnel-fill'} me-2`}></i>
               {showFilters ? 'Hide' : 'Show'} Filters
               {(selectedCategories.length > 0 || searchQuery) && (
-                <span className="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger">
-                  {selectedCategories.length + (searchQuery ? 1 : 0)}
-                </span>
+                <span className="badge-count">{selectedCategories.length + (searchQuery ? 1 : 0)}</span>
               )}
             </button>
 
-            {/* Filter Sidebar */}
-            <div
-              className={`card shadow-sm sticky-top ${showFilters ? 'd-block' : 'd-none d-lg-block'}`}
-              style={{ top: '90px', maxHeight: 'calc(100vh - 110px)', overflowY: 'auto' }}
-            >
+            {/* Sidebar Card */}
+            <div className={`card filter-card shadow-sm ${showFilters ? 'mobile-show' : 'd-none d-lg-block'}`}>
               <div className="card-body p-3">
-                {/* Filter Header */}
-                <div className="d-flex justify-content-between align-items-center pb-3 mb-3 border-bottom">
-                  <h6 className="mb-0 fw-bold">
-                    <i className="bi bi-sliders me-2"></i>Filters
-                  </h6>
-                  {(selectedCategories.length > 0 || priceRange[0] !== 0 || priceRange[1] !== maxPrice || searchQuery || sortBy !== 'default') && (
-                    <button className="btn btn-sm btn-outline-primary" onClick={clearFilters}>
-                      <i className="bi bi-arrow-clockwise me-1"></i>Clear
-                    </button>
-                  )}
+                <div className="d-flex justify-content-between align-items-center mb-3 pb-3 border-bottom">
+                  <h6 className="mb-0 fw-bold"><i className="bi bi-sliders me-2"></i>Filters</h6>
+                  <button className="btn btn-sm text-primary p-0" onClick={clearFilters}>Clear All</button>
                 </div>
 
-                {/* Search Filter */}
-                <div className="mb-4">
-                  <label className="form-label fw-semibold small mb-2">
-                    <i className="bi bi-search me-2"></i>Search
-                  </label>
-                  <div className="position-relative">
-                    <input
-                      type="text"
-                      className="form-control form-control-sm"
-                      placeholder="Search products..."
-                      value={searchQuery}
-                      onChange={(e) => setSearchQuery(e.target.value)}
-                    />
-                    {searchQuery && (
-                      <button
-                        className="btn btn-sm position-absolute top-50 end-0 translate-middle-y border-0"
-                        onClick={() => setSearchQuery('')}
-                      >
-                        <i className="bi bi-x text-muted"></i>
-                      </button>
-                    )}
+                {/* Search Box */}
+                <div className="filter-group mb-4">
+                  <label className="small fw-bold mb-2">Search</label>
+                  <div className="input-group input-group-sm">
+                    <span className="input-group-text bg-white border-end-0"><i className="bi bi-search"></i></span>
+                    <input type="text" className="form-control border-start-0" placeholder="Search..." 
+                      value={searchQuery} onChange={(e) => handleSearchChange(e.target.value)} />
                   </div>
                 </div>
 
-                {/* Category Filter */}
-                {categories.length > 0 && (
-                  <div className="mb-4">
-                    <label className="form-label fw-semibold small mb-2 d-flex justify-content-between align-items-center">
-                      <span><i className="bi bi-tags me-2"></i>Categories</span>
-                      {selectedCategories.length > 0 && (
-                        <span className="badge bg-primary">{selectedCategories.length}</span>
-                      )}
-                    </label>
-                    <div style={{ maxHeight: '180px', overflowY: 'auto' }}>
-                      {categories.map((cat) => (
-                        <div key={cat} className="form-check mb-2">
-                          <input
-                            className="form-check-input"
-                            type="checkbox"
-                            id={`cat-${cat}`}
-                            checked={selectedCategories.includes(cat)}
-                            onChange={() => toggleCategory(cat)}
-                          />
-                          <label className="form-check-label small d-flex justify-content-between w-100" htmlFor={`cat-${cat}`}>
-                            <span>{cat}</span>
-                            <span className="text-muted">
-                              ({products.filter((p) => p.category_name === cat).length})
-                            </span>
-                          </label>
-                        </div>
-                      ))}
-                    </div>
-                  </div>
-                )}
-
-                {/* Price Range Filter */}
-                <div className="mb-4">
-                  <label className="form-label fw-semibold small mb-2">
-                    <i className="bi bi-currency-rupee me-2"></i>Price Range
-                  </label>
-                  <div className="alert alert-info py-2 text-center small fw-bold">
-                    ₹{priceRange[0].toLocaleString('en-IN')} - ₹{priceRange[1].toLocaleString('en-IN')}
-                  </div>
-                  <input
-                    type="range"
-                    className="form-range mb-3"
-                    min="0"
-                    max={maxPrice}
-                    value={priceRange[1]}
-                    onChange={(e) => setPriceRange([priceRange[0], parseInt(e.target.value)])}
-                  />
-                  <div className="row g-2">
-                    <div className="col">
-                      <input
-                        type="number"
-                        className="form-control form-control-sm text-center"
-                        placeholder="Min"
-                        value={priceRange[0]}
-                        onChange={(e) => setPriceRange([parseInt(e.target.value) || 0, priceRange[1]])}
-                      />
-                    </div>
-                    <div className="col-auto d-flex align-items-center">
-                      <span className="text-muted small">to</span>
-                    </div>
-                    <div className="col">
-                      <input
-                        type="number"
-                        className="form-control form-control-sm text-center"
-                        placeholder="Max"
-                        value={priceRange[1]}
-                        onChange={(e) => setPriceRange([priceRange[0], parseInt(e.target.value) || maxPrice])}
-                      />
-                    </div>
+                {/* Category List */}
+                <div className="filter-group mb-4">
+                  <label className="small fw-bold mb-2">Categories</label>
+                  <div className="category-scroll">
+                    {categories.map((cat) => (
+                      <div key={cat} className="form-check mb-1">
+                        <input className="form-check-input" type="checkbox" id={cat}
+                          checked={selectedCategories.includes(cat)} onChange={() => toggleCategory(cat)} />
+                        <label className="form-check-label small w-100 d-flex justify-content-between" htmlFor={cat}>
+                          {cat} <span className="text-muted">({products.filter(p => p.category_name === cat).length})</span>
+                        </label>
+                      </div>
+                    ))}
                   </div>
                 </div>
 
-                {/* Sort By */}
-                <div className="mb-3">
-                  <label className="form-label fw-semibold small mb-2">
-                    <i className="bi bi-sort-down me-2"></i>Sort By
-                  </label>
-                  <select
-                    className="form-select form-select-sm"
-                    value={sortBy}
-                    onChange={(e) => setSortBy(e.target.value)}
-                  >
-                    <option value="default">Default</option>
-                    <option value="price-low">Price: Low → High</option>
-                    <option value="price-high">Price: High → Low</option>
-                    <option value="name-az">Name: A-Z</option>
-                    <option value="name-za">Name: Z-A</option>
-                    <option value="discount">Highest Discount</option>
+                {/* Price Slider */}
+                <div className="filter-group mb-4">
+                  <label className="small fw-bold mb-2">Price Range</label>
+                  <div className="price-display mb-2">₹{priceRange[0]} - ₹{priceRange[1]}</div>
+                  <input type="range" className="form-range" min="0" max={maxPrice} value={priceRange[1]}
+                    onChange={(e) => setPriceRange([priceRange[0], parseInt(e.target.value)])} />
+                </div>
+
+                {/* Sort dropdown */}
+                <div className="filter-group">
+                  <label className="small fw-bold mb-2">Sort By</label>
+                  <select className="form-select form-select-sm" value={sortBy} onChange={(e) => setSortBy(e.target.value)}>
+                    <option value="default">Newest First</option>
+                    <option value="price-low">Price: Low to High</option>
+                    <option value="price-high">Price: High to Low</option>
+                    <option value="name-az">A-Z</option>
                   </select>
                 </div>
               </div>
             </div>
           </div>
 
-          {/* ========== RIGHT SIDE - PRODUCTS ========== */}
+          {/* Product Grid */}
           <div className="col-lg-9">
-            {/* Results Header */}
-                       {/* Products Grid */}
             {filteredProducts.length > 0 ? (
               <div className="row g-3 g-md-4">
                 {filteredProducts.map((product) => (
@@ -297,96 +207,129 @@ export default function ProductsPage() {
                 ))}
               </div>
             ) : (
-              <div className="card shadow-sm text-center py-5">
-                <div className="card-body">
-                  <i className="bi bi-bag-x display-1 text-muted mb-4"></i>
-                  <h4 className="fw-bold mb-3">No Products Found</h4>
-                  <p className="text-muted mb-4">
-                    We couldn't find any products matching your filters.<br />
-                    Try adjusting your search criteria.
-                  </p>
-                  <button className="btn btn-primary" onClick={clearFilters}>
-                    <i className="bi bi-arrow-clockwise me-2"></i>Clear All Filters
-                  </button>
-                </div>
+              <div className="empty-state text-center py-5 card shadow-sm">
+                <i className="bi bi-search display-1 text-muted"></i>
+                <h4 className="mt-3">No matching products</h4>
+                <button className="btn btn-outline-primary mt-2" onClick={clearFilters}>Reset Filters</button>
               </div>
             )}
           </div>
         </div>
       </div>
 
-      {/* Mobile Filter Overlay */}
-      {showFilters && (
-        <div
-          className="position-fixed top-0 start-0 w-100 h-100 bg-dark bg-opacity-50 d-lg-none"
-          style={{ zIndex: 1040 }}
-          onClick={() => setShowFilters(false)}
-        />
-      )}
+      {/* Overlay for Mobile Sidebar */}
+      {showFilters && <div className="sidebar-overlay d-lg-none" onClick={() => setShowFilters(false)} />}
 
       <style jsx>{`
-        /* Mobile Filter Sidebar */
+        /* Root brand colors mapped from your setup */
+        .products-page {
+          --primary: #01A9E6;
+          --dark: #00739D;
+          --bg-soft: #f0f8ff;
+        }
+
+        .hero-banner {
+          background: linear-gradient(rgba(255,255,255,0.4), rgba(255,255,255,0.4)), url("/assets/parallex_bg.png");
+          background-size: cover;
+          border-radius: 12px;
+          color: #333;
+        }
+
+        .mobile-filter-btn {
+          background-color: var(--primary);
+          color: white;
+          border: none;
+          padding: 10px;
+          border-radius: 8px;
+          position: relative;
+        }
+
+        .badge-count {
+          position: absolute;
+          top: -5px;
+          right: -5px;
+          background: #ff4d4d;
+          color: white;
+          font-size: 0.7rem;
+          padding: 2px 6px;
+          border-radius: 50px;
+        }
+
+        .category-scroll {
+          max-height: 200px;
+          overflow-y: auto;
+          padding-right: 5px;
+        }
+
+        .category-scroll::-webkit-scrollbar { width: 4px; }
+        .category-scroll::-webkit-scrollbar-thumb { background: #ddd; border-radius: 10px; }
+
+        .price-display {
+          background: var(--bg-soft);
+          color: var(--dark);
+          font-weight: bold;
+          text-align: center;
+          padding: 5px;
+          border-radius: 5px;
+          font-size: 0.85rem;
+        }
+
+        .form-range::-webkit-slider-thumb { background: var(--primary); }
+        .form-check-input:checked { background-color: var(--primary); border-color: var(--dark); }
+
+        @media (min-width: 992px) {
+          .filter-card {
+            position: sticky;
+            top: 20px;
+            z-index: 100;
+          }
+        }
+
         @media (max-width: 991px) {
-          .sticky-top.d-block {
-            position: fixed !important;
-            top: 0 !important;
+          .filter-card.mobile-show {
+            position: fixed;
+            top: 0;
             left: 0;
             width: 85%;
-            max-width: 360px;
             height: 100vh;
-            z-index: 1050;
-            border-radius: 0 1rem 1rem 0 !important;
-            animation: slideIn 0.3s ease;
-            max-height: 100vh !important;
+            z-index: 2000;
+            border-radius: 0;
+            display: block !important;
+            animation: slideIn 0.3s ease-out;
           }
-
-          @keyframes slideIn {
-            from {
-              transform: translateX(-100%);
-            }
-            to {
-              transform: translateX(0);
-            }
+          .sidebar-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.5);
+            backdrop-filter: blur(2px);
+            z-index: 1999;
           }
         }
 
-        /* Custom Scrollbar */
-        .sticky-top::-webkit-scrollbar {
-          width: 6px;
+        @keyframes slideIn {
+          from { transform: translateX(-100%); }
+          to { transform: translateX(0); }
         }
 
-        .sticky-top::-webkit-scrollbar-thumb {
-          background: #dee2e6;
-          border-radius: 10px;
-        }
-
-        .sticky-top::-webkit-scrollbar-track {
-          background: #f8f9fa;
-        }
-
-        /* Form Range Custom Color */
-        .form-range::-webkit-slider-thumb {
-          background-color: #D4AF37;
-        }
-
-        .form-range::-moz-range-thumb {
-          background-color: #D4AF37;
-        }
-
-        /* Form Check Custom Color */
-        .form-check-input:checked {
-          background-color: #D4AF37;
-          border-color: #D4AF37;
-        }
-
-        /* Smooth Transitions */
-        .btn,
-        .form-control,
-        .form-select,
-        .form-check-input {
-          transition: all 0.3s ease;
+        .loading-state {
+          height: 60vh;
+          display: flex;
+          align-items: center;
+          justify-content: center;
         }
       `}</style>
     </div>
+  );
+}
+
+// Wrapper for Suspense (Required for useSearchParams in Next.js App Router)
+export default function ProductsPage() {
+  return (
+    <Suspense fallback={<div className="text-center py-5">Loading Products...</div>}>
+      <ProductsContent />
+    </Suspense>
   );
 }

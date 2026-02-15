@@ -9,7 +9,7 @@ export const metadata = {
   title: 'KalindiKart - Arts, Home Decor, Gem Stones & Gods Brass Idol Store',
   description: 'Now Get unique brass idols, Gems,  home decor, and artifacts.',
   icons: {
-    icon: '/favicon.png',
+    icon: '/favicon.png?v=2',
   },
 };
 

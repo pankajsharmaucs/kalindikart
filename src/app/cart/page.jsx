@@ -235,7 +235,7 @@ export default function CartPage() {
                       <div className="col-auto">
                         <div className="cart-item-image">
                           <img
-                            src={resolveImage(item.images)}
+                            src={`/assets/category/${item}/${resolveImage(item.images)}`}
                             alt={item.title}
                             onError={(e) => (e.currentTarget.src = '/placeholder.png')}
                           />
@@ -556,7 +556,7 @@ export default function CartPage() {
 
         .btn-checkout {
           width: 100%;
-          background: linear-gradient(135deg,#e79e3e,#e95943);
+          background: linear-gradient(135deg,#C8294B,#C8294B);
           color: white;
           border: none;
           padding: 0.85rem;
@@ -569,7 +569,7 @@ export default function CartPage() {
         }
 
         .btn-checkout:hover {
-          background: linear-gradient(135deg, #e79e3e,#e95943);
+          background: linear-gradient(135deg, #C8294B,#e95943);
           transform: translateY(-2px);
           box-shadow: 0 4px 12px rgba(201, 162, 39, 0.3);
         }

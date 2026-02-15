@@ -146,11 +146,7 @@ export default function ProductSwiper({ imageList = [], productTitle, onImageCha
             )}
           </div>
 
-          {/* Image Counter */}
-          <div className="image-counter">
-            <i className="fas fa-images me-2"></i>
-            {imagesToDisplay.length} {imagesToDisplay.length === 1 ? 'Image' : 'Images'}
-          </div>
+         
         </div>
       </div>
 

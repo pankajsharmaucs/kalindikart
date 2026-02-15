@@ -2,7 +2,6 @@
 
 import React, { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
-import Breadcrumb from '../../../components/Breadcrumb';
 
 export default function CategoryClient({ slug }) {
   const [subCategories, setSubCategories] = useState([]);
@@ -36,21 +35,26 @@ export default function CategoryClient({ slug }) {
 
   return (
     <div className="container py-4">
-      <Breadcrumb
-        title={
-          <span>
-            <a href="/collections" className="text-decoration-underline text-primary">
-              Collections
-            </a>{' '}
-            /{' '}
-            <a href={`/category/${slug}`} className="text-decoration-underline text-primary">
-              {readableSlug}
-            </a>
-          </span>
-        }
-        current={readableSlug}
-        description={`Explore subcategories under ${readableSlug}`}
-      />
+
+      <div
+        className="col-12 text-center py-5 mb-3"
+        style={{
+          background: 'linear-gradient(rgba(255,255,255,0.4), rgba(255,255,255,0.4)), url("/assets/parallex_bg.png")',
+          backgroundColor: '#f8e8c6', 
+          backgroundSize: 'cover',
+          borderRadius: '8px'
+        }}
+      >
+        <h1 className="fw-bold mb-2" style={{ color: '#4a4a4a', textTransform: "capitalize", fontSize: '2rem' }}>
+          {readableSlug}
+        </h1>
+        <nav aria-label="breadcrumb">
+          <ol className="breadcrumb justify-content-center mb-0" style={{ fontSize: '0.9rem' }}>
+            <li className="breadcrumb-item"><a href="/" className="text-decoration-none text-muted">Home</a></li>
+            <li className="breadcrumb-item active" aria-current="page"> Category</li>
+          </ol>
+        </nav>
+      </div>
 
       <div className="row g-4 mt-4">
         {subCategories.map((sub) => (
@@ -60,14 +64,13 @@ export default function CategoryClient({ slug }) {
             style={{ cursor: 'pointer' }}
             onClick={() => router.push(`/category/${slug}/${sub.slug}`)}
           >
-            <div className="card text-center p-3">
+            <div className="card border-0 text-center p-3">
               <img
-                src={sub.image || '/placeholder.png'}
+                src={`/assets/subcat/${sub.id}/${sub.image}`}
                 alt={sub.sub_category_name}
                 className="img-fluid mb-2"
               />
-              <h6 className="fw-bold">{sub.sub_category_name}</h6>
-              <p className="text-muted small">View products</p>
+              <h5 className=" text-gold">{sub.sub_category_name}</h5>
             </div>
           </div>
         ))}

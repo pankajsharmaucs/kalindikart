@@ -57,28 +57,32 @@ export default function CategorySection() {
         {loading ? (
           <p className="text-center">Loading categories...</p>
         ) : (
-          <div className="category-scroll">
+          <div className="row d-flex justify-content-center">
             {(Array.isArray(categories) ? categories : []).map((cat) => {
               const slug = createSlug(cat.slug || cat.name || cat.category_name || '');
               const name = cat.name || cat.category_name || 'Unnamed';
-              const image = cat.image || '/assets/Home/default-category.png';
+              const image = cat?.image
+                ? `/assets/category/${cat.id}/${cat.image}`
+                : '/assets/placeholder.png';
 
               return (
-                <Link
-                  href={`/category/${slug}`}
-                  key={cat.id || slug}
-                  className="cat-item text-decoration-none"
-                >
-                  <img
-                    src={image}
-                    alt={name}
-                    className="cat-img"
-                    onError={(e) => {
-                      e.target.src = '/assets/Home/default-category.png';
-                    }}
-                  />
-                  <div className="cat-name">{name}</div>
-                </Link>
+                <div className="col-md-3 col-md-4 col-6 text-center mb-4">
+                  <Link
+                    href={`/category/${slug}`}
+                    key={cat.id || slug}
+                    className="cat-item text-decoration-none"
+                  >
+                    <img
+                      src={image}
+                      alt={name}
+                      className="cat-img"
+                      onError={(e) => {
+                        e.target.src = '';
+                      }}
+                    />
+                    <div className="cat-name">{name}</div>
+                  </Link>
+                </div>
               );
             })}
           </div>

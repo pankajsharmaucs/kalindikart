@@ -35,12 +35,7 @@ export default function CategoryListPage() {
   }, []);
 
   return (
-    <div className="container py-4">
-      {/* <Breadcrumb
-        title="Category"
-        current="Category"
-        description="Explore all our handcrafted product categories."
-      /> */}
+    <div className="container  py-4 px-3">
 
 
       {loading && <p className="text-center">Loading categories...</p>}
@@ -51,29 +46,59 @@ export default function CategoryListPage() {
       )}
 
       {!loading && !error && categories.length > 0 && (
-        <div className="row g-4">
-          {categories.map((cat) => {
-            const slug = cat.slug ? createSlug(cat.slug) : createSlug(cat.category_name);
-            return (
-              <div key={cat.id} className="col-md-3 col-sm-6">
-                <Link
-                  href={`/category/${slug}`}
-                  className="card text-center p-3 text-decoration-none text-dark h-100 shadow-sm hover-shadow"
-                >
-                  <img
-                    src={cat.image || '/assets/Home/default-category.png'}
-                    alt={cat.category_name}
-                    className="img-fluid mb-2"
-                    style={{ height: '150px', objectFit: 'cover', borderRadius: '8px' }}
-                  />
-                  <h5 className="mb-1">{cat.category_name}</h5>
-                  <p className="text-muted small">View products in this category</p>
-                </Link>
-              </div>
-            );
-          })}
+        <div className="row ">
+
+          <div
+            className="col-12 text-center py-5 mb-3"
+            style={{
+              background: 'linear-gradient(rgba(255,255,255,0.4), rgba(255,255,255,0.4)), url("/assets/parallex_bg.png")',
+              backgroundColor: '#f8e8c6', // Fallback warm beige
+              backgroundSize: 'cover',
+              borderRadius: '8px'
+            }}
+          >
+            <h1 className="fw-bold mb-2" style={{ color: '#4a4a4a', fontSize: '2rem' }}>
+              Product Category
+            </h1>
+            <nav aria-label="breadcrumb">
+              <ol className="breadcrumb justify-content-center mb-0" style={{ fontSize: '0.9rem' }}>
+                <li className="breadcrumb-item"><a href="/" className="text-decoration-none text-muted">Home</a></li>
+                <li className="breadcrumb-item active" aria-current="page">All Category</li>
+              </ol>
+            </nav>
+          </div>
+
+          <div className="container px-5 ">
+
+            <div className="row">
+              {categories.map((cat) => {
+                const slug = cat.slug ? createSlug(cat.slug) : createSlug(cat.category_name);
+                return (
+                  <div key={cat.id} className="col-md-3 col-sm-6 col-6 mb-3">
+                    <Link
+                      href={`/category/${slug}`}
+                      className="card  border-0 text-center p-3 text-decoration-none 
+                      text-dark h-100 "
+                    >
+                      <img
+                        src={`/assets/category/${cat.id}/${cat.image}`}
+                        alt={cat.category_name}
+                        className="img-fluid mb-4"
+                        style={{ objectFit: 'cover', borderRadius: '8px' }}
+                      />
+                      <h5 className=" text-gold">{cat.category_name}</h5>
+
+                    </Link>
+                  </div>
+                );
+              })}
+            </div>
+
+          </div>
+
         </div>
       )}
+
     </div>
   );
 }

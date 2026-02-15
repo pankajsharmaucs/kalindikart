@@ -220,7 +220,7 @@ export default function Header() {
                                   src={
                                     cat.image.startsWith('http') || cat.image.startsWith('/')
                                       ? cat.image
-                                      : `/assets/category/${cat.image.split('/').pop()}`
+                                      : `/assets/category/${cat.id}/${cat.image.split('/').pop()}`
                                   }
                                   alt={cat.category_name}
                                 />
@@ -244,7 +244,7 @@ export default function Header() {
                                   href={`/category/${hoveredCategorySlug}/${subSlug}`}
                                   onClick={closeNavbar}
                                 >
-                                  {sub.image && <Image src={sub.image} alt={sub.sub_category_name} width={60} height={60} />}
+                                  {sub.image && <Image src={`/assets/subcat/${sub.id}/${sub.image.split('/').pop()}`} alt={sub.sub_category_name} width={60} height={60} />}
                                   <p>{sub.sub_category_name}</p>
                                 </Link>
                               );
@@ -266,7 +266,7 @@ export default function Header() {
 
             {/* Actions */}
             <div className="kk-actions-bar">
-              
+
 
               {/* Search Button - Hidden on mobile, visible on desktop */}
               <button className="kk-btn-action kk-search-desktop" onClick={() => setShowSearchModal(true)} title="Search">
@@ -340,6 +340,11 @@ export default function Header() {
               )}
 
               <div className="kk-sidebar-nav">
+
+                <Link href="/" className="kk-logo-brand" onClick={closeNavbar}>
+                  <img src="/main/kalindikart_logo.png" alt="KalindiKart" />
+                </Link>
+
                 <a href="/" onClick={(e) => handleMobileNav(e, '/')}>
                   <i className="fas fa-home"></i> Home
                 </a>
@@ -365,7 +370,7 @@ export default function Header() {
                               src={
                                 cat.image.startsWith('http') || cat.image.startsWith('/')
                                   ? cat.image
-                                  : `/assets/category/${cat.image.split('/').pop()}`
+                                  : `/assets/category/${cat.id}/${cat.image.split('/').pop()}`
                               }
                               alt={cat.category_name}
                             />
@@ -384,6 +389,7 @@ export default function Header() {
                                   href={`/category/${slug}/${subSlug}`}
                                   onClick={(e) => handleMobileNav(e, `/category/${slug}/${subSlug}`)}
                                 >
+                                  {sub.image && <Image src={`/assets/subcat/${sub.id}/${sub.image.split('/').pop()}`} alt={sub.sub_category_name} width={30} height={30} />}
                                   {sub.sub_category_name}
                                 </a>
                               );
@@ -491,7 +497,7 @@ export default function Header() {
           box-shadow: 0 2px 8px rgba(0,0,0,0.08);
           position: sticky;
           top: 0;
-          z-index: 1000;
+          z-index: 999999;
         }
 
         .kk-main-row {
@@ -568,7 +574,7 @@ export default function Header() {
           margin-top: 0.5rem;
           width: 750px;
           border-top: 3px solid var(--primary);
-          z-index: 1001;
+          z-index: 9999999999!important;
         }
 
         .kk-mega-layout {

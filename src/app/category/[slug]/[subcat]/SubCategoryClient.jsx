@@ -52,21 +52,27 @@ export default function SubCategoryClient() {
 
   return (
     <div className="container py-4">
-      <Breadcrumb
-        title={
-          <span>
-            <a
-              href={`/category/${categorySlug}`}
-              className="text-decoration-underline text-primary"
-            >
-              {readableCategory?.toUpperCase()}
-            </a>{' '}
-            / {readableSubCategory?.toUpperCase()}
-          </span>
-        }
-        current={readableSubCategory}
-        description={`Explore products under ${readableSubCategory}`}
-      />
+
+      <div
+        className="col-12 text-center py-5 mb-3"
+        style={{
+          background: 'linear-gradient(rgba(255,255,255,0.4), rgba(255,255,255,0.4)), url("/assets/parallex_bg.png")',
+          backgroundColor: '#f8e8c6', // Fallback warm beige
+          backgroundSize: 'cover',
+          borderRadius: '8px'
+        }}
+      >
+        <h1 className="fw-bold mb-2" style={{ color: '#4a4a4a', textTransform: "capitalize", fontSize: '2rem' }}>
+          {readableSubCategory}
+        </h1>
+        <nav aria-label="breadcrumb">
+          <ol className="breadcrumb justify-content-center mb-0" style={{ fontSize: '0.9rem' }}>
+            <li className="breadcrumb-item"><a href="/" className="text-decoration-none text-muted">Home</a></li>
+            <li className="breadcrumb-item active" aria-current="page">All Products</li>
+          </ol>
+        </nav>
+      </div>
+
 
       <div className="row g-4 mt-4">
         {products.map((product) => (
