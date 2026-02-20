@@ -8,23 +8,18 @@ import '../../app/globals.css';
 export default function CartPage() {
   const router = useRouter();
 
-  // Local cart store for guests
-  const guestCartItems = useCartStore((state) => state.cartItems);
+  const cartItems = useCartStore((state) => state.cartItems);
   const removeFromCart = useCartStore((state) => state.removeFromCart);
   const updateQuantity = useCartStore((state) => state.updateQuantity);
-  const getCartTotal = useCartStore((state) => state.getCartTotal);
+  const fetchCartFromDB = useCartStore((state) => state.fetchCartFromDB);
   const isLoggedIn = useCartStore((state) => state.isLoggedIn);
 
-  // State to hold cart for logged-in users
-  const [cartItems, setCartItems] = useState([]);
   const [loading, setLoading] = useState(true);
 
-  // Fetch cart from DB if user is logged in
+  // Fetch cart from DB if logged in
   useEffect(() => {
-    const fetchCart = async () => {
-      setLoading(true);
+    const init = async () => {
       if (!isLoggedIn) {
-        setCartItems(guestCartItems);
         setLoading(false);
         return;
       }
@@ -36,38 +31,32 @@ export default function CartPage() {
       }
 
       try {
-        const res = await fetch(`/api/cart?userId=${userMobile}`);
-        const data = await res.json();
-
-        if (data.success && Array.isArray(data.cartItems)) {
-          setCartItems(data.cartItems);
-        } else {
-          setCartItems([]);
-        }
+        await fetchCartFromDB(userMobile);
       } catch (err) {
-        console.error('Error fetching DB cart:', err);
-        setCartItems([]);
+        console.error('Cart fetch failed:', err);
       } finally {
         setLoading(false);
       }
     };
 
-    fetchCart();
-  }, [isLoggedIn, guestCartItems]);
+    init();
+  }, [isLoggedIn, fetchCartFromDB]);
 
-  // Remove item handler
+  // Remove item
   const handleRemove = async (product_id) => {
+    removeFromCart(product_id); // Optimistic UI
+
     if (isLoggedIn) {
       const userMobile = localStorage.getItem('userMobile');
-      await fetch('/api/cart', {
-        method: 'DELETE',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ userId: userMobile, productId: product_id }),
-      });
-      setCartItems(cartItems.filter((item) => item.product_id !== product_id));
-    } else {
-      removeFromCart(product_id);
-      setCartItems(guestCartItems);
+      try {
+        await fetch('/api/cart', {
+          method: 'DELETE',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ userId: userMobile, productId: product_id }),
+        });
+      } catch (err) {
+        console.error('Remove failed:', err);
+      }
     }
   };
 
@@ -75,20 +64,21 @@ export default function CartPage() {
   const handleUpdateQuantity = async (product_id, quantity) => {
     if (quantity <= 0) return;
 
+    updateQuantity(product_id, quantity); // Optimistic UI
+
     if (isLoggedIn) {
       const userMobile = localStorage.getItem('userMobile');
-      await fetch('/api/cart', {
-        method: 'PUT',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ userId: userMobile, productId: product_id, quantity }),
-      });
-      setCartItems(cartItems.map((item) => (item.product_id === product_id ? { ...item, quantity } : item)));
-    } else {
-      updateQuantity(product_id, quantity);
-      setCartItems(guestCartItems);
+      try {
+        await fetch('/api/cart', {
+          method: 'PUT',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ userId: userMobile, productId: product_id, quantity }),
+        });
+      } catch (err) {
+        console.error('Update failed:', err);
+      }
     }
   };
-
 
   const handleCheckout = () => {
     if (!isLoggedIn) {
@@ -133,7 +123,7 @@ export default function CartPage() {
     );
   }
 
-  // Empty Cart State
+  // Empty Cart
   if (!cartItems.length) {
     return (
       <>
@@ -161,7 +151,6 @@ export default function CartPage() {
             max-width: 500px;
             margin: 0 auto;
           }
-
           .empty-cart-icon {
             width: 80px;
             height: 80px;
@@ -172,25 +161,21 @@ export default function CartPage() {
             align-items: center;
             justify-content: center;
           }
-
           .empty-cart-icon i {
             font-size: 2.5rem;
             color: #adb5bd;
           }
-
           .empty-cart-title {
             font-size: 1.5rem;
             font-weight: 700;
             color: #333;
             margin-bottom: 0.75rem;
           }
-
           .empty-cart-text {
             color: #666;
             margin-bottom: 1.5rem;
             font-size: 0.95rem;
           }
-
           .btn-continue-shopping {
             background: linear-gradient(135deg, #178ad6, #27bbc9);
             color: white;
@@ -202,7 +187,6 @@ export default function CartPage() {
             cursor: pointer;
             transition: all 0.3s ease;
           }
-
           .btn-continue-shopping:hover {
             transform: translateY(-2px);
             box-shadow: 0 4px 12px rgba(23, 138, 214, 0.3);
@@ -211,6 +195,7 @@ export default function CartPage() {
       </>
     );
   }
+
 
   return (
     <>
@@ -235,9 +220,9 @@ export default function CartPage() {
                       <div className="col-auto">
                         <div className="cart-item-image">
                           <img
-                            src={`/assets/category/${item}/${resolveImage(item.images)}`}
+                            src={`/assets/products/${item.product_id}${resolveImage(item.images)}`}
                             alt={item.title}
-                            onError={(e) => (e.currentTarget.src = '/placeholder.png')}
+                          // onError={(e) => (e.currentTarget.src = '/placeholder.png')}
                           />
                         </div>
                       </div>

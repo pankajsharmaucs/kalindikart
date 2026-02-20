@@ -1,6 +1,15 @@
 import { NextResponse } from 'next/server';
 import { pool } from '../db.js';
 
+// Helper to resolve email/mobile to the DB mobile primary key
+async function getDbUserId(identifier) {
+  const [rows] = await pool.query(
+    'SELECT mobile FROM users WHERE mobile = ? OR email = ?',
+    [identifier, identifier]
+  );
+  return rows.length > 0 ? rows[0].mobile : null;
+}
+
 // GET: fetch cart
 export async function GET(req) {
   try {
@@ -8,9 +17,12 @@ export async function GET(req) {
     if (!userId)
       return NextResponse.json({ success: false, message: 'User ID required' }, { status: 400 });
 
+    const dbUserId = await getDbUserId(userId);
+    if (!dbUserId) return NextResponse.json({ success: true, cartItems: [] });
+
     const [rows] = await pool.query(
       'SELECT product_id, quantity, price FROM cart WHERE user_id = ?',
-      [userId]
+      [dbUserId]
     );
 
     const cartItems = await Promise.all(
@@ -42,10 +54,12 @@ export async function POST(req) {
     if (!userId || !product?.product_id)
       return NextResponse.json({ success: false, message: 'User & product required' }, { status: 400 });
 
-    // Check if product exists
+    const dbUserId = await getDbUserId(userId);
+    if (!dbUserId) return NextResponse.json({ success: false, message: 'User not found' }, { status: 404 });
+
     const [existing] = await pool.query(
       'SELECT id, quantity FROM cart WHERE user_id = ? AND product_id = ?',
-      [userId, product.product_id]
+      [dbUserId, product.product_id]
     );
 
     if (existing.length) {
@@ -56,7 +70,7 @@ export async function POST(req) {
     } else {
       await pool.query(
         'INSERT INTO cart (user_id, product_id, quantity, price, created_at) VALUES (?, ?, ?, ?, NOW())',
-        [userId, product.product_id, product.quantity || 1, product.price]
+        [dbUserId, product.product_id, product.quantity || 1, product.price]
       );
     }
 
@@ -74,12 +88,15 @@ export async function PUT(req) {
     if (!userId || !productId || quantity == null)
       return NextResponse.json({ success: false, message: 'Invalid data' }, { status: 400 });
 
+    const dbUserId = await getDbUserId(userId);
+    if (!dbUserId) return NextResponse.json({ success: false, message: 'User not found' }, { status: 404 });
+
     if (quantity <= 0) {
-      await pool.query('DELETE FROM cart WHERE user_id = ? AND product_id = ?', [userId, productId]);
+      await pool.query('DELETE FROM cart WHERE user_id = ? AND product_id = ?', [dbUserId, productId]);
     } else {
       await pool.query('UPDATE cart SET quantity = ? WHERE user_id = ? AND product_id = ?', [
         quantity,
-        userId,
+        dbUserId,
         productId,
       ]);
     }
@@ -98,7 +115,10 @@ export async function DELETE(req) {
     if (!userId || !productId)
       return NextResponse.json({ success: false, message: 'Invalid data' }, { status: 400 });
 
-    await pool.query('DELETE FROM cart WHERE user_id = ? AND product_id = ?', [userId, productId]);
+    const dbUserId = await getDbUserId(userId);
+    if (!dbUserId) return NextResponse.json({ success: false, message: 'User not found' }, { status: 404 });
+
+    await pool.query('DELETE FROM cart WHERE user_id = ? AND product_id = ?', [dbUserId, productId]);
 
     return NextResponse.json({ success: true });
   } catch (err) {

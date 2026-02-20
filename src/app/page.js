@@ -5,6 +5,7 @@ import Link from 'next/link';
 import HeroSwiper from '../components/HeroSwiper';
 import NewArrivalsSection from '../components/newArrivals/page';
 import CategorySection from '../components/Home/CategorySection';
+import ProductSliderNew from '../components/sliders/ProductSliderNew';
 
 export default function HomePage() {
   return (
@@ -90,6 +91,12 @@ export default function HomePage() {
           </div>
         </div>
       </section>
+
+
+       {/* ================= NEW ARRIVALS ================= */}
+      {/* <section className="section-spacing">
+        <ProductSliderNew />
+      </section> */}
 
       {/* ================= PARALLAX ================= */}
       <section className="parallax-banner">

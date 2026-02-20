@@ -55,9 +55,9 @@ export default function MyOrdersPage() {
 
         const safeData = Array.isArray(data)
           ? data.map((order) => ({
-              ...order,
-              items: Array.isArray(order.items) ? order.items : [],
-            }))
+            ...order,
+            items: Array.isArray(order.items) ? order.items : [],
+          }))
           : [];
 
         setOrders(safeData);
@@ -158,10 +158,10 @@ export default function MyOrdersPage() {
 
         <div class="track-timeline">
           ${ORDER_PIPELINE.map((step, index) => {
-            const done = currentStep >= index && currentStep !== -1;
-            const active = currentStep === index;
-            const isLast = index === ORDER_PIPELINE.length - 1;
-            return `
+        const done = currentStep >= index && currentStep !== -1;
+        const active = currentStep === index;
+        const isLast = index === ORDER_PIPELINE.length - 1;
+        return `
             <div class="track-step-wrapper">
               <div class="track-step-container">
                 <div class="track-marker ${done ? 'done' : ''} ${active ? 'active' : ''}">
@@ -174,7 +174,7 @@ export default function MyOrdersPage() {
               </div>
             </div>
           `;
-          }).join('')}
+      }).join('')}
         </div>
 
         <div class="track-details">
@@ -387,7 +387,9 @@ export default function MyOrdersPage() {
                       <div className="items-section">
                         {order.items.map((item, i) => (
                           <div key={i} className="item-row">
-                            <img src={resolveImage(item.image)} alt={item.product_name} className="item-img" />
+                            <img
+                              src={`/assets/products/${item.product_id}${resolveImage(item.images)}`}
+                              alt={item.product_name} className="item-img" />
                             <div className="item-col">
                               <p className="item-title">{item.product_name || 'Product'}</p>
                               <p className="item-qty">Qty: {item.quantity}</p>

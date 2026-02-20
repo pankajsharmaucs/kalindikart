@@ -6,47 +6,69 @@ import { useCartStore } from '../stores/cartStore';
 const AuthContext = createContext();
 
 export function AuthProvider({ children }) {
-  const [user, setUser] = useState(null); // { id: mobile }
+  // User object will now look like { id: "mobile_or_email", type: "phone|email" }
+  const [user, setUser] = useState(null); 
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [loading, setLoading] = useState(true);
 
-  const { setAuth } = useCartStore();
+  const { setAuth, logout: logoutCart } = useCartStore();
 
   /* ---------- RESTORE LOGIN ON REFRESH ---------- */
   useEffect(() => {
     const mobile = localStorage.getItem('userMobile');
+    const email = localStorage.getItem('userEmail');
+    
+    // Check which one exists
+    const identifier = mobile || email;
 
-    if (mobile) {
-      setUser({ id: mobile });
+    if (identifier) {
+      setUser({ 
+        id: identifier, 
+        mobile: mobile || null, 
+        email: email || null 
+      });
       setIsLoggedIn(true);
 
-      // 🔥 restore Zustand auth
-      setAuth(true, mobile);
+      // 🔥 restore Zustand auth with the generic identifier
+      setAuth(true, identifier);
     }
 
     setLoading(false);
   }, [setAuth]);
 
   /* ---------- LOGIN ---------- */
-  const login = ({ mobile }) => {
-    // 🔥 store only ONE thing
-    localStorage.setItem('userMobile', mobile);
+  const login = ({ mobile, email }) => {
+    const identifier = mobile || email;
 
-    setUser({ id: mobile });
+    if (mobile) {
+      localStorage.setItem('userMobile', mobile);
+      localStorage.removeItem('userEmail'); // Cleanup
+    } else if (email) {
+      localStorage.setItem('userEmail', email);
+      localStorage.removeItem('userMobile'); // Cleanup
+    }
+
+    setUser({ 
+      id: identifier, 
+      mobile: mobile || null, 
+      email: email || null 
+    });
     setIsLoggedIn(true);
 
-    // 🔥 sync Zustand
-    setAuth(true, mobile);
+    // 🔥 sync Zustand with the active identifier
+    setAuth(true, identifier);
   };
 
   /* ---------- LOGOUT ---------- */
   const logout = () => {
     localStorage.removeItem('userMobile');
+    localStorage.removeItem('userEmail');
 
     setUser(null);
     setIsLoggedIn(false);
 
-    setAuth(false, null);
+    // 🔥 Use the store's logout to clear cart and internal state
+    logoutCart(); 
   };
 
   return (

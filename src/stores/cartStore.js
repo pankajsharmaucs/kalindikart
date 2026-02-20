@@ -5,9 +5,9 @@ export const useCartStore = create(
   persist(
     (set, get) => ({
       cartItems: [],
-      cartCount: 0,          // NEW: total quantity
+      cartCount: 0,
       isLoggedIn: false,
-      userId: null,
+      userId: null, // This will now hold either mobile or email
       hasHydrated: false,
       hasSyncedGuestCart: false,
 
@@ -17,14 +17,20 @@ export const useCartStore = create(
       setAuth: (loggedIn, id) => {
         set({ isLoggedIn: loggedIn, userId: id });
         if (loggedIn && id) {
+          // Immediately sync and fetch using the provided ID (Email or Mobile)
           get().fetchCartFromDB(id).then(() => {
-            if (!get().hasSyncedGuestCart) get().syncLocalCartToDB();
-            get().fetchCartCount(id);  // <-- fetch count from DB
+            if (!get().hasSyncedGuestCart) {
+              get().syncLocalCartToDB();
+            }
+            get().fetchCartCount(id);
           });
         }
       },
 
       logout: () => {
+        // Clear everything including the identifiers
+        localStorage.removeItem('userMobile');
+        localStorage.removeItem('userEmail');
         set({
           isLoggedIn: false,
           userId: null,
@@ -42,6 +48,7 @@ export const useCartStore = create(
         const productId = product.id;
         let images = [];
 
+        // Image parsing logic
         if (Array.isArray(product.images)) images = product.images;
         else if (typeof product.images === 'string') {
           try {
@@ -56,11 +63,12 @@ export const useCartStore = create(
 
         if (isLoggedIn && userId) {
           try {
+            // API call now uses 'userId' which can be email or phone
             const res = await fetch('/api/cart', {
               method: 'POST',
               headers: { 'Content-Type': 'application/json' },
               body: JSON.stringify({
-                userId,
+                userId, // This matches the id passed in setAuth
                 product: {
                   product_id: productId,
                   quantity: existing ? existing.quantity + 1 : 1,
@@ -78,7 +86,6 @@ export const useCartStore = create(
           }
         }
 
-        // Update Zustand state
         set((state) => {
           let newCart;
           if (existing) {
@@ -94,7 +101,7 @@ export const useCartStore = create(
             ];
           }
           const newCount = newCart.reduce((sum, i) => sum + i.quantity, 0);
-          return { cartItems: newCart, cartCount: newCount }; // update count
+          return { cartItems: newCart, cartCount: newCount };
         });
       },
 
@@ -116,9 +123,6 @@ export const useCartStore = create(
 
       clearCart: () => set({ cartItems: [], cartCount: 0 }),
 
-      // ----------------------
-      // Cart Info
-      // ----------------------
       getCartCount: () => get().cartCount,
       getCartTotal: () =>
         get().cartItems.reduce((sum, item) => sum + item.price * item.quantity, 0),
@@ -126,7 +130,8 @@ export const useCartStore = create(
       fetchCartCount: async (userId) => {
         if (!userId) return;
         try {
-          const res = await fetch(`/api/cart/count?userId=${userId}`);
+          // Encodes the userId (important if it's an email with '@' or '.')
+          const res = await fetch(`/api/cart/count?userId=${encodeURIComponent(userId)}`);
           const data = await res.json();
           if (data.success) set({ cartCount: data.count || 0 });
         } catch (err) {
@@ -134,9 +139,6 @@ export const useCartStore = create(
         }
       },
 
-      // ----------------------
-      // Guest Cart Sync
-      // ----------------------
       syncLocalCartToDB: async () => {
         const { cartItems, userId, hasSyncedGuestCart } = get();
         if (!userId || !cartItems.length || hasSyncedGuestCart) return;
@@ -148,7 +150,7 @@ export const useCartStore = create(
             body: JSON.stringify({ userId, cartItems }),
           });
           set({ hasSyncedGuestCart: true });
-          get().fetchCartCount(userId); // update count after sync
+          get().fetchCartCount(userId);
         } catch (err) {
           console.error('Cart sync failed:', err);
         }
@@ -156,10 +158,13 @@ export const useCartStore = create(
 
       fetchCartFromDB: async (userId) => {
         try {
-          const res = await fetch(`/api/cart?userId=${userId}`);
+          const res = await fetch(`/api/cart?userId=${encodeURIComponent(userId)}`);
           const data = await res.json();
           if (data.success && Array.isArray(data.cartItems)) {
-            set({ cartItems: data.cartItems, cartCount: data.cartItems.reduce((sum, i) => sum + i.quantity, 0) });
+            set({ 
+              cartItems: data.cartItems, 
+              cartCount: data.cartItems.reduce((sum, i) => sum + i.quantity, 0) 
+            });
           } else {
             set({ cartItems: [], cartCount: 0 });
           }

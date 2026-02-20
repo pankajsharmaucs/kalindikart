@@ -1,5 +1,5 @@
 import { NextResponse } from 'next/server';
-import { pool } from '../../db.js'; // adjust relative path to your db.js
+import { pool } from '../../db.js';
 
 export async function POST(req) {
   try {
@@ -13,47 +13,69 @@ export async function POST(req) {
       line3,
       pincode,
       landmark,
+      userId // This is the identifier from your auth state (email or mobile)
     } = body;
 
-    if (!fullname || !mobile || !line1 || !pincode) {
+    // Use mobile or email as the fallback if userId isn't explicitly sent
+    const identifier = userId || mobile || email;
+
+    if (!fullname || !identifier || !line1 || !pincode) {
       return NextResponse.json(
-        { success: false, error: 'Missing required fields' },
+        { success: false, error: 'Missing required fields (Name, Identifier, Address, Pincode)' },
         { status: 400 }
       );
     }
 
-    // Check if user exists
+    /* 1️⃣ FLEXIBLE LOOKUP 
+       Check if the user exists using the identifier (could be email or mobile)
+    */
     const [existingUser] = await pool.query(
-      'SELECT id FROM users WHERE mobile = ?',
-      [mobile]
+      'SELECT id, mobile, email FROM users WHERE (mobile = ? AND mobile <> "") OR (email = ? AND email <> "") LIMIT 1',
+      [identifier, identifier]
     );
 
     if (!existingUser.length) {
       return NextResponse.json(
-        { success: false, error: 'User not found' },
+        { success: false, error: 'User record not found. Please register first.' },
         { status: 404 }
       );
     }
 
-    // Update address
+    const dbId = existingUser[0].id;
+
+    /* 2️⃣ UPDATE ADDRESS
+       We update via the internal 'id' which is the safest way to ensure 
+       we don't create duplicate records or fail FK constraints.
+    */
     await pool.query(
       `UPDATE users SET
         fullname = ?,
         email = ?,
+        mobile = ?,
         address_line1 = ?,
         address_line2 = ?,
         address_line3 = ?,
         pincode = ?,
         landmark = ?
-       WHERE mobile = ?`,
-      [fullname, email, line1, line2, line3, pincode, landmark, mobile]
+       WHERE id = ?`,
+      [
+        fullname, 
+        email || existingUser[0].email, // Keep existing email if new one is empty
+        mobile || existingUser[0].mobile, // Keep existing mobile if new one is empty
+        line1, 
+        line2, 
+        line3, 
+        pincode, 
+        landmark, 
+        dbId
+      ]
     );
 
-    return NextResponse.json({ success: true });
+    return NextResponse.json({ success: true, message: 'Address updated successfully' });
   } catch (err) {
     console.error('Checkout API error:', err);
     return NextResponse.json(
-      { success: false, error: err.message },
+      { success: false, error: 'Server error' },
       { status: 500 }
     );
   }

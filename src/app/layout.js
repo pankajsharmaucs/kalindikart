@@ -25,13 +25,40 @@ export default function RootLayout({ children }) {
       </head>
       <body>
         <AuthProvider>
-          <div className="top-bar">
-            <div className="marquee-container">
-              <div className="marquee-text">
-                FREE DELIVERY PAN INDIA. COD AVAILABLE NOW &nbsp;|&nbsp;
-                SAME DAY DELIVERY AVAILABLE IN DELHI/NCR &nbsp;|&nbsp;
-                FREE BRASS GIFT 🎁 ON ORDERS ABOVE ₹5,000! ✨
-              </div>
+          <div style={{
+            background: '#00739D',
+            color: '#fff',
+            fontSize: '14px',
+            padding: '10px 0',
+            fontWeight: '600',
+            textTransform: 'uppercase',
+            letterSpacing: '0.5px',
+            overflow: 'hidden'
+          }}>
+            <div style={{
+              display: 'flex',
+              whiteSpace: 'nowrap',
+              gap: '40px',
+              animation: 'kk-marquee 20s linear infinite'
+            }}>
+              <style>{`
+      @keyframes kk-marquee {
+        0% { transform: translateX(100%); }
+        100% { transform: translateX(-100%); }
+      }
+    `}</style>
+
+              <span style={{ display: 'inline-flex', alignItems: 'center', gap: '5px' }}>
+                <i className="fas fa-truck-fast" style={{ color: '#5FD3FD' }}></i> Free Pan-India & COD
+              </span>
+
+              <span style={{ display: 'inline-flex', alignItems: 'center', gap: '5px' }}>
+                <i className="fas fa-bolt" style={{ color: '#5FD3FD' }}></i> Same Day Delhi/NCR
+              </span>
+
+              <span style={{ display: 'inline-flex', alignItems: 'center', gap: '5px' }}>
+                <i className="fas fa-gift" style={{ color: '#5FD3FD' }}></i> Free Brass Gift @ ₹5k+
+              </span>
             </div>
           </div>
 

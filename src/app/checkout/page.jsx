@@ -560,7 +560,7 @@ export default function CheckoutPage() {
 
         /* Save Button */
         .btn-save {
-          width: 100%;
+          width: 230px;
           background: linear-gradient(135deg, #178ad6, #27bbc9);
           color: white;
           border: none;

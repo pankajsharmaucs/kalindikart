@@ -1,0 +1,667 @@
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+:root {
+    --primary: rgb(39, 171, 204);
+    --primary-soft: rgba(39, 171, 204, 0.08);
+    --text-primary: #0f1419;
+    --text-secondary: #57606f;
+    --border-color: #dfe4ea;
+    --bg-light: #f8f9fa;
+    --bg-white: #ffffff;
+}
+
+body {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen', 'Ubuntu', 'Cantarell', sans-serif;
+    background: var(--bg-light);
+    color: var(--text-primary);
+    font-size: 13px;
+    overflow-x: hidden;
+}
+
+.kk-header-new {
+    background: white;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+    position: sticky;
+    top: 0;
+    z-index: 999999;
+}
+
+.kk-main-row {
+    background: white;
+    padding: 0.75rem 0;
+}
+
+.kk-container-main {
+    max-width: 1400px;
+    margin: 0 auto;
+    padding: 0 1rem;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 2rem;
+}
+
+.kk-logo-brand {
+    flex-shrink: 0;
+    text-decoration: none;
+}
+
+.kk-logo-brand img {
+    height: 50px;
+    display: block;
+}
+
+.kk-nav-desktop {
+    display: none;
+    align-items: center;
+    gap: 0.5rem;
+    flex: 1;
+    justify-content: center;
+}
+
+@media (min-width: 992px) {
+    .kk-nav-desktop {
+        display: flex;
+    }
+}
+
+.kk-nav-desktop a,
+.kk-nav-desktop>div>a {
+    padding: 0.65rem 1.1rem;
+    color: var(--text-primary);
+    text-decoration: none;
+    font-weight: 500;
+    font-size: 15px;
+    border-radius: 6px;
+    display: flex;
+    align-items: center;
+    gap: 0.3rem;
+    transition: all 0.2s;
+}
+
+.kk-nav-desktop a:hover,
+.kk-nav-desktop a.active {
+    background: var(--primary-soft);
+    color: var(--primary);
+}
+
+.kk-cat-dropdown {
+    position: relative;
+}
+
+.kk-mega-panel {
+    position: absolute;
+    top: 80%;
+    left: 50%;
+    transform: translateX(-50%);
+    background: white;
+    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.12);
+    border-radius: 8px;
+    margin-top: 0.5rem;
+    width: 750px;
+    border-top: 3px solid var(--primary);
+    z-index: 9999999999 !important;
+}
+
+.kk-mega-layout {
+    display: grid;
+    grid-template-columns: 200px 1fr;
+    padding: 1rem;
+    gap: 1.5rem;
+}
+
+.kk-cats-col h6 {
+    font-weight: 700;
+    margin-bottom: 0.75rem;
+    font-size: 13px;
+}
+
+.kk-cats-col a {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.6rem 0.75rem;
+    color: var(--text-primary);
+    text-decoration: none;
+    border-radius: 6px;
+    font-size: 13px;
+    margin-bottom: 0.25rem;
+    transition: all 0.2s;
+}
+
+.kk-cats-col a:hover,
+.kk-cats-col a.active {
+    background: var(--primary-soft);
+    color: var(--primary);
+}
+
+.kk-cats-col a img {
+    width: 24px;
+    height: 24px;
+    border-radius: 4px;
+}
+
+.kk-sub-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 0.75rem;
+}
+
+.kk-sub-grid a {
+    text-align: center;
+    padding: 0.5rem;
+    border-radius: 6px;
+    text-decoration: none;
+    transition: all 0.2s;
+}
+
+.kk-sub-grid a:hover {
+    background: var(--bg-light);
+}
+
+.kk-sub-grid img {
+    width: 60px;
+    height: 60px;
+    border-radius: 6px;
+    margin-bottom: 0.4rem;
+}
+
+.kk-sub-grid p {
+    font-size: 12px;
+    color: var(--text-primary);
+    margin: 0;
+}
+
+/* Default: hide everywhere */
+.kk-menu-toggle {
+    display: none;
+}
+
+/* Mobile only */
+@media (max-width: 991px) {
+    .kk-menu-toggle {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+}
+
+
+
+.kk-actions-bar {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+/* Search button - hidden on mobile, visible on desktop */
+.kk-search-desktop {
+    display: none;
+}
+
+@media (min-width: 992px) {
+    .kk-search-desktop {
+        display: flex;
+    }
+}
+
+.kk-btn-action {
+    width: 40px;
+    height: 40px;
+    border: none;
+    background: white;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    color: var(--text-primary);
+    font-size: 1.1rem;
+    text-decoration: none;
+    position: relative;
+    transition: all 0.2s;
+}
+
+.kk-btn-action:hover {
+    background: var(--bg-light);
+    border-color: var(--primary);
+    color: var(--primary);
+}
+
+.kk-btn-action span {
+    position: absolute;
+    top: -4px;
+    right: -4px;
+    background: #dc3545;
+    color: white;
+    font-size: 10px;
+    font-weight: 700;
+    min-width: 18px;
+    height: 18px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.kk-user-wrap {
+    position: relative;
+}
+
+.kk-user-dropdown {
+    position: absolute;
+    top: calc(100% + 0.5rem);
+    right: 0;
+    background: white;
+    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.12);
+    border-radius: 8px;
+    min-width: 220px;
+    overflow: hidden;
+    z-index: 1001;
+}
+
+.kk-user-top {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    padding: 1rem;
+    background: linear-gradient(135deg, var(--primary), #27bbc9);
+    color: white;
+}
+
+.kk-user-top i {
+    font-size: 2rem;
+}
+
+.kk-user-top strong {
+    display: block;
+    font-size: 13px;
+}
+
+.kk-user-top small {
+    font-size: 11px;
+    opacity: 0.9;
+}
+
+.kk-user-dropdown a,
+.kk-user-dropdown button {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.75rem 1rem;
+    color: var(--text-primary);
+    text-decoration: none;
+    background: white;
+    border: none;
+    width: 100%;
+    cursor: pointer;
+    font-size: 13px;
+    transition: all 0.2s;
+}
+
+.kk-user-dropdown a:hover,
+.kk-user-dropdown button:hover {
+    background: var(--bg-light);
+    color: var(--primary);
+}
+
+.kk-user-dropdown button {
+    color: #dc3545;
+    border-top: 1px solid var(--border-color);
+}
+
+.kk-search-modal {
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.6);
+    z-index: 10000;
+    display: flex;
+    align-items: flex-start;
+    justify-content: center;
+    padding-top: 5rem;
+    animation: fadeIn 0.2s;
+}
+
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+    }
+
+    to {
+        opacity: 1;
+    }
+}
+
+.kk-search-modal-content {
+    background: white;
+    border-radius: 12px;
+    width: 90%;
+    max-width: 600px;
+    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.2);
+    animation: slideDown 0.3s;
+}
+
+@keyframes slideDown {
+    from {
+        opacity: 0;
+        transform: translateY(-20px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.kk-search-modal-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 1.25rem 1.5rem;
+    border-bottom: 1px solid var(--border-color);
+}
+
+.kk-search-modal-header h3 {
+    font-size: 16px;
+    font-weight: 600;
+    color: var(--text-primary);
+}
+
+.kk-modal-close {
+    width: 32px;
+    height: 32px;
+    border: none;
+    background: transparent;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    color: var(--text-secondary);
+    font-size: 1.2rem;
+    transition: all 0.2s;
+}
+
+.kk-modal-close:hover {
+    background: var(--bg-light);
+    color: var(--text-primary);
+}
+
+.kk-search-modal-body {
+    padding: 1.5rem;
+}
+
+.kk-modal-search-form {
+    display: flex;
+    background: var(--bg-light);
+    border: 2px solid var(--border-color);
+    border-radius: 8px;
+    overflow: hidden;
+    transition: all 0.2s;
+}
+
+.kk-modal-search-form:focus-within {
+    border-color: var(--primary);
+    box-shadow: 0 0 0 3px var(--primary-soft);
+}
+
+.kk-modal-search-form input {
+    flex: 1;
+    border: none;
+    padding: 0.9rem 1.2rem;
+    font-size: 14px;
+    outline: none;
+    background: transparent;
+}
+
+.kk-modal-search-form input::placeholder {
+    color: var(--text-secondary);
+}
+
+.kk-modal-search-form button {
+    width: 50px;
+    height: 50px;
+    background: var(--primary);
+    border: none;
+    cursor: pointer;
+    color: white;
+    font-size: 1.1rem;
+    transition: all 0.2s;
+}
+
+.kk-modal-search-form button:hover {
+    background: #2d9bb8;
+}
+
+.kk-btn-menu {
+    width: 40px;
+    height: 40px;
+    border: 1px solid var(--border-color);
+    background: white;
+    border-radius: 6px;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    font-size: 1.1rem;
+    color: var(--text-primary);
+    flex-shrink: 0;
+    transition: all 0.2s;
+}
+
+.kk-btn-menu:hover {
+    background: var(--bg-light);
+    border-color: var(--primary);
+    color: var(--primary);
+}
+
+.kk-overlay-mobile {
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.5);
+    z-index: 9998;
+    animation: fadeIn 0.2s;
+}
+
+.kk-sidebar-mobile {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 280px;
+    height: 100%;
+    background: white;
+    box-shadow: 4px 0 20px rgba(0, 0, 0, 0.15);
+    z-index: 9999;
+    overflow-y: auto;
+    animation: slideInLeft 0.3s;
+}
+
+@keyframes slideInLeft {
+    from {
+        transform: translateX(-100%);
+    }
+
+    to {
+        transform: translateX(0);
+    }
+}
+
+.kk-sidebar-top {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 0.75rem;
+    padding: 1px 1rem;
+    background: linear-gradient(135deg, #0b4c64, #1798a1);
+    color: white;
+}
+.kk-close-sidebar{
+    background: none;
+    border: none;
+}
+
+.kk-sidebar-top i {
+    font-size: 2rem;
+    color: #fff;
+}
+
+.kk-sidebar-top strong {
+    display: block;
+    font-size: 14px;
+}
+
+.kk-sidebar-top small {
+    font-size: 11px;
+    opacity: 0.9;
+}
+
+.kk-sidebar-nav {
+    padding: 0.5rem 0;
+}
+
+.kk-sidebar-nav>a,
+.kk-sidebar-nav>button {
+    color: #264767;
+    background: #fff;
+    border: none;
+    border-left-width: medium;
+    border-left-style: none;
+    border-left-color: currentcolor;
+    border-left: 3px solid #0000;
+    align-items: center;
+    gap: .75rem;
+    width: 100%;
+    padding: 14px 1rem;
+    font-size: 14px;
+    text-decoration: none;
+    transition: all .2s;
+    display: flex;
+    letter-spacing: 3px;
+    font-weight: 600;
+}
+
+.kk-sidebar-nav>a:hover,
+.kk-sidebar-nav>button:hover {
+    background: var(--bg-light);
+    border-left-color: var(--primary);
+}
+
+.kk-sidebar-nav i {
+    width: 20px;
+}
+
+.kk-sidebar-cats {
+    border-top: 1px solid var(--border-color);
+    border-bottom: 1px solid var(--border-color);
+    margin: 0.5rem 0;
+}
+
+.kk-cats-title span {
+    color: #264767;
+    border: none;
+    border-left-width: medium;
+    border-left-style: none;
+    border-left-color: currentcolor;
+    border-left: 3px solid #0000;
+    align-items: center;
+    gap: .75rem;
+    width: 100%;
+    padding: 0px;
+    font-size: 15px;
+    text-decoration: none;
+    transition: all .2s;
+    display: flex;
+    letter-spacing: 3px;
+    font-weight: 600 !important;
+}
+
+.kk-sidebar-cats button {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    padding: 0.85rem 1rem;
+    background: white;
+    border: none;
+    border-bottom: 1px solid var(--bg-light);
+    width: 100%;
+    cursor: pointer;
+    font-size: 13px;
+    transition: all 0.2s;
+}
+
+.kk-sidebar-cats button:hover {
+    background: var(--bg-light);
+}
+
+.kk-sidebar-cats button img {
+    width: 28px;
+    height: 28px;
+    border-radius: 4px;
+}
+
+.kk-sidebar-cats button span {
+    flex: 1;
+    text-align: left;
+}
+
+.kk-sidebar-cats button i {
+    font-size: 12px;
+    color: var(--text-secondary);
+}
+
+.kk-sidebar-subs {
+    background: #fafafa;
+}
+
+.kk-sidebar-subs a {
+    display: block;
+    padding: 0.65rem 1rem 0.65rem 3rem;
+    color: var(--text-secondary);
+    text-decoration: none;
+    font-size: 12px;
+    border-left: 3px solid transparent;
+    transition: all 0.2s;
+}
+
+.kk-sidebar-subs a:hover {
+    background: white;
+    border-left-color: var(--primary);
+    color: var(--primary);
+}
+
+.kk-sidebar-nav hr {
+    border: none;
+    border-top: 1px solid var(--border-color);
+    margin: 0.5rem 0;
+}
+
+@media (max-width: 576px) {
+    body {
+        font-size: 12px;
+    }
+
+    .kk-logo-brand img {
+        height: 50px;
+    }
+
+    .kk-btn-menu,
+    .kk-btn-action {
+        width: 36px;
+        height: 36px;
+    }
+
+    .kk-sidebar-mobile {
+        width: 260px;
+    }
+
+    .kk-search-modal {
+        padding-top: 3rem;
+    }
+
+    .kk-search-modal-content {
+        width: 95%;
+    }
+}

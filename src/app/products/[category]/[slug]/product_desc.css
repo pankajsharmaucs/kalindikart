@@ -1,0 +1,119 @@
+:root {
+    --primary-gold: #01A9E6; /* Your brand primary */
+    --dark-gold: #00739D;    /* Your brand dark */
+    --light-bg: #f0f8ff;     /* Your brand light */
+    --accent-teal: #00897b;  /* From the image screenshot */
+    --text-muted: #888;
+}
+
+.product-page-v2 {
+    font-family: 'Inter', -apple-system, sans-serif;
+    color: #333;
+    background-color: #fff;
+}
+
+/* Breadcrumbs Styling */
+.breadcrumb-nav {
+    font-size: 0.8rem;
+    color: #999;
+}
+
+/* Size Selectors - Circular as per image */
+.btn-size-circle {
+    width: 42px;
+    height: 42px;
+    border-radius: 50%;
+    border: 1.5px solid #ececec;
+    background: #fff;
+    font-weight: 500;
+    font-size: 0.85rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.btn-size-circle:hover {
+    border-color: var(--accent-teal);
+}
+
+.btn-size-circle.active {
+    background-color: var(--accent-teal);
+    color: white;
+    border-color: var(--accent-teal);
+}
+
+/* Action Buttons */
+.btn-add-cart {
+    background-color: var(--primary-gold);
+    color: white;
+    border: none;
+    padding: 12px 24px;
+    border-radius: 4px;
+    font-weight: 600;
+    letter-spacing: 0.5px;
+    flex-grow: 2;
+    transition: opacity 0.2s;
+}
+
+.btn-wishlist {
+    background-color: #a5a5a5;
+    color: white;
+    border: none;
+    padding: 12px 24px;
+    border-radius: 4px;
+    font-weight: 600;
+    flex-grow: 1;
+}
+
+.btn-add-cart:hover, .btn-wishlist:hover {
+    opacity: 0.9;
+}
+
+/* Typography & Layout Refinements */
+.product-main-title {
+    font-size: 1.75rem;
+    font-weight: 500;
+    color: #222;
+}
+
+.price-display {
+    margin-bottom: 1rem;
+}
+
+/* Vendor Section - Clean list style */
+.vendor-card {
+    margin-top: 2rem;
+    padding-top: 1.5rem;
+    border-top: 1px solid #f0f0f0;
+}
+
+.vendor-card ul {
+    padding: 0;
+    list-style: none;
+}
+
+.vendor-card li {
+    font-size: 0.85rem;
+    color: #666;
+    margin-bottom: 5px;
+}
+
+/* Details List */
+.material-section ul {
+    padding-left: 1.2rem;
+    color: #444;
+    line-height: 1.8;
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+    .product-main-title {
+        font-size: 1.4rem;
+    }
+    .btn-add-cart, .btn-wishlist {
+        padding: 10px 15px;
+        font-size: 0.9rem;
+    }
+}
