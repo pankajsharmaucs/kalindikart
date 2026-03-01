@@ -136,14 +136,14 @@ export async function POST(req) {
 
       await connection.query(
         `INSERT INTO orders (
-           user_id, mobile, order_number, 
-           product_id, product_name,
-           quantity, price, total,        -- item total
-           total_amount,                  -- whole order total
-           payment_method, payment_status,
-           order_status, shipping_address,
-           created_at
-         ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, NOW())`,
+     user_id, mobile, order_number, 
+     product_id, product_name,
+     quantity, price,                -- ✅ no total here
+     total_amount,
+     payment_method, payment_status,
+     order_status, shipping_address,
+     created_at
+   ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, NOW())`,
         [
           dbUserId,
           userMobile,
@@ -152,8 +152,7 @@ export async function POST(req) {
           item.product_name,
           qty,
           price,
-          itemTotal,        // per-item subtotal
-          totalOrderAmount, // repeated on every row
+          totalOrderAmount,
           finalPaymentMethod,
           paymentStatus,
           'pending',

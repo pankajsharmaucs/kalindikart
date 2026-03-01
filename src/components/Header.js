@@ -441,6 +441,7 @@ export default function Header() {
                       value={searchQuery}
                       onChange={(e) => setSearchQuery(e.target.value)}
                       autoFocus
+                      style={{ fontSize: '14px' }}
                     />
                     <button className="btn text-white px-4" type="submit" style={{ backgroundColor: '#01A9E6' }}>
                       <i className="fas fa-search"></i>

@@ -343,8 +343,9 @@ export default function LoginClient() {
                             <input
                               key={i}
                               ref={(el) => (phoneInputsRef.current[i] = el)}
-                              type="text"
-                              inputMode="numeric"
+                              type="tel"                // better mobile keypad support than "text"
+                              inputMode="numeric"      // hints numeric keyboard
+                              pattern="[0-9]*"         // helps iOS show number pad
                               className="kk-otp-input"
                               maxLength="1"
                               value={digit}
@@ -451,7 +452,7 @@ export default function LoginClient() {
         </div >
       </div >
 
-      
+
     </>
   );
 }
