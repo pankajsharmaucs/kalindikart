@@ -1,12 +1,9 @@
 import { NextResponse } from 'next/server';
 import { pool } from '../db';
 
-
-
 export async function GET(req) {
   try {
     const { searchParams } = new URL(req.url);
-
     const productSlug = searchParams.get('slug');      // product detail
     const categorySlug = searchParams.get('category'); // category page
 
@@ -29,64 +26,57 @@ export async function GET(req) {
         return NextResponse.json(null, { status: 404 });
       }
 
-      return NextResponse.json(rows[0]);
+      const product = rows[0];
+
+      // --- FETCH SPECIFICATIONS FOR THIS PRODUCT ---
+      const [specs] = await pool.query(
+        `SELECT id, icon, title, value FROM product_specification 
+         WHERE product_id = ? AND status = 'active'`,
+        [product.id]
+      );
+
+      // Add specifications array to the product object
+      product.specifications = specs;
+
+      return NextResponse.json(product);
     }
 
     /* =========================
-       CATEGORY → category_id
+       CATEGORY → category_id (Logic remains the same)
     ========================= */
-
     let categoryId = null;
-
     if (categorySlug) {
       const [cat] = await pool.query(
         `SELECT id FROM master_category WHERE LOWER(slug) = ? LIMIT 1`,
         [categorySlug.toLowerCase()]
       );
-
-      if (cat.length === 0) {
-        return NextResponse.json([]); // no category → no products
-      }
-
+      if (cat.length === 0) return NextResponse.json([]);
       categoryId = cat[0].id;
     }
 
     /* =========================
-       FETCH PRODUCTS BY category_id
+       FETCH ALL PRODUCTS (Logic remains the same)
     ========================= */
-
     let query = `
       SELECT 
-        p.id,
-        p.title,
-        p.slug,
-        p.price,
-        p.discount,
-        p.tax,
-        p.shipping_cost,
-        p.quantity,
-        p.stock,
-        p.description,
-        p.images,
-        p.created_at,
-        c.category_name,
-        c.slug AS category_slug
+        p.id, p.title, p.slug, p.price, p.discount, p.tax,
+        p.shipping_cost, p.quantity, p.stock, p.description,
+        p.images, p.created_at, c.category_name, c.slug AS category_slug
       FROM products p
       LEFT JOIN master_category c ON p.category_id = c.id
       WHERE p.status = 'active'
     `;
 
     const params = [];
-
     if (categoryId) {
       query += ` AND p.category_id = ?`;
       params.push(categoryId);
     }
 
     query += ` ORDER BY p.id DESC`;
-
-    const [rows] = await pool.query(query, params);
-    return NextResponse.json(rows);
+    const [allRows] = await pool.query(query, params);
+    
+    return NextResponse.json(allRows);
 
   } catch (error) {
     console.error('GET PRODUCTS ERROR:', error);

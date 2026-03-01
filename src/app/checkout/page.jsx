@@ -3,6 +3,7 @@
 import React, { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { useCartStore } from '../../stores/cartStore';
+import './checkout.css'
 
 export default function CheckoutPage() {
   const router = useRouter();
@@ -42,7 +43,7 @@ export default function CheckoutPage() {
   /* ---------------- FETCH USER ---------------- */
   const fetchUserDetails = async () => {
     try {
-      const res = await fetch(`/api/user/by-mobile?mobile=${userId}`);
+      const res = await fetch(`/api/user/by-mobile?identifier=${userId}`);
       const data = await res.json();
 
       if (data.exists) {
@@ -75,7 +76,7 @@ export default function CheckoutPage() {
       try {
         const parsed = JSON.parse(img);
         if (Array.isArray(parsed)) img = parsed[0];
-      } catch {}
+      } catch { }
     }
 
     if (Array.isArray(img)) img = img[0];
@@ -216,7 +217,7 @@ export default function CheckoutPage() {
   /* ---------------- UI ---------------- */
   return (
     <>
-      <div className="checkout-page-wrapper">
+      <div className="checkout-page-wrapper px-md-4 px-3">
         <div className="container py-3">
           {/* Page Header */}
           <div className="checkout-header">
@@ -235,138 +236,167 @@ export default function CheckoutPage() {
           <div className="row g-3 mt-1">
             {/* LEFT - Shipping Address */}
             <div className="col-lg-8">
-              <div className="address-card">
-                <div className="card-header-custom">
-                  <i className="fas fa-map-marker-alt me-2"></i>
-                  Shipping Address
-                </div>
-
-                <div className="card-body-custom">
-                  <div className="row g-2">
-                    {/* Full Name */}
-                    <div className="col-12">
-                      <label className="form-label">
-                        Full Name <span className="req">*</span>
-                      </label>
-                      <input
-                        type="text"
-                        className="form-input"
-                        placeholder="Enter full name"
-                        value={fullname}
-                        onChange={(e) => setFullname(e.target.value)}
-                      />
-                    </div>
-
-                    {/* Email & Mobile */}
-                    <div className="col-md-6">
-                      <label className="form-label">Email</label>
-                      <input
-                        type="email"
-                        className="form-input"
-                        placeholder="your@email.com"
-                        value={email}
-                        onChange={(e) => setEmail(e.target.value)}
-                      />
-                    </div>
-                    <div className="col-md-6">
-                      <label className="form-label">
-                        Mobile <span className="req">*</span>
-                      </label>
-                      <input type="text" className="form-input disabled" value={mobile} disabled />
-                    </div>
-
-                    {/* Address Lines */}
-                    <div className="col-12">
-                      <label className="form-label">
-                        Address Line 1 <span className="req">*</span>
-                      </label>
-                      <input
-                        type="text"
-                        className="form-input"
-                        placeholder="House/Flat No."
-                        value={line1}
-                        onChange={(e) => setLine1(e.target.value)}
-                      />
-                    </div>
-
-                    <div className="col-12">
-                      <label className="form-label">Address Line 2</label>
-                      <input
-                        type="text"
-                        className="form-input"
-                        placeholder="Street, Area"
-                        value={line2}
-                        onChange={(e) => setLine2(e.target.value)}
-                      />
-                    </div>
-
-                    <div className="col-12">
-                      <label className="form-label">Address Line 3</label>
-                      <input
-                        type="text"
-                        className="form-input"
-                        placeholder="City, State"
-                        value={line3}
-                        onChange={(e) => setLine3(e.target.value)}
-                      />
-                    </div>
-
-                    {/* Pincode & Landmark */}
-                    <div className="col-md-6">
-                      <label className="form-label">
-                        Pincode <span className="req">*</span>
-                      </label>
-                      <input
-                        type="text"
-                        className="form-input"
-                        placeholder="6-digit"
-                        maxLength={6}
-                        value={pincode}
-                        onChange={(e) => setPincode(e.target.value.replace(/\D/g, ''))}
-                      />
-                    </div>
-                    <div className="col-md-6">
-                      <label className="form-label">Landmark</label>
-                      <input
-                        type="text"
-                        className="form-input"
-                        placeholder="Nearby"
-                        value={landmark}
-                        onChange={(e) => setLandmark(e.target.value)}
-                      />
-                    </div>
-                  </div>
-
-                  {/* Messages */}
-                  {error && (
-                    <div className="alert-msg error-msg">
-                      <i className="fas fa-exclamation-circle me-1"></i>
-                      {error}
-                    </div>
-                  )}
-                  {success && (
-                    <div className="alert-msg success-msg">
-                      <i className="fas fa-check-circle me-1"></i>
-                      {success}
-                    </div>
-                  )}
-
-                  {/* Save Button */}
-                  <button className="btn-save" onClick={handleSaveAddress} disabled={saveLoading}>
-                    {saveLoading ? (
-                      <>
-                        <span className="spinner-border spinner-border-sm me-1"></span>
-                        Saving...
-                      </>
-                    ) : (
-                      <>
-                        <i className="fas fa-save me-1"></i>
-                        Save Address
-                      </>
-                    )}
+              <div className="address-card border shadow-sm ">
+                <div className="card-header-custom d-flex justify-content-between align-items-center">
+                  <span>
+                    <i className="fas fa-map-marker-alt me-2"></i>
+                    Shipping Address
+                  </span>
+                  {/* Edit Button - Triggers Modal */}
+                  <button
+                    className="btn btn-sm btn-light text-primary fw-bold"
+                    data-bs-toggle="modal"
+                    data-bs-target="#editAddressModal"
+                    style={{ fontSize: '0.75rem' }}
+                  >
+                    <i className="fas fa-edit me-1"></i> EDIT
                   </button>
                 </div>
+
+                <div className="card-body-custom p-4">
+                  <div className="row">
+                    <div className="col-12 mb-3">
+                      <h6 className="fw-bold mb-1 text-capitalize">{fullname}</h6>
+                      <p className="text-muted small mb-0">
+                        <i className="fas fa-phone-alt me-2"></i>{mobile}
+                        <br />
+                        <i className="fas fa-envelope me-2"></i>{email}
+                      </p>
+                    </div>
+                    <div className="col-12">
+                      <p className="mb-1" style={{ fontSize: '0.95rem', color: '#333' }}>
+                        {line1}, {line2}
+                      </p>
+                      <p className="mb-1" style={{ fontSize: '0.95rem', color: '#333' }}>
+                        {line3}
+                      </p>
+                      <p className="fw-bold" style={{ color: 'var(--primary-gold)' }}>
+                        PIN: {pincode} {landmark && `(Near ${landmark})`}
+                      </p>
+                    </div>
+                  </div>
+                </div>
               </div>
+
+              {/* BOOTSTRAP 5 MODAL */}
+              <div className="modal fade py-5" id="editAddressModal" tabIndex="-1"
+                style={{ zIndex: "99999999999999999991060", background: "#000000d1" }}
+                aria-labelledby="editAddressModalLabel" aria-hidden="true">
+                <div className="modal-dialog modal-dialog-centered">
+                  <div className="modal-content border-0">
+                    <div className="modal-header border-bottom-0">
+                      <h5 className="modal-title fw-bold" id="editAddressModalLabel">Update Shipping Address</h5>
+                      <button type="button" className="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <div className="modal-body">
+                      <div className="row g-3">
+
+                        <div className="flex-grow-1">
+                          <div style={{ fontSize: '0.7rem', color: '#666', textTransform: 'uppercase', fontWeight: '700', letterSpacing: '0.5px' }}>
+                            Contact Details
+                          </div>
+
+                          <div className="d-flex flex-wrap gap-3 mt-1">
+                            {/* MOBILE VALIDATION & DISPLAY */}
+                            <span style={{ fontSize: '0.9rem', fontWeight: '600', color: mobile ? '#333' : '#dc3545' }}>
+                              <i className={`fas fa-phone-alt me-2 ${mobile ? 'text-muted' : 'text-danger animate-pulse'}`}></i>
+                              {mobile && mobile.length === 10 ? (
+                                mobile
+                              ) : (
+                                <span style={{ fontSize: '0.8rem', fontWeight: '400', fontStyle: 'italic' }}>
+                                  Mobile required *
+                                </span>
+                              )}
+                            </span>
+
+                            {/* EMAIL VALIDATION & DISPLAY */}
+                            <span style={{ fontSize: '0.9rem', fontWeight: '600', color: email && email.includes('@') ? '#333' : '#dc3545' }}>
+                              <i className={`fas fa-envelope me-2 ${email && email.includes('@') ? 'text-muted' : 'text-danger'}`}></i>
+                              {email && email.includes('@') ? (
+                                email
+                              ) : (
+                                <span style={{ fontSize: '0.8rem', fontWeight: '400', fontStyle: 'italic' }}>
+                                  Email required *
+                                </span>
+                              )}
+                            </span>
+                          </div>
+                        </div>
+
+                        <div className="text-muted" style={{ fontSize: '0.75rem', fontStyle: 'italic' }}>
+                          (Delivery Information)
+                        </div>
+
+                        {/* --- YOUR EXISTING FORM START --- */}
+
+                        {!mobile || mobile === "" && (
+                          <input
+                            type="text"
+                            className="custom-input"
+                            placeholder="Enter mobile"
+                            value={mobile}
+                            onChange={(e) => setMobile(e.target.value.replace(/\D/g, ''))}
+                          />
+                        )}
+
+                        {!email || email === "" && (
+                          <input
+                            type="email"
+                            className="custom-input"
+                            placeholder="Enter email"
+                            value={email}
+                            onChange={(e) => setEmail(e.target.value)}
+                          />
+                        )}
+
+
+                        <div className="col-12">
+                          <label className="form-label small fw-bold">Full Name</label>
+                          <input type="text" className="custom-input" value={fullname} onChange={(e) => setFullname(e.target.value)} />
+                        </div>
+                        <div className="col-12">
+                          <label className="form-label small fw-bold">Address Line 1</label>
+                          <input type="text" className="custom-input" value={line1} onChange={(e) => setLine1(e.target.value)} />
+                        </div>
+
+                        <div className="col-12">
+                          <label className="form-label small fw-bold">Address Line 2</label>
+                          <input type="text" className="custom-input" value={line2} onChange={(e) => setLine2(e.target.value)} />
+                        </div>
+                        <div className="col-6">
+                          <label className="form-label small fw-bold">City/State (Line 3)</label>
+                          <input type="text" className="custom-input" value={line3} onChange={(e) => setLine3(e.target.value)} />
+                        </div>
+                        <div className="col-6">
+                          <label className="form-label small fw-bold">Pincode</label>
+                          <input type="text" className="custom-input" maxLength={6} value={pincode} onChange={(e) => setPincode(e.target.value.replace(/\D/g, ''))} />
+                        </div>
+                        <div className="col-md-6">
+                          <label className="form-label small fw-bold">Landmark</label>
+                          <input type="text" className="custom-input" value={landmark} onChange={(e) => setLandmark(e.target.value)} />
+                        </div>
+                        {/* --- YOUR EXISTING FORM END --- */}
+                      </div>
+
+                      {error && <div className="text-danger small mt-2"><i className="fas fa-exclamation-circle me-1"></i>{error}</div>}
+                      {success && <div className="text-success small mt-2"><i className="fas fa-check-circle me-1"></i>{success}</div>}
+                    </div>
+                    <div className="modal-footer border-top-0">
+                      <button type="button" className="btn btn-secondary btn-sm" data-bs-dismiss="modal">Close</button>
+                      <button
+                        type="button"
+                        className="btn btn-primary btn-sm px-4"
+                        onClick={handleSaveAddress}
+                        disabled={saveLoading}
+                        style={{ backgroundColor: 'var(--primary-gold)', border: 'none' }}
+                      >
+                        {saveLoading ? 'Updating...' : 'Save Changes'}
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
             </div>
 
             {/* RIGHT - Order Summary */}
@@ -382,7 +412,11 @@ export default function CheckoutPage() {
                   <div className="summary-items">
                     {cartItems.map((item) => (
                       <div key={item.product_id} className="summary-item">
-                        <img src={resolveImage(item.images)} alt={item.title} className="item-img" />
+                        <img
+                          src={ `/assets/products/${item.product_id}/${resolveImage(item.images)}` }
+                          alt={item.title}
+                          style={{ width: '40px', height: '40px', objectFit: 'cover' }}
+                        />
                         <div className="item-info">
                           <div className="item-name">{item.title}</div>
                           <div className="item-qty">Qty: {item.quantity}</div>
@@ -432,329 +466,22 @@ export default function CheckoutPage() {
                 </div>
               </div>
             </div>
+
           </div>
         </div>
-      </div>
+      </div >
 
       {/* Toast */}
-      {toast && (
-        <div className="toast-msg">
-          <i className="fas fa-exclamation-triangle me-2"></i>
-          {toast}
-        </div>
-      )}
+      {
+        toast && (
+          <div className="toast-msg">
+            <i className="fas fa-exclamation-triangle me-2"></i>
+            {toast}
+          </div>
+        )
+      }
 
-      <style jsx global>{`
-        /* ============= PAGE WRAPPER ============= */
-        .checkout-page-wrapper {
-          background: #f8f9fa;
-          min-height: 100vh;
-          padding: 1rem 0 2rem 0;
-        }
 
-        /* ============= HEADER ============= */
-        .checkout-header {
-          background: white;
-          padding: 0.875rem 1rem;
-          border-radius: 6px;
-          box-shadow: 0 1px 4px rgba(0, 0, 0, 0.06);
-          margin-bottom: 0.75rem;
-        }
-
-        .checkout-title {
-          font-size: 1.25rem;
-          font-weight: 700;
-          color: #333;
-          margin: 0;
-        }
-
-        .btn-back {
-          background: white;
-          border: 1px solid #e0e0e0;
-          color: #666;
-          padding: 0.5rem 1rem;
-          border-radius: 5px;
-          font-weight: 600;
-          font-size: 0.85rem;
-          cursor: pointer;
-        }
-
-        .btn-back:hover {
-          border-color: #178ad6;
-          color: #178ad6;
-        }
-
-        /* ============= ADDRESS CARD ============= */
-        .address-card {
-          background: white;
-          border-radius: 6px;
-          box-shadow: 0 1px 4px rgba(0, 0, 0, 0.06);
-          overflow: hidden;
-        }
-
-        .card-header-custom {
-          background: #f8f9fa;
-          padding: 0.75rem 1rem;
-          font-size: 0.95rem;
-          font-weight: 700;
-          color: #333;
-          border-bottom: 1px solid #e0e0e0;
-        }
-
-        .card-body-custom {
-          padding: 1rem;
-        }
-
-        /* Form Elements */
-        .form-label {
-          font-weight: 600;
-          color: #333;
-          font-size: 0.85rem;
-          margin-bottom: 0.35rem;
-          display: block;
-        }
-
-        .req {
-          color: #dc3545;
-        }
-
-        .form-input {
-          width: 100%;
-          padding: 0.6rem 0.75rem;
-          border: 1px solid #e0e0e0;
-          border-radius: 5px;
-          font-size: 0.9rem;
-        }
-
-        .form-input:focus {
-          outline: none;
-          border-color: #178ad6;
-          box-shadow: 0 0 0 2px rgba(23, 138, 214, 0.1);
-        }
-
-        .form-input.disabled {
-          background: #f8f9fa;
-          cursor: not-allowed;
-          opacity: 0.7;
-        }
-
-        /* Alerts */
-        .alert-msg {
-          padding: 0.6rem 0.75rem;
-          border-radius: 5px;
-          margin-top: 0.75rem;
-          font-size: 0.85rem;
-        }
-
-        .error-msg {
-          background: rgba(220, 53, 69, 0.1);
-          color: #dc3545;
-          border: 1px solid rgba(220, 53, 69, 0.2);
-        }
-
-        .success-msg {
-          background: rgba(40, 167, 69, 0.1);
-          color: #28a745;
-          border: 1px solid rgba(40, 167, 69, 0.2);
-        }
-
-        /* Save Button */
-        .btn-save {
-          width: 230px;
-          background: linear-gradient(135deg, #178ad6, #27bbc9);
-          color: white;
-          border: none;
-          padding: 0.7rem;
-          border-radius: 6px;
-          font-size: 0.95rem;
-          font-weight: 700;
-          cursor: pointer;
-          margin-top: 1rem;
-        }
-
-        .btn-save:hover:not(:disabled) {
-          opacity: 0.9;
-        }
-
-        .btn-save:disabled {
-          opacity: 0.6;
-          cursor: not-allowed;
-        }
-
-        /* ============= SUMMARY CARD ============= */
-        .summary-card {
-          background: white;
-          border-radius: 6px;
-          box-shadow: 0 1px 4px rgba(0, 0, 0, 0.08);
-          overflow: hidden;
-          top: 15px;
-        }
-
-        .summary-header {
-          background: linear-gradient(135deg, #e79e3e,#e95943);
-          color: white;
-          padding: 0.75rem 1rem;
-          font-size: 0.95rem;
-          font-weight: 700;
-        }
-
-        .summary-body {
-          padding: 1rem;
-        }
-
-        /* Summary Items */
-        .summary-items {
-          max-height: 220px;
-          overflow-y: auto;
-          margin-bottom: 0.75rem;
-        }
-
-        .summary-item {
-          display: flex;
-          gap: 0.6rem;
-          padding: 0.6rem;
-          background: #f8f9fa;
-          border-radius: 5px;
-          margin-bottom: 0.5rem;
-        }
-
-        .item-img {
-          width: 45px;
-          height: 45px;
-          border-radius: 5px;
-          object-fit: cover;
-          border: 1px solid #e0e0e0;
-        }
-
-        .item-info {
-          flex: 1;
-        }
-
-        .item-name {
-          font-weight: 600;
-          font-size: 0.85rem;
-          color: #333;
-          line-height: 1.3;
-          margin-bottom: 0.15rem;
-        }
-
-        .item-qty {
-          font-size: 0.75rem;
-          color: #999;
-        }
-
-        .item-price {
-          font-weight: 700;
-          color: #178ad6;
-          font-size: 0.9rem;
-        }
-
-        .divider {
-          height: 1px;
-          background: #e0e0e0;
-          margin: 0.6rem 0;
-        }
-
-        .price-row {
-          display: flex;
-          justify-content: space-between;
-          padding: 0.4rem 0;
-          font-size: 0.85rem;
-          color: #666;
-        }
-
-        .total-row {
-          display: flex;
-          justify-content: space-between;
-          padding: 0.6rem 0;
-          font-size: 1.05rem;
-          font-weight: 700;
-          color: #333;
-        }
-
-        /* Payment Button */
-        .btn-payment {
-          width: 100%;
-          background: linear-gradient(135deg, #e79e3e,#e95943);
-          color: white;
-          border: none;
-          padding: 0.75rem;
-          border-radius: 6px;
-          font-size: 0.95rem;
-          font-weight: 700;
-          cursor: pointer;
-          margin-top: 0.75rem;
-        }
-
-        .btn-payment:hover {
-          opacity: 0.9;
-        }
-
-        .security-badge {
-          text-align: center;
-          padding: 0.6rem;
-          background: rgba(40, 167, 69, 0.05);
-          border-radius: 5px;
-          color: #28a745;
-          font-weight: 600;
-          margin-top: 0.75rem;
-          font-size: 0.8rem;
-        }
-
-        /* Toast */
-        .toast-msg {
-          position: fixed;
-          top: 15px;
-          right: 15px;
-          background: #dc3545;
-          color: white;
-          padding: 0.75rem 1rem;
-          border-radius: 6px;
-          box-shadow: 0 2px 12px rgba(0, 0, 0, 0.2);
-          z-index: 9999;
-          font-weight: 600;
-          font-size: 0.85rem;
-        }
-
-        /* ============= RESPONSIVE ============= */
-        @media (max-width: 991px) {
-          .summary-card {
-            margin-top: 0.75rem;
-          }
-        }
-
-        @media (max-width: 576px) {
-          .checkout-page-wrapper {
-            padding: 0.75rem 0 1.5rem 0;
-          }
-
-          .checkout-header {
-            padding: 0.75rem;
-          }
-
-          .checkout-title {
-            font-size: 1.1rem;
-          }
-
-          .btn-back {
-            font-size: 0.8rem;
-            padding: 0.4rem 0.75rem;
-          }
-
-          .card-body-custom {
-            padding: 0.75rem;
-          }
-
-          .item-img {
-            width: 40px;
-            height: 40px;
-          }
-
-          .item-name {
-            font-size: 0.8rem;
-          }
-        }
-      `}</style>
     </>
   );
 }

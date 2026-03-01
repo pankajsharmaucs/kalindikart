@@ -15,6 +15,7 @@ export default function CategoryPage({ params }) {
   const filtered = products.filter(
     (p) => p.category && p.category.toLowerCase() === category.toLowerCase()
   );
+  
 
   // Capitalize title nicely
   const pageTitle =

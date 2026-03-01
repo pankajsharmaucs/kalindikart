@@ -4,11 +4,12 @@ import { pool } from '../../db.js';
 export async function GET(req) {
   try {
     const { searchParams } = new URL(req.url);
-    const mobile = searchParams.get('mobile');
+    // Renamed variable to 'identifier' since it can be email or mobile
+    const identifier = searchParams.get('identifier'); 
 
-    if (!mobile) {
+    if (!identifier) {
       return NextResponse.json(
-        { error: 'Mobile is required' },
+        { error: 'Identifier (Mobile or Email) is required' },
         { status: 400 }
       );
     }
@@ -24,9 +25,9 @@ export async function GET(req) {
         pincode,
         landmark
        FROM users
-       WHERE mobile = ?
+       WHERE mobile = ? OR LOWER(email) = LOWER(?)
        LIMIT 1`,
-      [mobile]
+      [identifier, identifier]
     );
 
     if (!rows.length) {
@@ -38,7 +39,7 @@ export async function GET(req) {
       user: rows[0],
     });
   } catch (err) {
-    console.error('GET USER BY MOBILE ERROR:', err);
+    console.error('GET USER ERROR:', err);
     return NextResponse.json(
       { error: 'Server error' },
       { status: 500 }

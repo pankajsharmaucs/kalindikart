@@ -15,6 +15,7 @@ export default function CartPage() {
   const isLoggedIn = useCartStore((state) => state.isLoggedIn);
 
   const [loading, setLoading] = useState(true);
+  const getIdentifier = () => localStorage.getItem('userMobile') || localStorage.getItem('userEmail');
 
   // Fetch cart from DB if logged in
   useEffect(() => {
@@ -44,36 +45,49 @@ export default function CartPage() {
 
   // Remove item
   const handleRemove = async (product_id) => {
-    removeFromCart(product_id); // Optimistic UI
+    removeFromCart(product_id); // Optimistic UI update
 
     if (isLoggedIn) {
-      const userMobile = localStorage.getItem('userMobile');
+      const identifier = getIdentifier();
       try {
-        await fetch('/api/cart', {
+        const res = await fetch('/api/cart', {
           method: 'DELETE',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ userId: userMobile, productId: product_id }),
+          body: JSON.stringify({
+            userId: identifier,
+            productId: product_id
+          }),
         });
+        if (!res.ok) throw new Error('Failed to delete from server');
       } catch (err) {
         console.error('Remove failed:', err);
+        // Optional: Revert optimistic UI if server fails
       }
     }
   };
 
   // Update quantity
   const handleUpdateQuantity = async (product_id, quantity) => {
-    if (quantity <= 0) return;
+    if (quantity <= 0) {
+      handleRemove(product_id);
+      return;
+    }
 
-    updateQuantity(product_id, quantity); // Optimistic UI
+    updateQuantity(product_id, quantity); // Optimistic UI update
 
     if (isLoggedIn) {
-      const userMobile = localStorage.getItem('userMobile');
+      const identifier = getIdentifier();
       try {
-        await fetch('/api/cart', {
+        const res = await fetch('/api/cart', {
           method: 'PUT',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ userId: userMobile, productId: product_id, quantity }),
+          body: JSON.stringify({
+            userId: identifier,
+            productId: product_id,
+            quantity: Number(quantity)
+          }),
         });
+        if (!res.ok) throw new Error('Failed to update server');
       } catch (err) {
         console.error('Update failed:', err);
       }

@@ -37,7 +37,7 @@ export default function CategoryClient({ slug }) {
     <div className="container py-4">
 
       <div
-        className="col-12 text-center py-5 mb-3"
+        className="col-12 text-center py-md-5 py-2 mb-3"
         style={{
           background: 'linear-gradient(rgba(255,255,255,0.4), rgba(255,255,255,0.4)), url("/assets/parallex_bg.png")',
           backgroundColor: '#f8e8c6', 
@@ -45,7 +45,7 @@ export default function CategoryClient({ slug }) {
           borderRadius: '8px'
         }}
       >
-        <h1 className="fw-bold mb-2" style={{ color: '#4a4a4a', textTransform: "capitalize", fontSize: '2rem' }}>
+        <h1 className="fw-bold mb-2" style={{ color: 'rgb(9, 106, 117)', textTransform: "capitalize", fontSize: '2rem' }}>
           {readableSlug}
         </h1>
         <nav aria-label="breadcrumb">

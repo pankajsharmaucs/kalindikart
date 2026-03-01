@@ -58,9 +58,21 @@ body {
 .kk-nav-desktop {
     display: none;
     align-items: center;
-    gap: 0.5rem;
     flex: 1;
     justify-content: center;
+     color: #264767;
+    background: #fff;
+    border: none;
+    border-left-width: medium;
+    border-left-style: none;
+    border-left-color: currentcolor;
+    border-left: 3px solid #0000;
+    align-items: center;
+    font-size: 14px;
+    text-decoration: none;
+    transition: all .2s;
+    letter-spacing: 2px;
+    font-weight: 700;
 }
 
 @media (min-width: 992px) {
@@ -91,9 +103,23 @@ body {
 
 .kk-cat-dropdown {
     position: relative;
+    color: #264767;
+    background: #fff;
+    border: none;
+    border-left-width: medium;
+    border-left-style: none;
+    border-left-color: currentcolor;
+    border-left: 3px solid #0000;
+    align-items: center;
+    font-size: 14px;
+    text-decoration: none;
+    transition: all .2s;
+    display: flex;
+    letter-spacing: 2px;
+    font-weight: 800;
 }
 
-.kk-mega-panel {
+/* .kk-mega-panel {
     position: absolute;
     top: 80%;
     left: 50%;
@@ -105,6 +131,44 @@ body {
     width: 750px;
     border-top: 3px solid var(--primary);
     z-index: 9999999999 !important;
+} */
+
+/* Initial state when the panel mounts */
+.kk-mega-panel {
+  position: absolute;
+  top: 80%;
+  left: 50%;
+  transform: translateX(-50%) translateY(12px) scale(0.98);
+  background: white;
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.12);
+  border-radius: 8px;
+  margin-top: 0.5rem;
+  width: 750px;
+  border-top: 3px solid var(--primary);
+  z-index: 9999999999 !important;
+
+  opacity: 0;
+  animation: kkDropdownIn 0.22s cubic-bezier(0.2, 0.8, 0.2, 1) forwards;
+  will-change: transform, opacity;
+}
+
+/* Keyframes for open animation */
+@keyframes kkDropdownIn {
+  from {
+    opacity: 0;
+    transform: translateX(-50%) translateY(12px) scale(0.98);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(-50%) translateY(0) scale(1);
+  }
+}
+
+/* When dropdown is open */
+.kk-mega-panel.is-open {
+    opacity: 1;
+    pointer-events: auto;
+    transform: translateX(-50%) translateY(0) scale(1);
 }
 
 .kk-mega-layout {
@@ -494,11 +558,12 @@ body {
     justify-content: space-between;
     align-items: center;
     gap: 0.75rem;
-    padding: 1px 1rem;
+    padding: 5px 1rem;
     background: linear-gradient(135deg, #0b4c64, #1798a1);
     color: white;
 }
-.kk-close-sidebar{
+
+.kk-close-sidebar {
     background: none;
     border: none;
 }
@@ -590,6 +655,7 @@ body {
     cursor: pointer;
     font-size: 13px;
     transition: all 0.2s;
+    letter-spacing: 1px;
 }
 
 .kk-sidebar-cats button:hover {
@@ -617,13 +683,13 @@ body {
 }
 
 .kk-sidebar-subs a {
-    display: block;
-    padding: 0.65rem 1rem 0.65rem 3rem;
     color: var(--text-secondary);
-    text-decoration: none;
+    border-left: 3px solid #0000;
+    padding: 0px 23px;
     font-size: 12px;
-    border-left: 3px solid transparent;
-    transition: all 0.2s;
+    text-decoration: none;
+    transition: all .2s;
+    display: block;
 }
 
 .kk-sidebar-subs a:hover {

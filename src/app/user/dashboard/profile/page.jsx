@@ -41,7 +41,7 @@ export default function ProfilePage() {
   /* ---------------- FETCH USER (DB) ---------------- */
   const fetchUserDetails = async () => {
     try {
-      const res = await fetch(`/api/user/by-mobile?mobile=${userId}`);
+      const res = await fetch(`/api/user/by-mobile?identifier=${userId}`);
       const data = await res.json();
 
       if (data.exists) {

@@ -4,6 +4,7 @@
     --light-bg: #f0f8ff;     /* Your brand light */
     --accent-teal: #00897b;  /* From the image screenshot */
     --text-muted: #888;
+    --secondary-bg: #c3264a;
 }
 
 .product-page-v2 {
@@ -47,6 +48,18 @@
 /* Action Buttons */
 .btn-add-cart {
     background-color: var(--primary-gold);
+    color: white;
+    border: none;
+    padding: 12px 24px;
+    border-radius: 4px;
+    font-weight: 600;
+    letter-spacing: 0.5px;
+    flex-grow: 2;
+    transition: opacity 0.2s;
+}
+
+.btn-checkout {
+    background-color: var(--secondary-bg);
     color: white;
     border: none;
     padding: 12px 24px;
@@ -106,6 +119,38 @@
     color: #444;
     line-height: 1.8;
 }
+
+
+/* Container for the tabs */
+#productTab {
+    border-bottom: 1px solid #eee !important; /* Light line across the whole row */
+}
+
+/* Default state for all tabs */
+#productTab .nav-link {
+    color: #888 !important; /* Grey for inactive */
+    background: none !important;
+    border: none !important;
+    border-bottom: 3px solid transparent !important; /* Reserve space for the border */
+    transition: all 0.3s ease;
+    padding-bottom: 12px !important;
+}
+
+/* ACTIVE STATE HIGHLIGHT */
+#productTab .nav-link.active {
+    color: #01A9E6 !important; /* Your Primary Gold/Blue */
+    border-bottom: 3px solid #01A9E6 !important; /* Thick bottom highlight */
+    font-weight: 700 !important;
+}
+
+/* HOVER STATE (Non-active) */
+#productTab .nav-link:hover:not(.active) {
+    color: #333 !important;
+    border-bottom: 3px solid #ccc !important;
+}
+
+
+/* =================Media====== */
 
 /* Responsive adjustments */
 @media (max-width: 768px) {

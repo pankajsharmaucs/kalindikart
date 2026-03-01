@@ -7,6 +7,7 @@ import Image from 'next/image';
 import { useAuth } from '../context/AuthContext';
 import { useCartStore } from '../stores/cartStore';
 import "./header.css";
+import FloatingSocialButtons from './FloatingSocialButtons';
 
 /**
  * Utility to close Bootstrap offcanvas if used alongside Next.js
@@ -37,6 +38,28 @@ export default function Header() {
   const [showSearchModal, setShowSearchModal] = useState(false);
   const [isCatsOpen, setIsCatsOpen] = useState(false);
 
+  const [searchResults, setSearchResults] = useState([]);
+  const [isSearching, setIsSearching] = useState(false);
+
+  const handleInputChange = async (e) => {
+    const value = e.target.value;
+    setSearchQuery(value);
+
+    if (value.length > 1) {
+      try {
+        const res = await fetch(`/api/products/search?q=${encodeURIComponent(value)}`);
+        const data = await res.json();
+        // data should be your array: [{"id":2, ...}, {"id":1, ...}]
+        setSearchResults(Array.isArray(data) ? data : []);
+      } catch (err) {
+        console.error("Fetch error:", err);
+        setSearchResults([]);
+      }
+    } else {
+      setSearchResults([]);
+    }
+  };
+
   // --- Store ---
   const cartCount = useCartStore((state) => state.cartCount);
   const fetchCartFromDB = useCartStore((state) => state.fetchCartFromDB);
@@ -62,10 +85,31 @@ export default function Header() {
     router.push('/');
   };
 
+  // Live Search Effect (Debounced)
+  useEffect(() => {
+    const delayDebounceFn = setTimeout(async () => {
+      if (searchQuery.trim().length > 1) {
+        try {
+          const res = await fetch(`/api/products/search?q=${encodeURIComponent(searchQuery)}`);
+          const data = await res.json();
+          setSearchResults(Array.isArray(data) ? data : []);
+        } catch (err) {
+          console.error("Search API Error:", err);
+        }
+      } else {
+        setSearchResults([]);
+      }
+    }, 300); // Wait 300ms
+
+    return () => clearTimeout(delayDebounceFn);
+  }, [searchQuery]);
+
+  // Final Submit Handler
   const handleSearch = (e) => {
-    e.preventDefault();
+    if (e) e.preventDefault();
     if (searchQuery.trim()) {
       setShowSearchModal(false);
+      setSearchResults([]); // Clear dropdown
       router.push(`/products?search=${encodeURIComponent(searchQuery.trim())}`);
       setSearchQuery('');
     }
@@ -203,8 +247,8 @@ export default function Header() {
                             >
                               {cat.image && (
                                 <img
-                                  src={cat.image.startsWith('http') || cat.image.startsWith('/') 
-                                    ? cat.image 
+                                  src={cat.image.startsWith('http') || cat.image.startsWith('/')
+                                    ? cat.image
                                     : `/assets/category/${cat.id}/${cat.image.split('/').pop()}`}
                                   alt={cat.category_name}
                                 />
@@ -229,11 +273,11 @@ export default function Header() {
                                   onClick={closeNavbar}
                                 >
                                   {sub.image && (
-                                    <Image 
-                                      src={`/assets/subcat/${sub.id}/${sub.image.split('/').pop()}`} 
-                                      alt={sub.sub_category_name} 
-                                      width={60} 
-                                      height={60} 
+                                    <Image
+                                      src={`/assets/subcat/${sub.id}/${sub.image.split('/').pop()}`}
+                                      alt={sub.sub_category_name}
+                                      width={60}
+                                      height={60}
                                     />
                                   )}
                                   <p>{sub.sub_category_name}</p>
@@ -289,7 +333,7 @@ export default function Header() {
             <div className="kk-sidebar-mobile" ref={mobileMenuRef}>
               <div className="kk-sidebar-top">
                 <Link href="/" onClick={closeNavbar}>
-                  <img src="/main/kalindikart_logo.png" style={{width:"100px"}} alt="KalindiKart" className="kk-mobile-logo" />
+                  <img src="/main/kalindikart_logo.png" style={{ width: "100px" }} alt="KalindiKart" className="kk-mobile-logo" />
                 </Link>
                 <button className="kk-close-sidebar" onClick={() => setIsMobileMenuOpen(false)}>
                   <i className="fas fa-times"></i>
@@ -298,7 +342,7 @@ export default function Header() {
 
               <div className="kk-sidebar-nav">
                 <Link href={isLoggedIn ? "/user/dashboard" : "/"} onClick={closeNavbar}>
-                  <i className={isLoggedIn ? "fas fa-tachometer-alt" : "fas fa-home"}></i> 
+                  <i className={isLoggedIn ? "fas fa-tachometer-alt" : "fas fa-home"}></i>
                   {isLoggedIn ? " Dashboard" : " Home"}
                 </Link>
 
@@ -319,6 +363,14 @@ export default function Header() {
                       return (
                         <div key={cat.id} className="kk-cat-item">
                           <button className="kk-cat-btn" onClick={() => toggleMobileCategory(slug)}>
+                            {cat.image && (
+                              <img
+                                src={cat.image.startsWith('http') || cat.image.startsWith('/')
+                                  ? cat.image
+                                  : `/assets/category/${cat.id}/${cat.image.split('/').pop()}`}
+                                alt={cat.category_name}
+                              />
+                            )}
                             <span>{cat.category_name}</span>
                             <i className={`fas fa-plus ${isExpanded ? 'rotate-45' : ''}`} />
                           </button>
@@ -326,6 +378,14 @@ export default function Header() {
                             <div className="kk-sidebar-subs">
                               {subcategories.filter(s => s.category_id === cat.id).map(sub => (
                                 <Link key={sub.id} href={`/category/${slug}/${sub.slug}`} onClick={closeNavbar}>
+                                  {sub.image && (
+                                    <Image
+                                      src={`/assets/subcat/${sub.id}/${sub.image.split('/').pop()}`}
+                                      alt={sub.sub_category_name}
+                                      width={40}
+                                      height={40}
+                                    />
+                                  )}
                                   {sub.sub_category_name}
                                 </Link>
                               ))}
@@ -352,27 +412,106 @@ export default function Header() {
           </>
         )}
 
-        {/* Search Modal */}
         {showSearchModal && (
-          <div className="kk-search-modal" onClick={() => setShowSearchModal(false)}>
-            <div className="kk-search-modal-content" onClick={(e) => e.stopPropagation()}>
-              <div className="kk-search-modal-header">
-                <h3>Search Products</h3>
-                <button onClick={() => setShowSearchModal(false)}><i className="fas fa-times"></i></button>
+          <div
+            className="kk-search-modal position-fixed top-0 start-0 w-100 h-100 d-flex justify-content-center px-3"
+            style={{ zIndex: 2000, backgroundColor: 'rgba(0,0,0,0.8)', backdropFilter: 'blur(8px)', paddingTop: '10vh' }}
+            onClick={() => setShowSearchModal(false)}
+          >
+            <div
+              className="kk-search-modal-content bg-white rounded-4 shadow-lg w-100 p-3 p-md-4"
+              style={{ maxWidth: '600px', height: 'fit-content', animation: 'slideDown 0.3s ease' }}
+              onClick={(e) => e.stopPropagation()}
+            >
+              {/* Header */}
+              <div className="d-flex justify-content-between align-items-center mb-3">
+                <h5 className="fw-bold mb-0" style={{ color: '#00739D' }}>Search Products</h5>
+                <button className="btn-close shadow-none" onClick={() => setShowSearchModal(false)}></button>
               </div>
-              <form className="kk-modal-search-form" onSubmit={handleSearch}>
-                <input
-                  ref={searchInputRef}
-                  type="text"
-                  placeholder="What are you looking for?"
-                  value={searchQuery}
-                  onChange={(e) => setSearchQuery(e.target.value)}
-                />
-                <button type="submit"><i className="fas fa-search"></i></button>
-              </form>
+
+              {/* Search Form Wrapper */}
+              <div className="position-relative">
+                <form onSubmit={handleSearch}>
+                  <div className="input-group input-group-lg border rounded-3 overflow-hidden" style={{ borderColor: '#01A9E6' }}>
+                    <input
+                      ref={searchInputRef}
+                      type="text"
+                      className="form-control border-0 shadow-none px-3"
+                      placeholder="Start typing..."
+                      value={searchQuery}
+                      onChange={(e) => setSearchQuery(e.target.value)}
+                      autoFocus
+                    />
+                    <button className="btn text-white px-4" type="submit" style={{ backgroundColor: '#01A9E6' }}>
+                      <i className="fas fa-search"></i>
+                    </button>
+                  </div>
+                </form>
+
+                {/* --- DROPDOWN RESULTS --- */}
+                {searchResults.length > 0 && (
+                  <div
+                    className="list-group position-absolute w-100 shadow-lg mt-2 rounded-3 border-0"
+                    style={{
+                      zIndex: 3000,
+                      maxHeight: '350px',
+                      overflowY: 'auto',
+                      top: '100%',
+                      backgroundColor: '#fff'
+                    }}
+                  >
+                    {searchResults.map((item) => (
+                      <div
+                        key={item.id}
+                        className="list-group-item list-group-item-action d-flex align-items-center p-3 border-0 border-bottom"
+                        style={{ cursor: 'pointer' }}
+                        onClick={() => {
+                          // Build the dynamic URL: /products/category-slug/product-slug
+                          const categoryPath = item.category_slug ? item.category_slug.toLowerCase().replace(/\s+/g, '-') : 'all';
+                          const productPath = item.slug;
+
+                          router.push(`/products/${categoryPath}/${productPath}`);
+
+                          // UI Cleanup
+                          setShowSearchModal(false);
+                          setSearchResults([]);
+                          setSearchQuery('');
+                        }}
+                      >
+                        <img
+                          src={`/assets/products/${item.id}/${item.images?.[0]}`}
+                          alt=""
+                          className="rounded border me-3"
+                          style={{ width: '45px', height: '45px', objectFit: 'cover' }}
+                          onError={(e) => e.target.src = '/placeholder.png'}
+                        />
+                        <div className="flex-grow-1 text-start">
+                          <div className="fw-bold text-dark text-truncate" style={{ maxWidth: '200px', fontSize: '0.9rem' }}>
+                            {item.title}
+                          </div>
+                          <small className="text-muted d-block" style={{ fontSize: '0.75rem' }}>{item.category_name}</small>
+                        </div>
+                        <div className="text-end ps-2">
+                          <span className="fw-bold" style={{ color: '#00739D' }}>₹{item.price}</span>
+                        </div>
+                      </div>
+                    ))}
+
+                    {/* View All Option */}
+                    <button
+                      className="list-group-item list-group-item-action text-center py-2 bg-light small fw-bold"
+                      onClick={handleSearch}
+                      style={{ color: '#01A9E6' }}
+                    >
+                      View All Results for "{searchQuery}"
+                    </button>
+                  </div>
+                )}
+              </div>
             </div>
           </div>
         )}
+
       </header>
 
       {/* Bootstrap Offcanvas (kept for secondary actions) */}
@@ -387,6 +526,9 @@ export default function Header() {
           <Link href="/cart" className="offcanvas-link" onClick={closeOffcanvas}>🛒 My Cart</Link>
         </div>
       </div>
+
+      <FloatingSocialButtons />
+
     </>
   );
 }

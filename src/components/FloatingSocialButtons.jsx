@@ -36,7 +36,7 @@ const FloatingSocialButtons = () => {
         style={{
           width: "55px",
           height: "47px",
-          borderRadius: "22px 0px 0px 22px",
+          borderRadius: "2px",
           display: "flex",
           alignItems: "center",
           justifyContent: "center",
@@ -64,7 +64,7 @@ const FloatingSocialButtons = () => {
         style={{
           width: "39px",
           height: "49px",
-          borderRadius: "22px 0px 0px 22px",
+          borderRadius: "2px",
           display: "flex",
           alignItems: "center",
           justifyContent: "center",
