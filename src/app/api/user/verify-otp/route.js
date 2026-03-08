@@ -27,7 +27,7 @@ export async function POST(req) {
     const token = jwt.sign(
       { id: user.id, mobile: user.mobile },
       JWT_SECRET,
-      { expiresIn: '7d' }
+      { expiresIn: '1d' }
     );
 
     return NextResponse.json({

@@ -4,6 +4,7 @@ import React, { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { useCartStore } from '../../stores/cartStore';
 import './checkout.css'
+import Swal from "sweetalert2";
 
 export default function CheckoutPage() {
   const router = useRouter();
@@ -89,8 +90,15 @@ export default function CheckoutPage() {
 
   const validateAddress = () => {
     if (!fullname || !mobile || !line1 || !pincode) {
-      setToast('Please fill all required fields');
-      setTimeout(() => setToast(''), 3000);
+      Swal.fire({
+        toast: true,
+        position: "bottom-start",
+        icon: "error",
+        title: "Please fill all address ",
+        showConfirmButton: false,
+        timer: 3000,
+        timerProgressBar: true
+      });
       return false;
     }
     return true;
@@ -130,6 +138,12 @@ export default function CheckoutPage() {
 
       setSuccess('Address saved successfully');
       setTimeout(() => setSuccess(''), 3000);
+
+      // close modal
+      const modalElement = document.getElementById("editAddressModal");
+      const modal = window.bootstrap.Modal.getInstance(modalElement);
+      modal.hide();
+
     } catch (err) {
       setError('Something went wrong');
     } finally {
@@ -249,33 +263,44 @@ export default function CheckoutPage() {
                     data-bs-target="#editAddressModal"
                     style={{ fontSize: '0.75rem' }}
                   >
-                    <i className="fas fa-edit me-1"></i> EDIT
+                    <i className="fas fa-edit me-1 "></i> Add/Edit Address
                   </button>
                 </div>
 
-                <div className="card-body-custom p-4">
-                  <div className="row">
-                    <div className="col-12 mb-3">
-                      <h6 className="fw-bold mb-1 text-capitalize">{fullname}</h6>
-                      <p className="text-muted small mb-0">
-                        <i className="fas fa-phone-alt me-2"></i>{mobile}
-                        <br />
-                        <i className="fas fa-envelope me-2"></i>{email}
-                      </p>
+                {
+                  fullname && mobile && email && pincode && (
+                    <div className="card-body-custom p-4">
+                      <div className="row">
+
+                        <div className="col-12 mb-3">
+                          <h6 className="fw-bold mb-1 text-capitalize">{fullname}</h6>
+                          <p className="text-muted small mb-0">
+                            <i className="fas fa-phone-alt me-2"></i>{mobile}
+                            <br />
+                            <i className="fas fa-envelope me-2"></i>{email}
+                          </p>
+                        </div>
+
+
+                        <div className="col-12">
+                          <p className="mb-1" style={{ fontSize: '0.95rem', color: '#333' }}>
+                            {line1}, {line2}
+                          </p>
+                          <p className="mb-1" style={{ fontSize: '0.95rem', color: '#333' }}>
+                            {line3}
+                          </p>
+                          <p className="fw-bold" >
+                            PIN: {pincode} {landmark && `(Near ${landmark})`}
+                          </p>
+                        </div>
+
+
+                      </div>
                     </div>
-                    <div className="col-12">
-                      <p className="mb-1" style={{ fontSize: '0.95rem', color: '#333' }}>
-                        {line1}, {line2}
-                      </p>
-                      <p className="mb-1" style={{ fontSize: '0.95rem', color: '#333' }}>
-                        {line3}
-                      </p>
-                      <p className="fw-bold" style={{ color: 'var(--primary-gold)' }}>
-                        PIN: {pincode} {landmark && `(Near ${landmark})`}
-                      </p>
-                    </div>
-                  </div>
-                </div>
+                  )
+                }
+
+
               </div>
 
               {/* BOOTSTRAP 5 MODAL */}
@@ -293,53 +318,37 @@ export default function CheckoutPage() {
 
                         <div className="flex-grow-1">
                           <div style={{ fontSize: '0.7rem', color: '#666', textTransform: 'uppercase', fontWeight: '700', letterSpacing: '0.5px' }}>
-                            Contact Details
-                          </div>
-
-                          <div className="d-flex flex-wrap gap-3 mt-1">
-                            {/* MOBILE VALIDATION & DISPLAY */}
-                            <span style={{ fontSize: '0.9rem', fontWeight: '600', color: mobile ? '#333' : '#dc3545' }}>
-                              <i className={`fas fa-phone-alt me-2 ${mobile ? 'text-muted' : 'text-danger animate-pulse'}`}></i>
-                              {mobile && mobile.length === 10 ? (
-                                mobile
-                              ) : (
-                                <span style={{ fontSize: '0.8rem', fontWeight: '400', fontStyle: 'italic' }}>
-                                  Mobile required *
-                                </span>
-                              )}
-                            </span>
-
-                            {/* EMAIL VALIDATION & DISPLAY */}
-                            <span style={{ fontSize: '0.9rem', fontWeight: '600', color: email && email.includes('@') ? '#333' : '#dc3545' }}>
-                              <i className={`fas fa-envelope me-2 ${email && email.includes('@') ? 'text-muted' : 'text-danger'}`}></i>
-                              {email && email.includes('@') ? (
-                                email
-                              ) : (
-                                <span style={{ fontSize: '0.8rem', fontWeight: '400', fontStyle: 'italic' }}>
-                                  Email required *
-                                </span>
-                              )}
-                            </span>
+                            Deleivery Details
                           </div>
                         </div>
 
-                        <div className="text-muted" style={{ fontSize: '0.75rem', fontStyle: 'italic' }}>
-                          (Delivery Information)
-                        </div>
+
 
                         {/* --- YOUR EXISTING FORM START --- */}
 
-                        {!mobile || mobile === "" && (
+                        <div className="col-12">
+                          <label className="form-label small fw-bold">Full Name</label>
+                          <input type="text" className="custom-input" value={fullname} onChange={(e) => setFullname(e.target.value)} />
+                        </div>
+
+                        <div className="col-12">
+                          <label className="form-label small fw-bold">Mobile</label>
                           <input
-                            type="text"
+                            type="tel"
                             className="custom-input"
                             placeholder="Enter mobile"
+                            inputMode="numeric"
+                            pattern="[0-9]*"
+                            maxLength={10}
                             value={mobile}
-                            onChange={(e) => setMobile(e.target.value.replace(/\D/g, ''))}
+                            onChange={(e) =>
+                              setMobile(e.target.value.replace(/\D/g, '').slice(0, 10))
+                            }
                           />
-                        )}
+                        </div>
 
-                        {!email || email === "" && (
+                        <div className="col-12">
+                          <label className="form-label small fw-bold">Email Address</label>
                           <input
                             type="email"
                             className="custom-input"
@@ -347,13 +356,9 @@ export default function CheckoutPage() {
                             value={email}
                             onChange={(e) => setEmail(e.target.value)}
                           />
-                        )}
-
-
-                        <div className="col-12">
-                          <label className="form-label small fw-bold">Full Name</label>
-                          <input type="text" className="custom-input" value={fullname} onChange={(e) => setFullname(e.target.value)} />
                         </div>
+
+
                         <div className="col-12">
                           <label className="form-label small fw-bold">Address Line 1</label>
                           <input type="text" className="custom-input" value={line1} onChange={(e) => setLine1(e.target.value)} />
@@ -375,24 +380,26 @@ export default function CheckoutPage() {
                           <label className="form-label small fw-bold">Landmark</label>
                           <input type="text" className="custom-input" value={landmark} onChange={(e) => setLandmark(e.target.value)} />
                         </div>
+
                         {/* --- YOUR EXISTING FORM END --- */}
                       </div>
 
                       {error && <div className="text-danger small mt-2"><i className="fas fa-exclamation-circle me-1"></i>{error}</div>}
                       {success && <div className="text-success small mt-2"><i className="fas fa-check-circle me-1"></i>{success}</div>}
                     </div>
-                    <div className="modal-footer border-top-0">
-                      <button type="button" className="btn btn-secondary btn-sm" data-bs-dismiss="modal">Close</button>
+
+                    <div className="modal-footer border-top-0 justify-content-center">
                       <button
                         type="button"
-                        className="btn btn-primary btn-sm px-4"
+                        className="btn btn-success px-4"
                         onClick={handleSaveAddress}
                         disabled={saveLoading}
-                        style={{ backgroundColor: 'var(--primary-gold)', border: 'none' }}
+                        style={{ backgroundColor: 'var(--primary-gold)', border: 'none', minWidth: '160px' }}
                       >
-                        {saveLoading ? 'Updating...' : 'Save Changes'}
+                        {saveLoading ? 'Updating...' : 'Update Address'}
                       </button>
                     </div>
+
                   </div>
                 </div>
               </div>
@@ -413,7 +420,7 @@ export default function CheckoutPage() {
                     {cartItems.map((item) => (
                       <div key={item.product_id} className="summary-item">
                         <img
-                          src={ `/assets/products/${item.product_id}/${resolveImage(item.images)}` }
+                          src={`/assets/products/${item.product_id}/${resolveImage(item.images)}`}
                           alt={item.title}
                           style={{ width: '40px', height: '40px', objectFit: 'cover' }}
                         />
@@ -472,15 +479,11 @@ export default function CheckoutPage() {
       </div >
 
       {/* Toast */}
-      {
-        toast && (
-          <div className="toast-msg">
-            <i className="fas fa-exclamation-triangle me-2"></i>
-            {toast}
-          </div>
-        )
-      }
-
+      {toast && (
+        <div className="toast-message">
+          {toast}
+        </div>
+      )}
 
     </>
   );

@@ -9,25 +9,26 @@ export default function ProductCard({ product }) {
   const { slug, category_slug, id, title, discount, price, rating = 4.5 } = product;
   const product_id = Number(id) || 0;
 
-  // Handle Image Logic
-  const img1 = `/assets/products/${product_id}/img1.jpg`;
-  const img2 = `/assets/products/${product_id}/img2.jpg`; 
+  // Handle Images dynamically
+  const rawImages = typeof product.images === 'string' ? JSON.parse(product.images) : product.images || [];
+  const imageList = rawImages.map(img => img.startsWith('http') ? img : `/assets/products/${product_id}/${img}`);
+
 
   const discountPercentage = Number(discount) || 0;
   const currentPrice = Number(price) || 0;
   const originalPrice = discountPercentage > 0 ? Math.round(currentPrice / (1 - discountPercentage / 100)) : currentPrice;
-  
+
   const re_category_slug = category_slug?.replace(/\s+/g, '-') || 'all';
 
   return (
     <div className="col-xl-3 col-lg-4 col-md-6 col-sm-6 col-6 mb-4">
       <Link href={`/products/${re_category_slug}/${slug}`} className="product-card-link">
         <div className="product-card">
-          
+
           {/* Image Container using --light-bg */}
           <div className="product-img-container">
-            <img src={img1} alt={title} className="product-img main-img" loading="lazy" />
-            <img src={img2} alt={title} className="product-img hover-img" loading="lazy" />
+            <img src={imageList[0]} alt={title} className="product-img main-img" loading="lazy" />
+            <img src={imageList[1]} alt={title} className="product-img hover-img" loading="lazy" />
 
             {/* Circular Discount Badge using --dark-gold (Blue accent) */}
             {discountPercentage > 0 && (
@@ -40,7 +41,7 @@ export default function ProductCard({ product }) {
           {/* Product Info */}
           <div className="product-info">
             <h3 className="product-title">{title || 'Handcrafted Brass Idol'}</h3>
-            
+
             {/* Rating Section using --primary-gold (Bright Blue) */}
             <div className="rating-container">
               <span className="stars">
@@ -53,9 +54,9 @@ export default function ProductCard({ product }) {
             <div className="price-container">
               <span className="current-price">Rs. {currentPrice.toLocaleString('en-IN')}.00</span>
               {discountPercentage > 0 && (
-                 <span className="original-price-strike">
-                   Rs. {originalPrice.toLocaleString('en-IN')}.00
-                 </span>
+                <span className="original-price-strike">
+                  Rs. {originalPrice.toLocaleString('en-IN')}.00
+                </span>
               )}
             </div>
 

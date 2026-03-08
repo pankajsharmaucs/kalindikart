@@ -15,7 +15,7 @@ export async function POST(req) {
 
     // 1. Resolve Identifier (Email or Mobile) to the DB Mobile Primary Key
     const [userRows] = await pool.query(
-      'SELECT mobile FROM users WHERE mobile = ? OR email = ?',
+      'SELECT id FROM users WHERE mobile = ? OR email = ?',
       [userId, userId]
     );
 
@@ -26,7 +26,7 @@ export async function POST(req) {
       );
     }
 
-    const dbUserId = userRows[0].mobile;
+    const dbUserId = userRows[0].id;
 
     // 2. Sync loop using the resolved dbUserId
     for (const item of cartItems) {

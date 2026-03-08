@@ -13,10 +13,9 @@ export async function POST(req) {
       line3,
       pincode,
       landmark,
-      userId // This is the identifier from your auth state (email or mobile)
+      userId
     } = body;
 
-    // Use mobile or email as the fallback if userId isn't explicitly sent
     const identifier = userId || mobile || email;
 
     if (!fullname || !identifier || !line1 || !pincode) {
@@ -26,27 +25,25 @@ export async function POST(req) {
       );
     }
 
-    /* 1️⃣ FLEXIBLE LOOKUP 
-       Check if the user exists using the identifier (could be email or mobile)
-    */
+    // 1️⃣ Find user by mobile OR email
     const [existingUser] = await pool.query(
-      'SELECT id, mobile, email FROM users WHERE (mobile = ? AND mobile <> "") OR (email = ? AND email <> "") LIMIT 1',
-      [identifier, identifier]
+      `SELECT id, mobile, email
+   FROM users
+   WHERE mobile = ? OR email = ?
+   LIMIT 1`,
+      [mobile || "", email || ""]
     );
 
     if (!existingUser.length) {
       return NextResponse.json(
-        { success: false, error: 'User record not found. Please register first.' },
+        { success: false, error: 'User not found. Please register first.' },
         { status: 404 }
       );
     }
 
     const dbId = existingUser[0].id;
 
-    /* 2️⃣ UPDATE ADDRESS
-       We update via the internal 'id' which is the safest way to ensure 
-       we don't create duplicate records or fail FK constraints.
-    */
+    // 2️⃣ Update address using user id
     await pool.query(
       `UPDATE users SET
         fullname = ?,
@@ -59,23 +56,28 @@ export async function POST(req) {
         landmark = ?
        WHERE id = ?`,
       [
-        fullname, 
-        email || existingUser[0].email, // Keep existing email if new one is empty
-        mobile || existingUser[0].mobile, // Keep existing mobile if new one is empty
-        line1, 
-        line2, 
-        line3, 
-        pincode, 
-        landmark, 
+        fullname,
+        email || existingUser[0].email,
+        mobile || existingUser[0].mobile,
+        line1,
+        line2,
+        line3,
+        pincode,
+        landmark,
         dbId
       ]
     );
 
-    return NextResponse.json({ success: true, message: 'Address updated successfully' });
+    return NextResponse.json({
+      success: true,
+      message: "Address updated successfully"
+    });
+
   } catch (err) {
-    console.error('Checkout API error:', err);
+    console.error("Checkout API error:", err);
+
     return NextResponse.json(
-      { success: false, error: 'Server error' },
+      { success: false, error: "Server error" },
       { status: 500 }
     );
   }

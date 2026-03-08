@@ -20,6 +20,203 @@
     --status-error: #dc2626;
 }
 
+/* FILTER BAR */
+
+.order-filter-bar {
+    display: flex;
+    overflow-x: auto;
+    gap: 8px;
+    padding: 12px;
+    border-bottom: 1px solid #eee;
+    background: #fff;
+}
+
+.filter-btn {
+    padding: 6px 14px;
+    border-radius: 20px;
+    font-size: 12px;
+    font-weight: 600;
+    border: 1px solid #ddd;
+    background: white;
+    color: #666;
+    cursor: pointer;
+    white-space: nowrap;
+}
+
+.filter-btn.active {
+    background: #000;
+    color: white;
+    border: none;
+}
+
+
+
+/* ORDERS */
+
+.orders-container {
+    padding: 10px;
+}
+
+.order-card {
+    background: white;
+    border: 1px solid #eee;
+    border-radius: 8px;
+    margin-bottom: 14px;
+    overflow: hidden;
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.04);
+}
+
+
+
+/* HEADER */
+
+.order-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 12px;
+    border-bottom: 1px solid #eee;
+}
+
+.order-number {
+    font-weight: 700;
+    font-size: 14px;
+}
+
+.order-date {
+    font-size: 12px;
+    color: #888;
+}
+
+
+
+/* STATUS BADGE */
+
+.status-badge {
+    padding: 4px 10px;
+    border-radius: 12px;
+    font-size: 11px;
+    font-weight: 600;
+    text-transform: capitalize;
+}
+
+.status-booked {
+    background: #fff3cd;
+    color: #856404;
+}
+
+.status-shipped {
+    background: #cfe2ff;
+    color: #084298;
+}
+
+.status-delivered {
+    background: #d1e7dd;
+    color: #0f5132;
+}
+
+.status-cancelled {
+    background: #f8d7da;
+    color: #842029;
+}
+
+
+
+/* ITEMS */
+
+.order-items {
+    padding: 12px;
+}
+
+.order-item {
+    display: flex;
+    align-items: center;
+    margin-bottom: 10px;
+}
+
+.product-img {
+    width: 50px;
+    height: 50px;
+    object-fit: cover;
+    border-radius: 6px;
+    border: 1px solid #eee;
+}
+
+.item-info {
+    margin-left: 10px;
+    flex: 1;
+}
+
+.product-name {
+    font-size: 13px;
+    font-weight: 600;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    max-width: 180px;
+}
+
+.product-meta {
+    font-size: 12px;
+    color: #777;
+}
+
+
+
+/* ACTION BUTTONS */
+
+.order-actions {
+    display: flex;
+    gap: 8px;
+    padding: 12px;
+    border-top: 1px solid #eee;
+}
+
+.btn-track {
+    background: #0d6efd;
+    color: white;
+    border: none;
+    padding: 6px 12px;
+    border-radius: 6px;
+    font-size: 12px;
+    font-weight: 600;
+    cursor: pointer;
+}
+
+.btn-track:hover {
+    background: #0b5ed7;
+}
+
+.btn-cancel {
+    border: 1px solid #dc3545;
+    background: white;
+    color: #dc3545;
+    padding: 6px 12px;
+    border-radius: 6px;
+    font-size: 12px;
+    font-weight: 600;
+    cursor: pointer;
+}
+
+.btn-cancel:hover {
+    background: #dc3545;
+    color: white;
+}
+
+
+
+/* EMPTY STATE */
+
+.no-orders {
+    text-align: center;
+    padding: 40px;
+    color: #999;
+    background: white;
+    border-radius: 8px;
+    border: 1px solid #eee;
+}
+
+
 body {
     font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
     background: var(--bg-light);
@@ -139,10 +336,25 @@ body {
     text-transform: uppercase;
 }
 
-.status-pending { background: #fffbeb; color: #b45309; }
-.status-processing { background: #eff6ff; color: #1d4ed8; }
-.status-delivered { background: #ecfdf5; color: #047857; }
-.status-cancelled { background: #fef2f2; color: #b91c1c; }
+.status-pending {
+    background: #fffbeb;
+    color: #b45309;
+}
+
+.status-processing {
+    background: #eff6ff;
+    color: #1d4ed8;
+}
+
+.status-delivered {
+    background: #ecfdf5;
+    color: #047857;
+}
+
+.status-cancelled {
+    background: #fef2f2;
+    color: #b91c1c;
+}
 
 /* ITEMS SECTION */
 .card-body {
@@ -164,10 +376,24 @@ body {
     border: 1px solid #eee;
 }
 
-.item-info { flex: 1; }
-.item-info .name { font-weight: 600; font-size: 0.95rem; }
-.item-info .qty { font-size: 0.85rem; color: var(--text-secondary); }
-.price { font-weight: 700; color: var(--primary-dark); }
+.item-info {
+    flex: 1;
+}
+
+.item-info .name {
+    font-weight: 600;
+    font-size: 0.95rem;
+}
+
+.item-info .qty {
+    font-size: 0.85rem;
+    color: var(--text-secondary);
+}
+
+.price {
+    font-weight: 700;
+    color: var(--primary-dark);
+}
 
 /* FOOTER ACTIONS */
 .card-footer {
@@ -178,7 +404,8 @@ body {
     gap: 1rem;
 }
 
-.btn-track, .btn-cancel {
+.btn-track,
+.btn-cancel {
     padding: 0.6rem 1.2rem;
     border-radius: 6px;
     font-weight: 600;
@@ -264,9 +491,17 @@ body {
 }
 
 @keyframes pulse {
-    0% { transform: scale(1); }
-    50% { transform: scale(1.1); }
-    100% { transform: scale(1); }
+    0% {
+        transform: scale(1);
+    }
+
+    50% {
+        transform: scale(1.1);
+    }
+
+    100% {
+        transform: scale(1);
+    }
 }
 
 .track-label {

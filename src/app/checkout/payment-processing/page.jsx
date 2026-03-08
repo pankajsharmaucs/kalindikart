@@ -38,12 +38,13 @@ export default function PaymentProcessing() {
         // 4. Send request to /api/orders
         // The backend will take these, SELECT the ID from the users table, 
         // and save it as user_id in the orders table.
+        const identifier = userMobile || userEmail;
+
         const res = await fetch('/api/orders', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
-            userId: userMobile || null,
-            userId: userEmail || null,
+            userId: identifier,
             payment_method: 'online',
             shipping_address: lastAddress || 'N/A',
           }),
@@ -62,39 +63,13 @@ export default function PaymentProcessing() {
         // Optional: Clear checkout-specific local storage but keep user sessions
         localStorage.removeItem('last_shipping_address');
 
-        Swal.fire({
-          title: '🎉 Payment Successful!',
-          html: `
-        <div style="text-align: center;">
-          <p>Your order <strong>${data.order_number}</strong> has been placed.</p>
-          <small class="text-muted">A confirmation has been sent to your registered info.</small>
-        </div>
-      `,
-          icon: 'success',
-          showCancelButton: true,
-          confirmButtonText: 'View Orders',
-          cancelButtonText: 'Continue Shopping',
-          confirmButtonColor: '#01A9E6', // --primary-gold
-          cancelButtonColor: '#00739D',  // --dark-gold
-        }).then((result) => {
-          if (result.isConfirmed) {
-            router.push('/user/dashboard/my-orders');
-          } else {
-            router.push('/');
-          }
-        });
+        router.push(`/order-success?order=${data.order_number}`);
 
       } catch (error) {
         clearInterval(progressInterval);
-        console.error("Payment Process Error:", error);
 
-        Swal.fire({
-          title: 'Payment Failed',
-          text: error.message,
-          icon: 'error',
-          confirmButtonColor: '#01A9E6'
-        });
-        router.push('/cart');
+        router.push(`/`);
+
       }
     };
 

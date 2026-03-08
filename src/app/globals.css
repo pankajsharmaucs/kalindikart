@@ -23,6 +23,28 @@
             background: var(--light-bg)
           }
 
+
+          
+        .btn-secondary {
+          background: linear-gradient(135deg,#C8294B,#C8294B);
+          color: white;
+          border: none;
+          padding: 0.85rem;
+          border-radius: 6px;
+          font-size: 0.95rem;
+          font-weight: 700;
+          cursor: pointer;
+          transition: all 0.3s ease;
+          margin-top: 0.75rem;
+        }
+
+        .btn-secondary:hover {
+          background: linear-gradient(135deg, #C8294B,#e95943);
+          transform: translateY(-2px);
+          box-shadow: 0 4px 12px rgba(201, 162, 39, 0.3);
+        }
+        
+
           /* ============================= */
           /* Primary Gold Buttons & Text   */
           /* ============================= */
