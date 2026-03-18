@@ -105,7 +105,7 @@ export default function AdminLayout({ children }) {
                     </button>
                   </li>
 
-                    <li>
+                  <li>
                     <button
                       onClick={() => router.push('/admin/manage-orders')}
                       className="dropdown-item d-flex align-items-center gap-2"
@@ -116,13 +116,13 @@ export default function AdminLayout({ children }) {
 
                   <li>
                     <button
-                      onClick={() => router.push('/admin/manage-website')}
+                      onClick={() => router.push('/admin/settings')}
                       className="dropdown-item d-flex align-items-center gap-2"
                     >
                       🌐 Manage Website
                     </button>
                   </li>
-
+                  {/* 
                   <li>
                     <button
                       onClick={() => router.push('/admin/manage-seo')}
@@ -130,7 +130,7 @@ export default function AdminLayout({ children }) {
                     >
                       🔎 Manage SEO
                     </button>
-                  </li>
+                  </li> */}
 
                   <li><hr className="dropdown-divider" /></li>
 

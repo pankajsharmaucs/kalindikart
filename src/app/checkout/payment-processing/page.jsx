@@ -40,6 +40,7 @@ export default function PaymentProcessing() {
         // and save it as user_id in the orders table.
         const identifier = userMobile || userEmail;
 
+
         const res = await fetch('/api/orders', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
@@ -51,6 +52,9 @@ export default function PaymentProcessing() {
         });
 
         const data = await res.json();
+
+        //  console.log(data);
+        // return;
 
         if (!res.ok || data.error) {
           throw new Error(data.error || 'Order creation failed');

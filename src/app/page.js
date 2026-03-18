@@ -6,10 +6,14 @@ import HeroSwiper from '../components/HeroSwiper';
 import NewArrivalsSection from '../components/newArrivals/page';
 import CategorySection from '../components/Home/CategorySection';
 import ProductSliderNew from '../components/sliders/ProductSliderNew';
+import Slider2 from '../components/Slider2';
 
 export default function HomePage() {
   return (
     <>
+
+
+
       {/* ================= HERO ================= */}
       <section className="hero-wrapper">
         <HeroSwiper />
@@ -93,7 +97,12 @@ export default function HomePage() {
       </section>
 
 
-       {/* ================= NEW ARRIVALS ================= */}
+      {/* ================= NEW ARRIVALS ================= */}
+      <section className="section-spacing">
+        <Slider2 />
+      </section>
+
+      {/* ================= NEW ARRIVALS ================= */}
       {/* <section className="section-spacing">
         <ProductSliderNew />
       </section> */}

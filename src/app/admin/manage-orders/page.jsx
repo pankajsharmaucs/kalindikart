@@ -95,6 +95,28 @@ export default function AdminOrders() {
     }
   };
 
+  const showAddressPopup = (order) => {
+    Swal.fire({
+      title: 'Shipping Address',
+      html: `
+      <div style="text-align:left; font-size:14px;">
+        <p><strong>Name:</strong> ${order.fullname || 'N/A'}</p>
+        <p><strong>Mobile:</strong> ${order.mobile || 'N/A'}</p>
+        <p><strong>Email:</strong> ${order.email || 'N/A'}</p>
+        <hr/>
+        <p><strong>Address Line 1:</strong> ${order.address_line1 || 'N/A'}</p>
+        <p><strong>Address Line 2:</strong> ${order.address_line2 || 'N/A'}</p>
+        <p><strong>Address Line 3:</strong> ${order.address_line3 || 'N/A'}</p>
+        <p><strong>Landmark:</strong> ${order.landmark || 'N/A'}</p>
+        <p><strong>Pincode:</strong> ${order.pincode || 'N/A'}</p>
+      </div>
+    `,
+      icon: 'info',
+      confirmButtonText: 'Close',
+      width: '500px'
+    });
+  };
+
   /** Open ship modal */
   const openShipModal = (order) => {
     setShipData({
@@ -143,6 +165,151 @@ export default function AdminOrders() {
     }
   };
 
+  const printInvoice = (order) => {
+    const invoiceWindow = window.open('', '_blank');
+
+    const gstRate = 18;
+    const price = parseFloat(order.price || 0);
+    const qty = parseInt(order.order_qty || 0);
+    const subtotal = price * qty;
+    const gstAmount = (subtotal * gstRate) / 100;
+    const total = subtotal + gstAmount;
+
+    invoiceWindow.document.write(`
+    <html>
+      <head>
+        <title>Invoice - ${order.order_number}</title>
+        <style>
+          body {
+            font-family: Arial;
+            padding: 20px;
+            color: #000;
+          }
+          .header {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 20px;
+          }
+          .box {
+            width: 48%;
+          }
+          h2, h4 {
+            margin: 0 0 10px 0;
+          }
+          table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+          }
+          table, th, td {
+            border: 1px solid #000;
+          }
+          th, td {
+            padding: 8px;
+            text-align: center;
+          }
+          .text-left {
+            text-align: left;
+          }
+          .footer {
+            margin-top: 40px;
+            display: flex;
+            justify-content: space-between;
+          }
+          .note {
+            margin-top: 20px;
+            font-size: 12px;
+            text-align: center;
+          }
+        </style>
+      </head>
+      <body>
+
+        <h2>INVOICE</h2>
+
+        <div class="header">
+          <!-- Customer Address -->
+          <div class="box">
+            <h4>Billing To:</h4>
+            <p><strong>${order.fullname}</strong></p>
+            <p>${order.address_line1 || ''}</p>
+            <p>${order.address_line2 || ''}</p>
+            <p>${order.address_line3 || ''}</p>
+            <p>${order.landmark || ''}</p>
+            <p>Pincode: ${order.pincode || ''}</p>
+            <p>Mobile: ${order.mobile || ''}</p>
+            <p>Email: ${order.email || ''}</p>
+          </div>
+
+          <!-- Order Info -->
+          <div class="box">
+            <h4>Order Details:</h4>
+            <p><strong>Order ID:</strong> ${order.order_number}</p>
+            <p><strong>Date:</strong> ${new Date(order.created_at).toLocaleDateString()}</p>
+            <p><strong>Payment:</strong> ${order.payment_method}</p>
+            <p><strong>Status:</strong> ${order.order_status}</p>
+          </div>
+        </div>
+
+        <!-- Product Table -->
+        <table>
+          <thead>
+            <tr>
+              <th>#</th>
+              <th class="text-left">Product</th>
+              <th>Qty</th>
+              <th>Price</th>
+              <th>GST (${gstRate}%)</th>
+              <th>Total</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>1</td>
+              <td class="text-left">${order.product_name}</td>
+              <td>${qty}</td>
+              <td>₹${price.toFixed(2)}</td>
+              <td>₹${gstAmount.toFixed(2)}</td>
+              <td>₹${total.toFixed(2)}</td>
+            </tr>
+
+            <!-- Final Row -->
+            <tr>
+              <td colspan="5"><strong>Grand Total</strong></td>
+              <td><strong>₹${total.toFixed(2)}</strong></td>
+            </tr>
+          </tbody>
+        </table>
+
+        <!-- Footer -->
+        <div class="footer">
+          <div>
+            <p><strong>Your Company Name</strong></p>
+          </div>
+          <div style="text-align:right;">
+            <p>Authorised Signature</p>
+            <br/><br/>
+            ______________________
+          </div>
+        </div>
+
+        <div class="note">
+          This is a computer generated bill.
+        </div>
+
+        <script>
+          window.onload = function() {
+            window.print();
+          }
+        </script>
+
+      </body>
+    </html>
+  `);
+
+    invoiceWindow.document.close();
+  };
+
   if (loading) return (
     <div className="d-flex justify-content-center align-items-center vh-100">
       <div className="spinner-border text-primary" role="status">
@@ -174,8 +341,6 @@ export default function AdminOrders() {
                 <th>#</th>
                 <th>Order Number</th>
                 <th>Product</th>
-                <th>User</th>
-                <th>Email</th>
                 <th>Qty</th>
                 <th>Total</th>
                 <th>Status</th>
@@ -192,20 +357,39 @@ export default function AdminOrders() {
                   <td>{indexOfFirst + idx + 1}</td>
                   <td>{order.order_number}</td>
                   <td>{order.product_name || 'N/A'}</td>
-                  <td>{order.name || 'N/A'}</td>
-                  <td>{order.email || 'N/A'}</td>
-                  <td>{order.quantity}</td>
+                  <td>{order.order_qty}</td>
                   <td>₹{order.total_amount || (order.price * order.quantity)}</td>
                   <td className={order.order_status === 'cancelled' ? 'text-danger' : order.order_status === 'shipped' ? 'text-success' : ''}>
                     {order.order_status || 'booked'}
                   </td>
                   <td>
+
+                    {/* View Address Button */}
+                    <button
+                      className="btn btn-sm btn-primary me-2"
+                      onClick={() => showAddressPopup(order)}
+                    >
+                      User Details
+                    </button>
+
+                    <button
+                      className="btn btn-sm btn-success me-2 "
+                      onClick={() => printInvoice(order)}
+                    >
+                      Print Bill
+                    </button>
+
+
                     {order.order_status === 'booked' && (
                       <>
-                        <button className="btn btn-sm btn-danger me-2" onClick={() => cancelOrder(order.order_number, order.user_id)}>Cancel</button>
-                        <button className="btn btn-sm btn-success" onClick={() => openShipModal(order)}>Mark Shipped</button>
+                        <button className="btn btn-sm btn-warning  me-2" onClick={() => openShipModal(order)}>Mark Shipped</button>
+                        <button className="btn btn-sm btn-danger" onClick={() => cancelOrder(order.order_number, order.user_id)}>Cancel</button>
                       </>
                     )}
+
+
+
+
                     {order.order_status === 'shipped' && (
                       <span className="badge bg-success">Shipped</span>
                     )}

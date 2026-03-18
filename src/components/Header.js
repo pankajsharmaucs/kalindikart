@@ -369,12 +369,11 @@ export default function Header() {
                   </Link>
 
                   {isLoggedIn && (
-                    <Link href="/user/my-orders" onClick={closeNavbar}>
+                    <Link href="/user/dashboard/my-orders" onClick={closeNavbar}>
                       <i className={isLoggedIn ? "fas fa-archive" : "fas fa-home"}></i>
                       Orders
                     </Link>
                   )}
-
 
                   <Link href="/products" onClick={closeNavbar}>
                     <i className="fas fa-box"></i> Products

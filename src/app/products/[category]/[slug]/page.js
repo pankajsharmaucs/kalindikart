@@ -13,14 +13,20 @@ export default function ProductPage() {
     const addToCart = useCartStore((state) => state.addToCart);
     const cartItems = useCartStore((state) => state.cartItems);
     const cartCount = useCartStore((state) => state.getCartCount());
+    const [loading, setLoading] = useState(false);
+    const [error, setError] = useState('');
 
     const [product, setProduct] = useState(null);
-    const [loading, setLoading] = useState(true);
-    const [error, setError] = useState(null);
-    const [pincode, setPincode] = useState('');
     const [deliveryStatus, setDeliveryStatus] = useState(null);
     const [mainImage, setMainImage] = useState(null);
     const [selectedQuantity, setSelectedQuantity] = useState(1);
+
+    const [pincode, setPincode] = useState('');
+    const [deliveryInfo, setDeliveryInfo] = useState(null);
+    const [delLoading, setDelLoading] = useState(false);
+
+    const [delError, setdelError] = useState('');
+
 
     const alreadyInCart = useMemo(() => {
         return product ? cartItems.some(item => item.product_id === product.id) : false;
@@ -29,6 +35,62 @@ export default function ProductPage() {
     const handleImageChange = useCallback((newImageUrl) => {
         setMainImage(newImageUrl);
     }, []);
+
+    const checkDelivery = async (e) => {
+        if (e) e.preventDefault();
+
+        // ✅ Empty check
+        if (!pincode) {
+            setdelError('Please enter pincode');
+            setDeliveryInfo(null);
+            return;
+        }
+
+        // ✅ 6-digit numeric validation
+        if (!/^[0-9]{6}$/.test(pincode)) {
+            setdelError('Enter valid 6-digit pincode');
+            setDeliveryInfo(null);
+            return;
+        }
+
+        try {
+            setDelLoading(true);
+            setdelError('');
+
+            // delay
+            await new Promise((resolve) => setTimeout(resolve, 500));
+
+            const res = await fetch(`/api/pincode-delivery?pincode=${pincode}`);
+            const data = await res.json();
+
+            // ✅ INVALID PINCODE (404)
+            if (res.status === 404) {
+                setdelError('Invalid pincode');
+                setDeliveryInfo(null);
+                localStorage.removeItem('deliveryInfo');
+                return;
+            }
+
+            // ✅ OTHER ERRORS
+            if (!res.ok) {
+                setdelError(data.error || 'Something went wrong');
+                setDeliveryInfo(null);
+                return;
+            }
+
+            // ✅ SUCCESS
+            setDeliveryInfo(data);
+            setdelError('');
+
+            localStorage.setItem('deliveryInfo', JSON.stringify(data));
+
+        } catch (err) {
+            setdelError('Network error. Please try again.');
+            setDeliveryInfo(null);
+        } finally {
+            setDelLoading(false);
+        }
+    };
 
     // Fetch Product Data (Using your existing logic)
     useEffect(() => {
@@ -51,6 +113,16 @@ export default function ProductPage() {
         };
         fetchProduct();
     }, [slug]);
+
+    useEffect(() => {
+        const savedData = localStorage.getItem('deliveryInfo');
+
+        if (savedData) {
+            const parsed = JSON.parse(savedData);
+            setDeliveryInfo(parsed);
+            setPincode(parsed.pincode); // 👈 prefill input
+        }
+    }, []);
 
     const { currentPrice, originalPrice, discountPercentage, imageList, specifications, productRating, totalRatings } = useMemo(() => {
         if (!product) return {};
@@ -197,39 +269,97 @@ export default function ProductPage() {
 
                             {/* CHECK DELIVERY SECTION */}
                             <div className="delivery-check-section mb-md-3 mb-4 col-md-8">
-                                <label className="form-label fw-bold text-uppercase mb-2" style={{ fontSize: '0.75rem', color: '#666' }}>
+
+                                <label
+                                    className="form-label fw-bold text-uppercase mb-2"
+                                    style={{ fontSize: '0.75rem', color: '#666' }}
+                                >
                                     Check Delivery & Services
                                 </label>
+
                                 <div className="input-group mb-2" style={{ maxWidth: '350px' }}>
                                     <input
-                                        type="text"
+                                        type="tel" // ✅ shows number keypad on mobile
+                                        inputMode="numeric" // ✅ stronger hint for numeric keyboard
+                                        pattern="[0-9]*" // ✅ allows only digits
+                                        maxLength={6} // ✅ limit to 6 digits
                                         className="form-control"
                                         placeholder="Enter Pincode"
                                         value={pincode}
-                                        onChange={(e) => setPincode(e.target.value)}
-                                        style={{ fontSize: '0.9rem', padding: '10px 15px', border: '1px solid #ddd' }}
+                                        onChange={(e) => {
+                                            const value = e.target.value.replace(/\D/g, ''); // ✅ remove non-digits
+                                            setPincode(value);
+                                            setdelError('');
+                                        }}
+                                        style={{
+                                            fontSize: '0.9rem',
+                                            padding: '10px 15px',
+                                            border: '1px solid #ddd'
+                                        }}
                                     />
+
                                     <button
                                         className="btn fw-bold px-4"
                                         type="button"
+                                        onClick={checkDelivery}
                                         style={{
                                             backgroundColor: 'transparent',
-                                            color: '#01A9E6', // Your primary-gold (Blue)
+                                            color: '#01A9E6',
                                             border: '1px solid #ddd',
                                             borderLeft: 'none',
                                             fontSize: '0.85rem'
                                         }}
-                                        onClick={() => {/* Add your pincode check logic here */ }}
                                     >
                                         CHECK
                                     </button>
                                 </div>
 
-                                {/* Helper text / Status message */}
-                                <div className="d-flex align-items-center gap-2" style={{ fontSize: '0.8rem', color: '#888' }}>
-                                    <i className="fa fa-map-marker-alt"></i>
-                                    <span>Please enter PIN code to check delivery time.</span>
+                                {/* ✅ Status Section */}
+                                <div style={{ fontSize: '0.85rem' }}>
+
+                                    {delLoading && (
+                                        <span style={{ color: '#888' }}>Checking...</span>
+                                    )}
+
+                                    {!delLoading && deliveryInfo && (
+                                        <div className="d-flex flex-column gap-1">
+
+                                            <div style={{ color: 'green', fontWeight: '600' }}>
+                                                ✅ Delivery in {deliveryInfo.delivery_days}
+                                            </div>
+
+                                            <div style={{ color: '#666' }}>
+                                                📍 {deliveryInfo.city}, {deliveryInfo.state}
+                                            </div>
+
+                                        </div>
+                                    )}
+
+                                    {!deliveryInfo && !delLoading && !delError && (
+                                        <div
+                                            className="d-flex align-items-center gap-2"
+                                            style={{ color: '#888' }}
+                                        >
+                                            <i className="fa fa-map-marker-alt"></i>
+                                            <span>
+                                                Please enter PIN code to check delivery time.
+                                            </span>
+                                        </div>
+                                    )}
+                                    {delError && (
+                                        <div
+                                            className="d-flex align-items-center gap-2"
+                                            style={{ color: '#888' }}
+                                        >
+                                            <i className="fa fa-map-marker-alt"></i>
+                                            <span>
+                                                Invalid Pincode.
+                                            </span>
+                                        </div>
+                                    )}
+
                                 </div>
+
                             </div>
 
                             {/* ACTIONS */}
@@ -237,7 +367,7 @@ export default function ProductPage() {
 
                                 {alreadyInCart ? (
                                     <button className="btn-checkout" onClick={() => router.push('/cart')}>
-                                         GO TO CART <i className="fa fa-chevron-right me-2"></i>
+                                        GO TO CART <i className="fa fa-chevron-right me-2"></i>
                                     </button>
                                 ) : (
                                     <button className="btn-add-cart" onClick={() => addToCart(product)}>

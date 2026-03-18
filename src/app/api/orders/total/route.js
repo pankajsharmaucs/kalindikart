@@ -11,7 +11,8 @@ export async function GET() {
     const [rows] = await connection.query(
       `
       SELECT 
-        o.*, 
+        o.*,
+        o.quantity as order_qty, 
         u.*, 
         p.*
       FROM orders o
