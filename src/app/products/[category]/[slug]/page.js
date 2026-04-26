@@ -173,7 +173,7 @@ export default function ProductPage() {
                             <div className="text-uppercase mb-1" style={{ fontSize: '0.75rem', fontWeight: '700', color: '#00bfa5', letterSpacing: '1px' }}>
                                 {product.category_slug}
                             </div>
-                            <h1 className="product-main-title" style={{ fontSize: '2rem', fontWeight: '600' }}>
+                            <h1 className="product-main-title" style={{ fontSize: '1.3rem', fontWeight: '600' }}>
                                 {product.title}
                             </h1>
 

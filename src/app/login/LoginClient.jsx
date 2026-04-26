@@ -88,7 +88,7 @@ export default function LoginClient() {
   const [phoneTimer, setPhoneTimer] = useState(60);
 
   // EMAIL
-  const [email, setEmail] = useState('pspankajsharma222@gmail.com');
+  const [email, setEmail] = useState('');
   const [emailStep, setEmailStep] = useState('email');
   const [emailOtp, setEmailOtp] = useState(Array(5).fill(''));
   const emailInputsRef = useRef([]);
@@ -221,6 +221,24 @@ export default function LoginClient() {
   };
 
 
+  const handleOtpPaste = (e, setOtp, inputsRef) => {
+    e.preventDefault();
+
+    const pasteData = e.clipboardData.getData("text").trim();
+
+    // Only digits, max 5
+    if (!/^\d+$/.test(pasteData)) return;
+
+    const otpArray = pasteData.slice(0, 5).split("");
+    setOtp(otpArray);
+
+    // Focus last filled input
+    const lastIndex = otpArray.length - 1;
+    if (inputsRef.current[lastIndex]) {
+      inputsRef.current[lastIndex].focus();
+    }
+  };
+
   return (
     <>
       <div className="kk-login-wrapper">
@@ -343,9 +361,10 @@ export default function LoginClient() {
                             <input
                               key={i}
                               ref={(el) => (phoneInputsRef.current[i] = el)}
-                              type="tel"                // better mobile keypad support than "text"
-                              inputMode="numeric"      // hints numeric keyboard
-                              pattern="[0-9]*"         // helps iOS show number pad
+                              type="tel"
+                              inputMode="numeric"
+                              pattern="[0-9]*"
+                              autoComplete="one-time-code"
                               className="kk-otp-input"
                               maxLength="1"
                               value={digit}
@@ -354,6 +373,9 @@ export default function LoginClient() {
                               }
                               onKeyDown={(e) =>
                                 handleOtpKeyDown(e, i, phoneOtp, phoneInputsRef)
+                              }
+                              onPaste={(e) =>
+                                handleOtpPaste(e, setPhoneOtp, phoneInputsRef)
                               }
                             />
                           ))}
@@ -425,11 +447,37 @@ export default function LoginClient() {
                       <div className="kk-otp-info">OTP sent to {email}</div>
                       <div className="kk-otp-inputs">
                         {emailOtp.map((d, i) => (
-                          <input key={i} ref={el => emailInputsRef.current[i] = el} maxLength="1"
+                          <input
+                            key={i}
+                            ref={el => (emailInputsRef.current[i] = el)}
+                            type="text"
+                            inputMode="numeric"
+                            pattern="[0-9]*"
+                            name={i === 0 ? "otp" : undefined}                 // 🔥 helps autofill
+                            autoComplete={i === 0 ? "one-time-code" : "off"}   // 🔥 autofill support
                             className="kk-otp-input"
+                            maxLength="1"
                             value={d}
-                            onChange={e => handleOtpChange(e.target.value, i, emailOtp, setEmailOtp, emailInputsRef)}
-                            onKeyDown={e => handleOtpKeyDown(e, i, emailOtp, emailInputsRef)}
+
+                            onChange={(e) =>
+                              handleOtpChange(
+                                e.target.value.replace(/\D/g, ""), // only digits
+                                i,
+                                emailOtp,
+                                setEmailOtp,
+                                emailInputsRef
+                              )
+                            }
+
+                            onKeyDown={(e) =>
+                              handleOtpKeyDown(e, i, emailOtp, emailInputsRef)
+                            }
+
+                            onPaste={(e) =>
+                              handleOtpPaste(e, setEmailOtp, emailInputsRef)
+                            }
+
+                            onFocus={(e) => e.target.select()} // better UX
                           />
                         ))}
                       </div>

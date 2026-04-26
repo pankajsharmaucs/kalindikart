@@ -18,6 +18,7 @@ export default function CheckoutPage() {
   const [error, setError] = useState('');
   const [success, setSuccess] = useState('');
   const [saveLoading, setSaveLoading] = useState(false);
+  const [lastFetchedPin, setLastFetchedPin] = useState('');
 
   // Address
   const [fullname, setFullname] = useState('');
@@ -26,6 +27,12 @@ export default function CheckoutPage() {
   const [line1, setLine1] = useState('');
   const [line2, setLine2] = useState('');
   const [line3, setLine3] = useState('');
+
+  const [city, setCity] = useState('');           // ID
+  const [state, setState] = useState('');         // ID
+  const [cityName, setCityName] = useState('');   // DISPLAY
+  const [stateName, setStateName] = useState(''); // DISPLAY
+
   const [pincode, setPincode] = useState('');
   const [landmark, setLandmark] = useState('');
 
@@ -41,6 +48,24 @@ export default function CheckoutPage() {
     fetchUserDetails();
   }, [hasHydrated, isLoggedIn, userId]);
 
+  const fetchLocationFromPincode = async (pin) => {
+    if (pin.length !== 6) return;
+
+    try {
+      const res = await fetch(`/api/master/pincode?pincode=${pin}`);
+      const data = await res.json();
+
+      if (data.success) {
+        setCity(data.data.city_id);         // ✅ ID
+        setState(data.data.state_id);       // ✅ ID
+        setCityName(data.data.city_name);   // ✅ NAME
+        setStateName(data.data.state_name);
+      }
+    } catch (err) {
+      console.error("Pincode fetch error:", err);
+    }
+  };
+
   /* ---------------- FETCH USER ---------------- */
   const fetchUserDetails = async () => {
     try {
@@ -49,22 +74,27 @@ export default function CheckoutPage() {
 
       if (data.exists) {
         const u = data.user;
+
         setFullname(u.fullname || '');
         setEmail(u.email || '');
         setMobile(u.mobile || '');
         setLine1(u.address_line1 || '');
         setLine2(u.address_line2 || '');
         setLine3(u.address_line3 || '');
+        setCity(u.city || '');
+        setState(u.state || '');
+        setCityName(u.city_name || '');
+        setStateName(u.state_name || '');
         setPincode(u.pincode || '');
         setLandmark(u.landmark || '');
       }
+
     } catch (err) {
       console.error('Checkout user fetch error:', err);
     } finally {
       setLoading(false);
     }
   };
-
   /* ---------------- HELPERS ---------------- */
   const getCartTotal = () => cartItems.reduce((sum, item) => sum + item.price * item.quantity, 0);
   const getTotalItems = () => cartItems.reduce((sum, item) => sum + item.quantity, 0);
@@ -123,10 +153,12 @@ export default function CheckoutPage() {
           mobile,
           line1,
           line2,
-          line3,
+          line3,   // ✅ include this
+          city,
+          state,
           pincode,
           landmark,
-        }),
+        })
       });
 
       const data = await res.json();
@@ -284,10 +316,10 @@ export default function CheckoutPage() {
 
                         <div className="col-12">
                           <p className="mb-1" style={{ fontSize: '0.95rem', color: '#333' }}>
-                            {line1}, {line2}
+                            {line1}, {line2},   {line3}
                           </p>
                           <p className="mb-1" style={{ fontSize: '0.95rem', color: '#333' }}>
-                            {line3}
+                            {cityName}, {stateName}
                           </p>
                           <p className="fw-bold" >
                             PIN: {pincode} {landmark && `(Near ${landmark})`}
@@ -368,14 +400,53 @@ export default function CheckoutPage() {
                           <label className="form-label small fw-bold">Address Line 2</label>
                           <input type="text" className="custom-input" value={line2} onChange={(e) => setLine2(e.target.value)} />
                         </div>
-                        <div className="col-6">
-                          <label className="form-label small fw-bold">City/State (Line 3)</label>
+
+                        <div className="col-12">
+                          <label className="form-label small fw-bold">Address Line 3</label>
                           <input type="text" className="custom-input" value={line3} onChange={(e) => setLine3(e.target.value)} />
                         </div>
+
                         <div className="col-6">
                           <label className="form-label small fw-bold">Pincode</label>
-                          <input type="text" className="custom-input" maxLength={6} value={pincode} onChange={(e) => setPincode(e.target.value.replace(/\D/g, ''))} />
+                          <input
+                            className="custom-input"
+                            type="text"
+                            maxLength={6}
+                            value={pincode}
+                            onChange={(e) => {
+                              const val = e.target.value.replace(/\D/g, '');
+                              setPincode(val);
+
+                              // ✅ only call if exactly 6 AND not already fetched
+                              if (val.length === 6 && val !== lastFetchedPin) {
+                                fetchLocationFromPincode(val);
+                                setLastFetchedPin(val);
+                              }
+                            }}
+                          />
                         </div>
+
+                        <div className="col-6">
+                          <label className="form-label small fw-bold">City/Town</label>
+                          <input
+                            type="text"
+                            className="custom-input"
+                            value={cityName}
+                            onChange={(e) => setCity(e.target.value)}
+                          />
+                        </div>
+
+                        <div className="col-6">
+                          <label className="form-label small fw-bold">State</label>
+                          <input
+                            type="text"
+                            className="custom-input"
+                            value={stateName}
+                            onChange={(e) => setState(e.target.value)}
+                          />
+                        </div>
+
+
                         <div className="col-md-6">
                           <label className="form-label small fw-bold">Landmark</label>
                           <input type="text" className="custom-input" value={landmark} onChange={(e) => setLandmark(e.target.value)} />

@@ -4,8 +4,7 @@ import { pool } from '../../db.js';
 export async function GET(req) {
   try {
     const { searchParams } = new URL(req.url);
-    // Renamed variable to 'identifier' since it can be email or mobile
-    const identifier = searchParams.get('identifier'); 
+    const identifier = searchParams.get('identifier');
 
     if (!identifier) {
       return NextResponse.json(
@@ -16,17 +15,27 @@ export async function GET(req) {
 
     const [rows] = await pool.query(
       `SELECT 
-        fullname,
-        email,
-        mobile,
-        address_line1,
-        address_line2,
-        address_line3,
-        pincode,
-        landmark
-       FROM users
-       WHERE mobile = ? OR LOWER(email) = LOWER(?)
-       LIMIT 1`,
+          u.fullname,
+          u.email,
+          u.mobile,
+          u.address_line1,
+          u.address_line2,
+          u.address_line3,
+          u.pincode,
+          u.landmark,
+
+          mc.id AS city_id,
+          mc.state_id AS state_id,
+
+          mc.name AS city_name,
+          ms.name AS state_name
+
+        FROM users u
+        LEFT JOIN master_cities mc ON u.city = mc.id
+        LEFT JOIN master_states ms ON u.state = ms.id
+
+        WHERE u.mobile = ? OR LOWER(u.email) = LOWER(?)
+        LIMIT 1`,
       [identifier, identifier]
     );
 
@@ -38,6 +47,7 @@ export async function GET(req) {
       exists: true,
       user: rows[0],
     });
+
   } catch (err) {
     console.error('GET USER ERROR:', err);
     return NextResponse.json(

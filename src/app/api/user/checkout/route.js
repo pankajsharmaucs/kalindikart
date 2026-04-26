@@ -4,13 +4,16 @@ import { pool } from '../../db.js';
 export async function POST(req) {
   try {
     const body = await req.json();
+
     const {
       fullname,
       email,
       mobile,
       line1,
       line2,
-      line3,
+      line3,     // ✅ BACK ADDED
+      city,      // ✅ NEW
+      state,     // ✅ NEW
       pincode,
       landmark,
       userId
@@ -18,19 +21,20 @@ export async function POST(req) {
 
     const identifier = userId || mobile || email;
 
-    if (!fullname || !identifier || !line1 || !pincode) {
+    // ✅ Updated validation
+    if (!fullname || !identifier || !line1 || !pincode || !city || !state) {
       return NextResponse.json(
-        { success: false, error: 'Missing required fields (Name, Identifier, Address, Pincode)' },
+        { success: false, error: 'Missing required fields (Name, Address, City, State, Pincode)' },
         { status: 400 }
       );
     }
 
-    // 1️⃣ Find user by mobile OR email
+    // 1️⃣ Find user
     const [existingUser] = await pool.query(
       `SELECT id, mobile, email
-   FROM users
-   WHERE mobile = ? OR email = ?
-   LIMIT 1`,
+       FROM users
+       WHERE mobile = ? OR email = ?
+       LIMIT 1`,
       [mobile || "", email || ""]
     );
 
@@ -43,7 +47,7 @@ export async function POST(req) {
 
     const dbId = existingUser[0].id;
 
-    // 2️⃣ Update address using user id
+    // 2️⃣ Update user address
     await pool.query(
       `UPDATE users SET
         fullname = ?,
@@ -52,18 +56,22 @@ export async function POST(req) {
         address_line1 = ?,
         address_line2 = ?,
         address_line3 = ?,
+        city = ?,
+        state = ?,
         pincode = ?,
         landmark = ?
-       WHERE id = ?`,
+      WHERE id = ?`,
       [
         fullname,
         email || existingUser[0].email,
         mobile || existingUser[0].mobile,
         line1,
-        line2,
-        line3,
+        line2 || '',
+        line3 || '',
+        parseInt(city),
+        parseInt(state),
         pincode,
-        landmark,
+        landmark || '',
         dbId
       ]
     );
@@ -77,7 +85,7 @@ export async function POST(req) {
     console.error("Checkout API error:", err);
 
     return NextResponse.json(
-      { success: false, error: "Server error" },
+      { success: false, error: "Something Went wrong" },
       { status: 500 }
     );
   }
