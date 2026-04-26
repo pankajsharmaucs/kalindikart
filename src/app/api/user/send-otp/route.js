@@ -18,9 +18,8 @@ export async function POST(req) {
     if (rows.length === 0) {
       // 🔥 New user
       await pool.query(
-        `INSERT INTO users (mobile, otp, verified, status)
-         VALUES (?, ?, 0, 'active')`,
-        [mobile, otp]
+        `INSERT INTO users (mobile, otp, verified, status, email, password) VALUES (?, ?, 0, 'active', '', '')`
+        , [mobile, otp]
       );
     } else {
       // 🔥 Existing user → update OTP
@@ -35,7 +34,13 @@ export async function POST(req) {
 
     return NextResponse.json({ success: true });
   } catch (err) {
-    console.error(err);
-    return NextResponse.json({ success: false }, { status: 500 });
+    console.error("🔥 FULL ERROR:", err);
+
+    return NextResponse.json({
+      success: false,
+      error: err.message,
+      code: err.code,
+      sqlMessage: err.sqlMessage
+    }, { status: 500 });
   }
 }
